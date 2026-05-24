@@ -118,121 +118,62 @@
         
         /* ==========================================
 
-   وضع غروب الشمس (النهاري)
-   ========================================== */
+/* ==========================================
+   إعدادات الوضع المضيء ودعم تباين الهالات
+========================================== */
 body.light-mode {
-    /* تغيير المتغيرات الأساسية للألوان */
-    --sys-cyan: #005bb5; /* أزرق نيون غامق */
-    --sys-cyan-glow: rgba(0, 91, 181, 0.4);
-    --sys-purple: #ff5e00; /* برتقالي نيون غامق (غروب الشمس) */
-    --sys-purple-glow: rgba(255, 94, 0, 0.4);
-    --sys-bg-dark: #fffafa; /* خلفية بيضاء مائلة قليلاً للدفء */
-    --sys-panel: rgba(255, 250, 245, 0.9); /* لوحات شفافة بخلفية بيضاء */
-    --sys-border: rgba(255, 94, 0, 0.5); /* حدود برتقالية */
-    
-    color: #111827 !important; /* تحويل النص الافتراضي للأسود */
-    background-color: var(--sys-bg-dark);
-    background-image: 
-        radial-gradient(circle at 15% 50%, var(--sys-purple-glow) 0%, transparent 35%),
-        radial-gradient(circle at 85% 30%, var(--sys-cyan-glow) 0%, transparent 35%);
+    background-color: var(--sys-bg-dark) !important;
+    color: #1e293b !important;
 }
 
-/* إجبار كلاسات Tailwind (البيضاء والرمادية) لتصبح سوداء في الوضع النهاري */
+/* تحويل النصوص الافتراضية الداكنة لتصبح مرئية بوضوح فوق الخلفية البيضاء */
 body.light-mode .text-white, 
 body.light-mode .text-slate-200, 
 body.light-mode .text-slate-300, 
-body.light-mode .text-slate-400 {
-    color: #1f2937 !important; 
+body.light-mode .text-slate-400,
+body.light-mode .text-slate-100 {
+    color: #0f172a !important; 
 }
 
-/* إضاءة النصوص الملونة (Glow) */
-body.light-mode .sl-glow-text {
-    text-shadow: 0 0 5px rgba(255, 94, 0, 0.3) !important; /* توهج برتقالي خفيف */
-}
-
-/* تغيير خلفيات اللوحات الداكنة (Slate/Black) لتناسب غروب الشمس */
+/* تحويل الألواح والبطاقات الجانبية للون الأبيض الشفاف الفاخر بنمط الزجاج المشرق */
 body.light-mode .bg-slate-900,
 body.light-mode .bg-slate-950,
 body.light-mode .bg-black\/40,
 body.light-mode .bg-black\/50,
-body.light-mode .bg-\[\#02040a\] {
-    background-color: rgba(255, 245, 235, 0.8) !important;
-    border-color: rgba(255, 94, 0, 0.3) !important;
+body.light-mode .bg-black\/60,
+body.light-mode .bg-slate-900\/80,
+body.light-mode .bg-slate-950\/40 {
+    background-color: var(--sys-panel) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
 }
-/* تعديل خلفية حقل الإدخال */
-body.light-mode input, body.light-mode select {
-    color: #111827 !important;
+
+/* تكييف حقول الإدخال والدردشة مع المعالج الذكي */
+body.light-mode input, 
+body.light-mode select, 
+body.light-mode textarea {
+    color: #0f172a !important; 
+    background-color: #ffffff !important; 
+    border-color: rgba(0, 0, 0, 0.15) !important;
 }
 body.light-mode input::placeholder {
-    color: #6b7280 !important;
+    color: #94a3b8 !important;
 }
 
-/* تعديل خطوط الجداول */
-body.light-mode .sys-table td { 
-    border-bottom-color: rgba(0, 0, 0, 0.1); 
+/* صياغة تأثير توهج النصوص للهالات المضيئة (البرق المزدوج والطبيعة الوردية) */
+body.light-mode .sl-glow-text,
+body.light-mode .glow-text {
+    text-shadow: 0 0 4px var(--sys-cyan-glow), 0 0 8px var(--sys-purple-glow) !important;
+    color: var(--sys-cyan) !important;
 }
-/* ==========================================
-           الهالة 2: هالة الدم القرمزي (Crimson Aura)
-           ========================================== */
-        body.theme-crimson {
-            --sys-cyan: #ff003c; /* أحمر قرمزي مضيء */
-            --sys-cyan-glow: rgba(255, 0, 60, 0.8);
-            --sys-purple: #ffffff; /* أبيض ناصع */
-            --sys-purple-glow: rgba(255, 255, 255, 0.5);
-            --sys-bg-dark: #050000; /* أسود دموي غامق */
-            --sys-panel: rgba(15, 0, 0, 0.85);
-            --sys-border: rgba(255, 0, 60, 0.5);
-        }
-        body.theme-crimson .sl-glow-text { text-shadow: 0 0 15px #ff003c !important; }
 
-        /* ==========================================
-           الهالة 3: البرق الناري الأزرق (Blue Lightning Fire)
-           ========================================== */
-        body.theme-blue-fire {
-            --sys-cyan: #0066ff; /* أزرق ناري غامق */
-            --sys-cyan-glow: rgba(0, 102, 255, 0.8);
-            --sys-purple: #00d4ff; /* أزرق كهربائي فاتح */
-            --sys-purple-glow: rgba(0, 212, 255, 0.8);
-            --sys-bg-dark: #f0f4f8; /* أبيض رمادي للخلفية */
-            --sys-panel: rgba(255, 255, 255, 0.9);
-            --sys-border: rgba(0, 102, 255, 0.6);
-            color: #0f172a !important; /* تحويل النصوص للداكن للرؤية */
-        }
-        /* إجبار النصوص البيضاء على أن تصبح داكنة في الهالة البيضاء */
-        body.theme-blue-fire .text-white, 
-        body.theme-blue-fire .text-slate-200, 
-        body.theme-blue-fire .text-slate-300, 
-        body.theme-blue-fire .text-slate-400 { color: #1e293b !important; }
-        
-        body.theme-blue-fire .bg-slate-900,
-        body.theme-blue-fire .bg-slate-950,
-        body.theme-blue-fire .bg-black\/40,
-        body.theme-blue-fire .bg-black\/50 {
-            background-color: rgba(240, 248, 255, 0.8) !important;
-            border-color: rgba(0, 102, 255, 0.3) !important;
-        }
-    
-
-
-        /* مؤثرات شرارات النار والكهرباء (Sparks) */
-        @keyframes shoot-spark {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-100vh) translateX(20px) scale(0); opacity: 0; }
-        }
-        .lightning-spark {
-            position: fixed;
-            bottom: -10px;
-            width: 3px;
-            height: 15px;
-            background: #00d4ff; /* لون الشرارة */
-            box-shadow: 0 0 10px #0066ff, 0 0 20px #00d4ff;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            animation: shoot-spark linear infinite;
-        }
-        
-     
+/* محاكاة شرارات البرق والوردي عبر الحدود المتوهجة ديناميكياً */
+body.light-mode [class*="border-[var(--sys-cyan)]"] {
+    box-shadow: 0 0 12px var(--sys-cyan-glow);
+}
+body.light-mode [class*="border-[var(--sys-purple)]"] {
+    box-shadow: 0 0 12px var(--sys-purple-glow);
+}
     </style>
 </head>
 <body class="p-2 md:p-6 relative text-slate-200">
@@ -373,9 +314,9 @@ body.light-mode .sys-table td {
         <span class="group-hover:animate-pulse text-[var(--sys-cyan)]">📍📈</span>
     </a>
     
-    <button onclick="SystemControls.cycleTheme()" class="w-10 h-10 flex items-center justify-center bg-slate-900/80 backdrop-blur border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded-full transition-all group shadow-[0_0_10px_rgba(0,0,0,0.5)]" title="تغيير هالة النظام">
-        <span id="themeIcon" class="text-lg transition-transform group-hover:rotate-180 duration-500">🌌</span>
-    </button>
+    <button onclick="AuraThemes.cycleTheme()" class="w-10 h-10 flex items-center justify-center bg-slate-900/80 backdrop-blur border border-slate-700 hover:border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded-full transition-all group shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer" title="تبديل الهالة السيادية فوراً">
+    <span id="themeIconInner" class="text-lg transition-transform group-hover:rotate-180 duration-500">🌌</span>
+</button>
 </div>
 
         <header class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
@@ -401,6 +342,31 @@ body.light-mode .sys-table td {
                     <button onclick="UI.toggleTimerSettings()" class="bg-black/50 border border-white/10 hover:border-[var(--sys-cyan)] text-white w-12 h-12 flex items-center justify-center transition-all text-xl" title="Configure Timer">⚙️</button>
                 </div>
             </div>
+            <div id="floatingTimerWidget" class="fixed bottom-6 left-6 z-50 hidden bg-slate-950/90 backdrop-blur border border-[var(--sys-cyan)] p-4 rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.15)] max-w-sm w-72">
+    <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-[var(--sys-cyan)] tracking-wider sys-font">[DIRECTIVE ACTIVE]</span>
+        <span id="floatingTimerText" class="text-lg font-black tracking-widest text-white sys-font">25:00</span>
+    </div>
+    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+        <div id="floatingTimerProgress" class="bg-[var(--sys-cyan)] h-full w-full transition-all duration-1000 shadow-[0_0_8px_var(--sys-cyan)]"></div>
+    </div>
+    <div class="text-[10px] text-slate-400 mt-1.5 text-center flex items-center justify-center gap-1">
+        <span>⚠️ بروتوكول منع التشتت نشط. لا تغادر التبويب!</span>
+    </div>
+</div>
+
+<div id="ironcladAlarmOverlay" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col items-center justify-center p-6 text-center">
+    <div class="animate-pulse mb-6">
+        <div class="w-24 h-24 rounded-full border-4 border-red-500 flex items-center justify-center mx-auto text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.5)]">
+            <span class="text-4xl font-black">⚡</span>
+        </div>
+    </div>
+    <h2 class="text-3xl font-black text-red-500 mb-2 tracking-wide">أكتملت فترة المحاكمة الزمنية!</h2>
+    <p class="text-slate-300 max-w-md mb-8 text-sm">لقد صمدت لنهاية الوقت أيها العاهل. اضغط على الزر أدناه لتأكيد النجاح واستلام مكافأة الـ XP، أو سيستمر النظام في الإنذار.</p>
+    <button onclick="SovereignTimer.completeTaskSuccess()" class="px-8 py-3 bg-red-600 hover:bg-red-500 text-white font-black rounded border border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all tracking-wider text-base">
+        [تأكيد إتمام المهمة بنجاح]
+    </button>
+</div>
         </header>
 <section id="statsSection" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="sl-panel p-5 border-t-2 border-t-[var(--sys-cyan)] bg-gradient-to-b from-[rgba(0,240,255,0.05)] to-transparent">
@@ -1262,65 +1228,100 @@ const UI = {
         document.getElementById('timerModal').classList.toggle('hidden');
     }
 };
+const AuraThemes = {
+    // الترتيب التسلسلي للهالات (التبديل المباشر بنقرة واحدة)
+    themeOrder: ['dark', 'lightning', 'crimson', 'nature'],
+    currentIndex: 0,
+    
+    themes: {
+        // 1. هالة الظلال الأسطورية (وضع ليلي - كما هي)
+        dark: {
+            '--sys-cyan': '#00f0ff', 
+            '--sys-cyan-glow': 'rgba(0, 240, 255, 0.6)',
+            '--sys-purple': '#9d4edd', 
+            '--sys-purple-glow': 'rgba(157, 78, 221, 0.4)',
+            '--sys-bg-dark': '#02040a', 
+            '--sys-panel': 'rgba(5, 10, 25, 0.85)',
+            isLight: false, icon: '🌌'
+        },
+        // 2. هالة البرق الصاعقة (وضع نهاري - خلفية بيضاء ساطعة بألوان متباينة)
+        lightning: {
+            '--sys-cyan': '#0284c7', // أزرق سماوي نقي (Sky Blue)
+            '--sys-cyan-glow': 'rgba(2, 132, 199, 0.4)',
+            '--sys-purple': '#f97316', // برتقالي غروب الشمس (Sunset Orange)
+            '--sys-purple-glow': 'rgba(249, 115, 22, 0.3)',
+            '--sys-bg-dark': '#f8fafc', // خلفية بيضاء ناصعة غالبة
+            '--sys-panel': 'rgba(255, 255, 255, 0.95)',
+            isLight: true, icon: '⚡'
+        },
+        // 3. هالة الدم الحمراء القرمزية (وضع ليلي - كما هي)
+        crimson: {
+            '--sys-cyan': '#ff003c', 
+            '--sys-cyan-glow': 'rgba(255, 0, 60, 0.6)',
+            '--sys-purple': '#7f1d1d', 
+            '--sys-purple-glow': 'rgba(127, 29, 29, 0.4)',
+            '--sys-bg-dark': '#080102', 
+            '--sys-panel': 'rgba(15, 0, 0, 0.85)',
+            isLight: false, icon: '🩸'
+        },
+        // 4. هالة الطبيعة الزمردية (وضع نهاري - تدرجات خضراء مع لمسات وردية)
+        nature: {
+            '--sys-cyan': '#10b981', // أخضر زمردي أساسي
+            '--sys-cyan-glow': 'rgba(16, 185, 129, 0.4)',
+            '--sys-purple': '#ec4899', // وردي حيوي متوهج (Pink Accent)
+            '--sys-purple-glow': 'rgba(236, 72, 153, 0.3)',
+            '--sys-bg-dark': '#f4fbf7', // خلفية بيضاء مائلة للنقاء الطبيعي المريح
+            '--sys-panel': 'rgba(255, 255, 255, 0.95)',
+            isLight: true, icon: '🌿'
+        }
+    },
 
-const SystemControls = {
-    themes: ['default', 'theme-crimson', 'theme-blue-fire'],
-    currentThemeIndex: 0,
+    init() {
+        const savedAura = localStorage.getItem('sovereign-aura') || 'dark';
+        this.currentIndex = this.themeOrder.indexOf(savedAura) !== -1 ? this.themeOrder.indexOf(savedAura) : 0;
+        this.applyTheme(this.themeOrder[this.currentIndex], false);
+    },
+
+    // دالة التبديل الفوري بنقرة واحدة
     cycleTheme() {
-        const body = document.body;
-        body.classList.remove('theme-crimson', 'theme-blue-fire', 'light-mode');
-        
-        this.currentThemeIndex = (this.currentThemeIndex + 1) % this.themes.length;
-        const newTheme = this.themes[this.currentThemeIndex];
-        
-        if (newTheme !== 'default') body.classList.add(newTheme);
-
-        const icon = document.getElementById('themeIcon');
-        if (icon) {
-            if (newTheme === 'default') icon.textContent = '🌌';
-            else if (newTheme === 'theme-crimson') icon.textContent = '🩸';
-            else if (newTheme === 'theme-blue-fire') icon.textContent = '⚡';
-        }
-
-        localStorage.setItem('MONARCH_THEME', newTheme);
-        if (typeof SoundEffects !== 'undefined') SoundEffects.playSystemClick();
-        this.manageSparks(newTheme === 'theme-blue-fire');
+        this.currentIndex = (this.currentIndex + 1) % this.themeOrder.length;
+        const nextTheme = this.themeOrder[this.currentIndex];
+        this.applyTheme(nextTheme, true);
     },
-    initTheme() {
-        const savedTheme = localStorage.getItem('MONARCH_THEME') || 'default';
-        this.currentThemeIndex = this.themes.indexOf(savedTheme) !== -1 ? this.themes.indexOf(savedTheme) : 0;
-        
-        if (savedTheme !== 'default') document.body.classList.add(savedTheme);
 
-        const icon = document.getElementById('themeIcon');
-        if (icon) {
-            if(savedTheme === 'default') icon.textContent = '🌌';
-            else if(savedTheme === 'theme-crimson') icon.textContent = '🩸';
-            else if(savedTheme === 'theme-blue-fire') icon.textContent = '⚡';
-        }
-        this.manageSparks(savedTheme === 'theme-blue-fire');
-    },
-    manageSparks(isActive) {
-        let container = document.getElementById('sparks-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'sparks-container';
-            document.body.appendChild(container);
-        }
-        container.innerHTML = ''; 
-        if (isActive) {
-            for(let i=0; i < 40; i++) {
-                const spark = document.createElement('div');
-                spark.className = 'lightning-spark';
-                spark.style.left = Math.random() * 100 + 'vw';
-                spark.style.animationDuration = (Math.random() * 2 + 0.5) + 's';
-                spark.style.animationDelay = Math.random() * 2 + 's';
-                container.appendChild(spark);
+    applyTheme(themeName, playSound = true) {
+        const root = document.documentElement;
+        const selectedAura = this.themes[themeName];
+
+        // حقن المتغيرات اللونية في مستند الـ DOM
+        for (const [property, value] of Object.entries(selectedAura)) {
+            if (property !== 'isLight' && property !== 'icon') {
+                root.style.setProperty(property, value);
             }
+        }
+
+        // التحكم في فئات الوضعين (النهاري والليلي) ديناميكياً
+        if (selectedAura.isLight) {
+            document.body.classList.add('light-mode');
+        } else {
+            document.body.classList.remove('light-mode');
+        }
+
+        // تحديث أيقونة الزر في الواجهة فوراً ليواكب الطاقة المفعلة
+        const iconEl = document.getElementById('themeIconInner');
+        if (iconEl) iconEl.textContent = selectedAura.icon;
+
+        localStorage.setItem('sovereign-aura', themeName);
+
+        // إطلاق إشعار نقر هادئ وتحديث الحالة
+        if (playSound && window.SoundEffects && typeof window.SoundEffects.playSystemClick === 'function') {
+            window.SoundEffects.playSystemClick();
+        }
+        if (playSound && window.Toast && typeof window.Toast.show === 'function') {
+            window.Toast.show(`تفعيل الهالة: ${themeName.toUpperCase()}`, 'success');
         }
     }
 };
-
 // --- 1. SOUND EFFECTS (CLEAN & PROFESSIONAL) ---
 const SoundEffects = {
     bgMusic: new Audio('Kingdom_of_Iron.mp3'),
@@ -1389,6 +1390,7 @@ const AnimePopup = {
         modal.classList.remove('hidden');
     },
     
+    
     acceptQuest() {
         if(window.SoundEffects) SoundEffects.playSystemClick();
         
@@ -1417,6 +1419,140 @@ const AnimePopup = {
         }
         
         this.currentQuest = null;
+    }
+};
+// --- 1.8. SYSTEM SCHEDULE MATRIX (مصفوفة البيانات وجدول المستويات والأيام) ---
+const SovereignSchedules = {
+    // محرك الفرز الذكي لنطاقات المستويات المعتمدة في النظام
+    getTier(level) {
+        if (level >= 1 && level <= 70) return "tier_1_70";
+        if (level > 70 && level <= 130) return "tier_70_130";
+        if (level > 130 && level <= 180) return "tier_130_180";
+        if (level > 180 && level <= 250) return "tier_180_250";
+        if (level > 250 && level <= 320) return "tier_250_320";
+        if (level > 320 && level <= 400) return "tier_320_400";
+        if (level > 400 && level <= 450) return "tier_400_450";
+        if (level > 450) return "tier_infinity"; // نمط الحرية المطلقة والرتب المتقدمة
+        return "tier_1_70";
+    },
+
+    // ميزان توزيع نقاط الخبرة (XP) الصارم لمنع العشوائية
+    xpRules: {
+        cognitive: 30,  // البرمجة، الذكاء الاصطناعي، الدراسة الأكاديمية العميقة والدروس الجديدة
+        physical: 20,   // الرياضة البدنية، التمدد، الكاليسثينكس، تمارين ومهارات الموي تاي والكرة
+        elevation: 10,  // لغات، تطوير ذهني، مراجعات خفيفة، زنزانات التدريب، والحرف
+        trivial: 5      // المهام الجانبية البسيطة جداً
+    },
+
+    // مصفوفة الميثاق العملياتي اليومي (تم إعداد التوزيع الأكاديمي والرياضي بدقة للمستوى الحالي)
+    matrix: {
+        "tier_1_70": {
+            "Sunday": [
+                { time: "05:00", title: "الفترة الروحية | Spiritual Block", desc: "تلاوة القرآن، صلاة الفجر والأذكار + تمارين الإطالات العضلية والتمدد.", xp: 20, type: "physical" },
+                { time: "06:00", title: "الهندسة البرمجية المتقدمة | Advanced Software Engineering", desc: "أساسيات البرمجة العامة وبناء منطق الويب المتقدم (Python/JS).", xp: 30, type: "cognitive" },
+                { time: "08:30", title: "المسار الأكاديمي الأساسي | Core Academic Track", desc: "الرياضيات المتقدمة وحل مسائل المنطق المعقدة بكفاءة عالية.", xp: 30, type: "cognitive" },
+                { time: "10:30", title: "إتقان اللغة الإنجليزية | English Mastery", desc: "الانغماس التقني، بناء المخردات والمصطلحات البرمجية، والمحاكاة الصوتية (Shadowing).", xp: 10, type: "elevation" },
+                { time: "15:00", title: "الإعداد البدني | Physical Conditioning", desc: "تمارين نظام PPL المتقدم واستقرار الكاليسثينكس البدني الصارم.", xp: 20, type: "physical" },
+                { time: "17:30", title: "التركيز الأكاديمي المسائي | Academic Focus", desc: "دراسة مادة الرياضيات (درس جديد) مع التركيز المطلق وتفكيك العقد الصعبة.", xp: 30, type: "cognitive" },
+                { time: "19:30", title: "التدريب الرياضي الخاص | Basketball Training", desc: "تمارين ومهارات كرة السلة المخصصة بشكل فردي (بدون مباريات كامة).", xp: 20, type: "physical" }
+            ],
+            "Monday": [
+                { time: "05:00", title: "الفترة الروحية | Spiritual Block", desc: "حفظ جديد وتلاوة، صلاة الفجر والأذكار الصباحية.", xp: 10, type: "elevation" },
+                { time: "17:30", title: "التركيز الأكاديمي المسائي | Academic Focus", desc: "دراسة مادة العلوم الطبيعية (درس جديد) وفهم العمق العلمي للوحدة.", xp: 30, type: "cognitive" },
+                { time: "19:30", title: "التدريب الرياضي الخاص | Football Training", desc: "تمارين كرة القدم الفردية وتطوير دقة التحكم واللياقة البدنية.", xp: 20, type: "physical" }
+            ],
+            "Tuesday": [
+                { time: "17:30", title: "التركيز الأكاديمي المسائي | Academic Focus", desc: "دراسة مادة الفيزياء (درس جديد) وحل القوانين الفيزيائية بكفاءة هندسية.", xp: 30, type: "cognitive" },
+                { time: "19:30", title: "التدريب الرياضي الخاص | Basketball Training", desc: "تطوير مهارات التسديد وحركات الخداع الفردية في كرة السلة.", xp: 20, type: "physical" }
+            ],
+            "Wednesday": [
+                { time: "17:30", title: "التركيز الأكاديمي المسائي | Academic Focus", desc: "مراجعة مادة الرياضيات وتثبيت المفاهيم المكتسبة طوال الأسبوع وحل التمارين.", xp: 30, type: "cognitive" },
+                { time: "19:30", title: "التدريب الرياضي الخاص | Football Training", desc: "تمارين مهارية فردية مكثفة لتطوير الأداء الرياضي في كرة القدم.", xp: 20, type: "physical" }
+            ],
+            "Thursday": [
+                { time: "19:30", title: "كتلة الفنون القتالية والدفاع | Jiu-Jitsu & Muay Thai", desc: "تمارين وتكتيكات رياضية قتالية لتعزيز الانضباط الجسدي والذهني المطلق.", xp: 20, type: "physical" }
+            ],
+            "Friday": [
+                { time: "05:00", title: "جمعة الإبداع الروحية | Surah Al-Kahf & Review", desc: "قراءة سورة الكهف، أذكار الصباح، ومراجعة شاملة لدروس الأسبوع (العلوم الطبيعية).", xp: 30, type: "cognitive" },
+                { time: "08:00", title: "التعديل البصري الاحترافي | Video Editing Lab", desc: "جلسة المونتاج وتعديل الفيديو الاحترافي للمحتوى الرقمي قنوات اليوتيوب.", xp: 30, type: "cognitive" }
+            ],
+            "Saturday": [
+                { time: "05:00", title: "سبت الإتقان الأكاديمي | Physics Repetition", desc: "تكرار ومراجعة مادة الفيزياء لترسيخ وتثبيت القوانين وحل المسائل المتقدمة.", xp: 30, type: "cognitive" }
+            ]
+        },
+        // يتم الاحتفاظ بنطاقات المستويات العليا فارغة حالياً ليتم ملؤها تدريجياً وتجنب التفاوت
+        "tier_70_130": {},
+        "tier_130_180": {},
+        "tier_180_250": {},
+        "tier_250_320": {},
+        "tier_320_400": {},
+        "tier_400_450": {},
+        "tier_infinity": {} // النمط الذي يفتح تلقائياً بعد ليفل 450 لإضافة مهام حرة برتب (C, A, S)
+    }
+};
+// --- 1.9. TIME-SCHEDULE ENGINE (محرك المراقبة والاستدعاء التلقائي) ---
+const ScheduleEngine = {
+    lastTriggeredTask: null, // يمنع تكرار إطلاق الإشعار أكثر من مرة في نفس الدقيقة
+
+    // بدء تشغيل المحرك وربطه بالتوقيت الحي للنظام
+    init() {
+        console.log("[SYSTEM] Time-Schedule Engine initialized successfully.");
+        this.checkSchedule(); // فحص فوري عند تحميل الصفحة
+        
+        // إعداد فحص دوري دقيق يتكرر كل دقيقة كاملة (60000 مللي ثانية)
+        setInterval(() => {
+            this.checkSchedule();
+        }, 60000);
+    },
+
+    // دالة الفحص والمطابقة الدورية
+    checkSchedule() {
+        const now = new Date();
+        
+        // تحويل اليوم الحالي إلى النص المقابل في مصفوفة النظام
+        const daysMap = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const currentDay = daysMap[now.getDay()];
+        
+        // استخراج الوقت الحالي بصيغة (HH:MM) متناسقة وثنائية الخانات
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const currentTimeStr = `${hours}:${minutes}`;
+
+        // قراءة مستوى اللاعب الحالي بأمان من نظام رصد الحالة
+        const currentLevel = (window.PlayerState && window.PlayerState.level) || 1;
+        const currentTier = SovereignSchedules.getTier(currentLevel);
+
+        // جلب قائمة مهام اليوم الحالي بناءً على النطاق المستهدف
+        const todayTasks = SovereignSchedules.matrix[currentTier]?.[currentDay] || [];
+
+        // البحث عن مهمة تطابق الدقيقة والساعة الحالية تماماً
+        const activeTask = todayTasks.find(task => task.time === currentTimeStr);
+
+        if (activeTask) {
+            // صياغة معرف فريد للمهمة الحالية لمنع التكرار اللانهائي خلال نفس الدقيقة
+            const taskIdentifier = `${currentDay}-${currentTimeStr}-${activeTask.title}`;
+            
+            if (this.lastTriggeredTask !== taskIdentifier) {
+                this.lastTriggeredTask = taskIdentifier;
+                this.executeDirective(activeTask);
+            }
+        }
+    },
+
+    // دالة إطلاق الإشعار والربط التلقائي بواجهة الأنمي المنبثقة
+    executeDirective(task) {
+        // تحديد مدة افتراضية للمهمة (ساعة ونصف) متوافقة مع واجهة العرض
+        const defaultDuration = "01:30:00";
+
+        if (window.AnimePopup && typeof window.AnimePopup.show === 'function') {
+            // استدعاء نافذة المهام في منتصف الشاشة تلقائياً وبث النقاء الصوتي
+            window.AnimePopup.show(task.title, task.desc, defaultDuration, task.xp);
+            
+            // تسجيل الحدث برمجياً في الكونسول لتوثيق الاستجابة الآلية
+            console.log(`[DIRECTIVE ACTIVATED] Auto-triggered task: ${task.title} at ${task.time}`);
+        } else {
+            console.warn("[SYSTEM CRITICAL] AnimePopup.show() is missing or not fully loaded.");
+        }
     }
 };
 // ضع هذين الكائنين، وتأكد أنك حذفت SoundEffects القديم
@@ -2221,7 +2357,32 @@ window.addEventListener('DOMContentLoaded', () => {
     if(typeof Pomodoro !== 'undefined') Pomodoro.init(); 
     if(typeof Weather !== 'undefined') Weather.init(); 
     if(typeof PlayerState !== 'undefined') PlayerState.init(); 
-    if(typeof QuestSystem !== 'undefined') QuestSystem.init(); 
+    if(typeof QuestSystem !== 'undefined') QuestSystem.init();
+    if(typeof ScheduleEngine !== 'undefined') ScheduleEngine.init();
+    // --- 1.10. ANTI-DISTRACTION PROTOCOL (بروتوكول منع التشتت الصارم) ---
+window.addEventListener('blur', () => {
+    // التحقق مما إذا كان هناك مهمة نشطة حالياً في الشريط السفلي لمنع التشتت وظلم اللاعب
+    const activeBar = document.getElementById('activeDirectiveBar');
+    const isTaskRunning = activeBar && !activeBar.classList.contains('hidden');
+
+    if (isTaskRunning) {
+        if (window.PlayerState && typeof window.PlayerState.addXP === 'function') {
+            // تطبيق العقوبة الفورية بخصم 5 نقاط خبرة
+            window.PlayerState.addXP(-5);
+            
+            // إشعار تحذيري سريع يظهر للمختبر أو العاهل عند العودة
+            if (window.Toast && typeof window.Toast.show === 'function') {
+                window.Toast.show("[تحذير النظام] تم رصد خروج وتشتت ذهني! الخصم: -5 XP", "error");
+            }
+            
+            // إرسال التحذير كحدث برمي ليتم التقاطه لاحقاً في سجلات النظام
+            const distractionEvent = new CustomEvent('systemLogAdded', {
+                detail: { type: 'penalty', text: 'تم رصد محاولة تشتت أو خروج أثناء تنفيذ المهمة النشطة.', change: '-5 XP' }
+            });
+            window.dispatchEvent(distractionEvent);
+        }
+    }
+}); 
     
     // 3. Dynamic Greeting
     const h = new Date().getHours(); 
@@ -2254,8 +2415,169 @@ window.BrainGames = BrainGames;
 window.Pomodoro = Pomodoro;
 window.Router = Router;
 window.Milestone = Milestone;
+// دالة موحدة لتسجيل أحداث النظام التاريخية عبر المتصفح
+function saveSystemLog(type, text, change) {
+    const now = new Date();
+    const timestamp = now.toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', second:'2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+    
+    let logs = [];
+    try {
+        logs = JSON.parse(localStorage.getItem('sovereign_system_logs')) || [];
+    } catch(e) { logs = []; }
+    
+    logs.push({ type, text, change, timestamp });
+    
+    // الاحتفاظ بآخر 200 سجل فقط لحماية الأداء ومنع تكدس الذاكرة
+    if(logs.length > 200) logs.shift();
+    
+    localStorage.setItem('sovereign_system_logs', JSON.stringify(logs));
+}
+const SovereignTimer = {
+    timerInterval: null,
+    timeRemaining: 0,
+    totalDuration: 0,
+    isActive: false,
+    penaltyTriggered: false,
+    alarmAudioContext: null,
+    alarmOscillator: null,
+    alarmInterval: null,
+
+    init() {
+        this.setupAntiDistraction();
+    },
+
+    start(minutes) {
+        if (this.isActive) this.stop();
+        
+        this.totalDuration = minutes * 60;
+        this.timeRemaining = this.totalDuration;
+        this.isActive = true;
+        this.penaltyTriggered = false;
+
+        if (window.SoundEffects && typeof window.SoundEffects.playSystemClick === 'function') {
+            window.SoundEffects.playSystemClick();
+        }
+        
+        this.updateUI();
+        document.getElementById('floatingTimerWidget').classList.remove('hidden');
+
+        this.timerInterval = setInterval(() => {
+            if (this.timeRemaining > 0) {
+                this.timeRemaining--;
+                this.updateUI();
+            } else {
+                this.triggerAlarm();
+            }
+        }, 1000);
+    },
+
+    stop() {
+        clearInterval(this.timerInterval);
+        this.isActive = false;
+        document.getElementById('floatingTimerWidget').classList.add('hidden');
+    },
+
+    updateUI() {
+        const mins = Math.floor(this.timeRemaining / 60).toString().padStart(2, '0');
+        const secs = (this.timeRemaining % 60).toString().padStart(2, '0');
+        
+        // تحديث النص والشريط العائم
+        document.getElementById('floatingTimerText').textContent = `${mins}:${secs}`;
+        const progressPercent = (this.timeRemaining / this.totalDuration) * 100;
+        document.getElementById('floatingTimerProgress').style.width = `${progressPercent}%`;
+
+        // إذا كان لديك عنصر عرض رئيسي للساعة في لوحتك حدثه هنا أيضاً
+        const mainDisplay = document.getElementById('sovereignClockDisplay');
+        if (mainDisplay) mainDisplay.textContent = `${mins}:${secs}`;
+    },
+
+    setupAntiDistraction() {
+        // حماية التركيز: رصد الخروج من التبويب أو فقدان التركيز البؤري للنافذة
+        const penaltyAction = () => {
+            if (this.isActive && !this.penaltyTriggered) {
+                this.penaltyTriggered = true;
+                if (window.PlayerState && typeof window.PlayerState.addXP === 'function') {
+                    window.PlayerState.addXP(-5); // خصم نقاط العقوبة
+                }
+                
+                if (window.Toast && typeof window.Toast.show === 'function') {
+                    window.Toast.show('🚨 [تحذير التشتت]: غادرت محيط التركيز! تم خصم 5 XP.', 'error');
+                } else {
+                    alert('🚨 [تحذير التشتت]: غادرت محيط التركيز! تم خصم 5 XP.');
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) penaltyAction();
+        });
+        window.addEventListener('blur', penaltyAction);
+    },
+
+    triggerAlarm() {
+        this.stop();
+        // تفعيل شاشة الإنذار الفولاذية
+        const overlay = document.getElementById('ironcladAlarmOverlay');
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        
+        // إطلاق صوت التنبيه المستمر واللحوح باستخدام الـ Web Audio API لضمان استقلاليته وملائمته لطلبك
+        this.playIroncladTone();
+    },
+
+    playIroncladTone() {
+        try {
+            this.alarmAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.alarmOscillator = this.alarmAudioContext.createOscillator();
+            const gainNode = this.alarmAudioContext.createGain();
+            
+            this.alarmOscillator.type = 'sawtooth'; // نغمة حادة وقاطعة تمنع التراخي
+            this.alarmOscillator.frequency.setValueAtTime(440, this.alarmAudioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.2, this.alarmAudioContext.currentTime);
+            
+            this.alarmOscillator.connect(gainNode);
+            gainNode.connect(this.alarmAudioContext.destination);
+            this.alarmOscillator.start();
+
+            // نغمة نبضية متناوبة لإجبارك على الاستيقاظ أو إنهاء المهمة فوراً
+            this.alarmInterval = setInterval(() => {
+                if(this.alarmOscillator) {
+                    let currentFreq = this.alarmOscillator.frequency.value;
+                    this.alarmOscillator.frequency.setValueAtTime(currentFreq === 440 ? 587 : 440, this.alarmAudioContext.currentTime);
+                }
+            }, 500);
+        } catch(e) {
+            console.log("Audio Context Alert: Waiting for User Interaction.");
+        }
+    },
+
+    completeTaskSuccess() {
+        // إيقاف التنبيه الصوتي تماماً
+        if (this.alarmOscillator) {
+            this.alarmOscillator.stop();
+            this.alarmOscillator = null;
+        }
+        clearInterval(this.alarmInterval);
+        if (this.alarmAudioContext) this.alarmAudioContext.close();
+
+        // إخفاء الواجهة
+        document.getElementById('ironcladAlarmOverlay').classList.remove('flex');
+        document.getElementById('ironcladAlarmOverlay').classList.add('hidden');
+
+        // منح مكافأة الانضباط الكامل
+        if (window.PlayerState && typeof window.PlayerState.addXP === 'function') {
+            window.PlayerState.addXP(30); // إضافة مكافأة التركيز الكاملة
+        }
+        
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00f0ff', '#9d4edd'] });
+        }
+    }
+};
 </script>
 </body>
 </html>
+
+
 
 
