@@ -29,6 +29,35 @@
         }
         .sys-pulse { animation: systemPulse 2s infinite; }
     </style>
+<script>
+    const SystemCore = {
+        init() {
+            // 1. استعادة الهالة فوراً
+            const savedAura = localStorage.getItem('sovereign-aura') || 'dark';
+            this.applyTheme(savedAura);
+            
+            // 2. تفعيل حالة اللاعب (PlayerState) إذا وجد
+            if(window.PlayerState) window.PlayerState.init();
+        },
+        applyTheme(themeName) {
+            const root = document.documentElement;
+            // مصفوفة الألوان (يجب أن تكون موحدة في كل الملفات)
+            const themes = {
+                dark: {'--sys-cyan': '#00f0ff', '--sys-purple': '#9d4edd', '--sys-bg-dark': '#02040a', 'isLight': false},
+                lightning: {'--sys-cyan': '#0284c7', '--sys-purple': '#f97316', '--sys-bg-dark': '#f8fafc', 'isLight': true},
+                crimson: {'--sys-cyan': '#ff003c', '--sys-purple': '#7f1d1d', '--sys-bg-dark': '#080102', 'isLight': false},
+                nature: {'--sys-cyan': '#10b981', '--sys-purple': '#ec4899', '--sys-bg-dark': '#f4fbf7', 'isLight': true}
+            };
+            const theme = themes[themeName] || themes.dark;
+            Object.keys(theme).forEach(key => {
+                if(key !== 'isLight') root.style.setProperty(key, theme[key]);
+            });
+            if(theme.isLight) document.body.classList.add('light-mode');
+            else document.body.classList.remove('light-mode');
+        }
+    };
+    window.addEventListener('DOMContentLoaded', () => SystemCore.init());
+</script>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-6">
 
@@ -225,6 +254,7 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => SovereignAI.init());
-    </script>
+
+   </script>
 </body>
 </html>
