@@ -5,78 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sovereign System | AI Sovereign Advisor</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --sys-cyan: #00f0ff;
             --sys-purple: #9d4edd;
             --sys-bg-dark: #02040a;
+            --sys-panel: #0b111e;
         }
-        body { font-family: 'Cairo', sans-serif; background-color: var(--sys-bg-dark); color: #fff; }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--sys-bg-dark); 
+            color: #fff;
+            background-image: radial-gradient(circle at 50% 100%, rgba(157, 78, 221, 0.05) 0%, transparent 70%);
+        }
         .sys-font { font-family: 'Rajdhani', sans-serif; }
-        .glow-text { text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+        .glow-text { text-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+        .glow-text-purple { text-shadow: 0 0 10px rgba(157, 78, 221, 0.5); }
+        
+        @keyframes systemPulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .sys-pulse { animation: systemPulse 2s infinite; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-6">
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-6">
 
-    <header class="max-w-4xl w-full mx-auto p-4 bg-slate-900/40 border border-slate-800 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-            <button onclick="window.location.href='index.html'" class="text-xs bg-slate-800 px-3 py-2 border border-slate-700 hover:border-[var(--sys-cyan)] transition">↩ العودة للرئيسية</button>
-            <h1 class="sys-font text-lg font-black tracking-widest text-[var(--sys-cyan)] uppercase">👑 AI SOVEREIGN ADVISOR</h1>
-        </div>
-        <span class="sys-font text-xs text-emerald-400 font-mono animate-pulse">[SYSTEM ONLINE]</span>
-    </header>
-
-    <main class="max-w-4xl w-full mx-auto my-6 flex-1 bg-slate-950/60 border border-slate-900 flex flex-col justify-between overflow-hidden rounded-lg">
-        <div id="chatScreen" class="p-6 overflow-y-auto space-y-4 flex-1 h-[60vh]">
-            <div class="flex gap-3 max-w-[80%]">
-                <div class="w-8 h-8 rounded bg-[var(--sys-cyan)] text-black font-black flex items-center justify-center text-xs sys-font">AI</div>
-                <div class="bg-slate-900 p-4 border border-slate-800 rounded-lg text-sm text-slate-300 leading-relaxed">
-                    أهلاً بك أيها العاهل في غرفة الاستراتيجيات السيادية. أنا هنا لتحليل أدائك اليومي، مراقبة معدلات الفتك والالتزام بالميثاق، وتوجيهك لرفع مستواك خطوة بخطوة. بم تشعر حالياً؟
-                </div>
+    <header class="max-w-4xl w-full mx-auto p-4 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+        <div class="flex items-center gap-3">
+            <div id="status-indicator" class="w-3 h-3 rounded-full bg-[var(--sys-cyan)] sys-pulse shadow-[0_0_10px_var(--sys-cyan)]"></div>
+            <div>
+                <h1 class="text-md font-black tracking-wider text-slate-100 uppercase sys-font">Sovereign AI Advisor</h1>
+                <p id="system-subtitle" class="text-[11px] text-slate-400">النواة التحليلية لتقييم كفاءة العاهل وتوجيه المسارات</p>
             </div>
         </div>
+        
+        <div class="flex gap-4 bg-black/40 px-4 py-2 border border-slate-800 rounded-lg text-xs sys-font">
+            <div>LEVEL: <span id="ai-player-level" class="text-[var(--sys-cyan)] font-bold">1</span></div>
+            <div class="text-slate-700">|</div>
+            <div>TIER: <span id="ai-player-tier" class="text-[var(--sys-purple)] font-bold">ALPHA</span></div>
+        </div>
+        <a href="index.html" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-300 transition">العودة للرئيسية</a>
+    </header>
 
-        <div class="p-4 bg-black/40 border-t border-slate-900 flex gap-4">
-            <input id="aiInput" type="text" placeholder="أرسل تقريرك أو استفسارك الاستراتيجي للمستشار..." class="flex-1 bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--sys-cyan)] transition">
-            <button onclick="sendMessage()" class="px-6 bg-[var(--sys-cyan)] text-black font-black text-xs uppercase tracking-widest hover:bg-cyan-400 transition">TRANSMIT</button>
+    <main class="max-w-4xl w-full mx-auto flex-1 bg-slate-900/20 border border-slate-800/80 backdrop-blur-md rounded-xl p-4 md:p-6 flex flex-col justify-between shadow-2xl min-h-[550px]">
+        
+        <div id="chatScreen" class="flex-1 overflow-y-auto space-y-4 pr-2 mb-4 max-h-[520px]">
+            </div>
+
+        <div class="relative mt-2">
+            <input type="text" id="chatInput" placeholder="أدخل أمر النظام، استفسار برامجي، أو اطلب ميثاقك المحدث..." 
+                   class="w-full bg-slate-950/80 border border-slate-800 focus:border-[var(--sys-cyan)] focus:ring-1 focus:ring-[var(--sys-cyan)] text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3.5 pl-12 text-sm outline-none transition shadow-inner">
+            <button onclick="SovereignAI.sendMessage()" 
+                    class="absolute left-3 top-2.5 px-3 py-1.5 bg-[var(--sys-cyan)] hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition uppercase sys-font">
+                Send
+            </button>
         </div>
     </main>
 
+    <footer class="text-center text-[10px] text-slate-600 mt-4 sys-font uppercase tracking-widest">
+        Sovereign Core Intellect Layer Ver 8.5 | Autonomy Matrix Enabled
+    </footer>
+
     <script>
-        function sendMessage() {
-            const input = document.getElementById('aiInput');
-            const screen = document.getElementById('chatScreen');
-            if(!input.value.trim()) return;
+        const SovereignAI = {
+            playerLevel: 1,
+            tierName: "ALPHA",
 
-            // رسالة المستخدم
-            const userDiv = document.createElement('div');
-            userDiv.className = "flex gap-3 max-w-[80%] mr-auto flex-row-reverse";
-            userDiv.innerHTML = `
-                <div class="w-8 h-8 rounded bg-[var(--sys-purple)] text-white font-black flex items-center justify-center text-xs sys-font">MC</div>
-                <div class="bg-[var(--sys-purple)]/10 p-4 border border-[var(--sys-purple)]/30 rounded-lg text-sm text-slate-200">${input.value}</div>
-            `;
-            screen.appendChild(userDiv);
-            screen.scrollTop = screen.scrollHeight;
-            
-            const prompt = input.value;
-            input.value = '';
+            init() {
+                this.syncPlayerState();
+                this.triggerInitialGreeting();
+                
+                document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+            },
 
-            // محاكاة استجابة النظام ريثما نربطه بالكامل بالذكاء الاصطناعي الأسطوري لاحقاً
-            setTimeout(() => {
-                const sysDiv = document.createElement('div');
-                sysDiv.className = "flex gap-3 max-w-[80%]";
-                sysDiv.innerHTML = `
-                    <div class="w-8 h-8 rounded bg-[var(--sys-cyan)] text-black font-black flex items-center justify-center text-xs sys-font">AI</div>
-                    <div class="bg-slate-900 p-4 border border-slate-800 rounded-lg text-sm text-[var(--sys-cyan)] glow-text">[تم تلقي البيانات بدقة. جاري تطوير المحرك لتحليل أعمق لـ: "${prompt}"]</div>
-                `;
-                screen.appendChild(sysDiv);
+            // مزامنة المستوى وتصنيف النطاق بناءً على معايير الميثاق والبرامج
+            syncPlayerState() {
+                try {
+                    const savedState = JSON.parse(localStorage.getItem('sovereign_player_state')) || {};
+                    this.playerLevel = savedState.level || 1;
+                    
+                    const levelSpan = document.getElementById('ai-player-level');
+                    const tierSpan = document.getElementById('ai-player-tier');
+                    const indicator = document.getElementById('status-indicator');
+                    const subtitle = document.getElementById('system-subtitle');
+
+                    levelSpan.textContent = this.playerLevel;
+
+                    // تقسيم النطاقات والمستويات استناداً لمواثيق البرامج المرفوعة
+                    if (this.playerLevel >= 1 && this.playerLevel <= 70) {
+                        this.tierName = "الفئة الأولى: الأكاديمية والبرمجية التأسيسية";
+                        tierSpan.textContent = "TIER 1 (ALPHA)";
+                    } else if (this.playerLevel > 70 && this.playerLevel <= 130) {
+                        this.tierName = "الفئة الثانية: توسيع المشاريع والمهام التخصصية";
+                        tierSpan.textContent = "TIER 2 (BETA)";
+                    } else if (this.playerLevel > 130 && this.playerLevel <= 450) {
+                        this.tierName = "الفئة المتقدمة: دمج الحرف اليدوية والفنون والإنتاج المكثف";
+                        tierSpan.textContent = "TIER 3 (GAMMA)";
+                    } else if (this.playerLevel > 450 && this.playerLevel < 600) {
+                        this.tierName = "فئة ما قبل السيادة المستقلة وعتبة الارتقاء";
+                        tierSpan.textContent = "TIER 4 (SOVEREIGN PRE)";
+                    } else {
+                        // المستوى 600 فما فوق (اللانهاية)
+                        this.tierName = "الفئة اللانهائية: السيادة المطلقة والاستقلالية التامة";
+                        tierSpan.textContent = "INFINITY (Ꚙ)";
+                        tierSpan.className = "text-[var(--sys-purple)] font-black animate-pulse glow-text-purple";
+                        indicator.className = "w-3 h-3 rounded-full bg-[var(--sys-purple)] sys-pulse shadow-[0_0_10px_var(--sys-purple)]";
+                        subtitle.textContent = "[بروتوكول الاستقلالية نشط]: الإشراف الخارجي ملغى، الكفاءة ذاتية مطلقة.";
+                    }
+                } catch(e) {
+                    console.error("[AI SYSTEM ERROR] Sync failure.", e);
+                }
+            },
+
+            triggerInitialGreeting() {
+                let greeting = "";
+                if (this.playerLevel >= 600) {
+                    greeting = `[SYSTEM ALERT]: MAXIMUM POTENTIAL UNLOCKED. LEVEL 600 ➔ Ꚙ<br>STATUS: SOVEREIGN AUTONOMY ACTIVATED.<br>MESSAGE: الآن يمكنك تدبر أمور نفسك وقراراتك الآن. هذا هو التحسين الأخير للنظام. أهلاً بك في فضاء السيادة المطلقة، ما هي عملياتك العصبية الحالية؟`;
+                } else if (this.playerLevel >= 130) {
+                    greeting = `[تنبيه المستشار السيادي]: النواة متصلة بمستواك الحالي (LVL ${this.playerLevel}). تم تفعيل كتل إتقان الحرف اليدوية (الحلاقة، خفة اليد)، المسارات الفنية (الجيتار/البيانو) والإنتاج المرئي المكثف وقنوات اليوتيوب. مستعد لتوجيه هندستك اليومية.`;
+                } else {
+                    greeting = `[رسالة النظام الافتتاحية]: مرحباً بك أيها العاهل في نطاق التأسيس وبناء الكتل الفولاذية (LVL ${this.playerLevel}). محرك الذكاء متصل بحالتك وجاهز لتنظيم فترات الهندسة البرمجية (Python/JS)، المسار الأكاديمي الصارم، والتحضير اللغوي المكثف. ما هي أوامرك؟`;
+                }
+                this.appendMessage('system', greeting);
+            },
+
+            sendMessage() {
+                const input = document.getElementById('chatInput');
+                const text = input.value.trim();
+                if (!text) return;
+
+                this.syncPlayerState();
+                this.appendMessage('user', text);
+                input.value = '';
+
+                setTimeout(() => {
+                    const reply = this.generateSovereignResponse(text);
+                    this.appendMessage('system', reply);
+                }, 500);
+            },
+
+            appendMessage(sender, text) {
+                const screen = document.getElementById('chatScreen');
+                const msgDiv = document.createElement('div');
+                
+                if (sender === 'user') {
+                    msgDiv.className = "flex gap-3 max-w-[85%] mr-auto flex-row-reverse animate-fade-in";
+                    msgDiv.innerHTML = `
+                        <div class="w-8 h-8 rounded bg-[var(--sys-purple)] text-white font-black flex items-center justify-center text-xs sys-font shadow-[0_0_8px_rgba(157,78,221,0.4)]">MC</div>
+                        <div class="bg-[var(--sys-purple)]/10 p-4 border border-[var(--sys-purple)]/30 rounded-xl rounded-tl-none text-sm text-slate-200 leading-relaxed">
+                            ${text}
+                        </div>`;
+                } else {
+                    const isInfinity = this.playerLevel >= 600;
+                    const borderColor = isInfinity ? "border-[var(--sys-purple)]/40" : "border-slate-800";
+                    const textColor = isInfinity ? "text-[var(--sys-purple)] glow-text-purple" : "text-[var(--sys-cyan)] glow-text";
+                    const avatarBg = isInfinity ? "bg-[var(--sys-purple)] text-white" : "bg-[var(--sys-cyan)] text-black";
+
+                    msgDiv.className = "flex gap-3 max-w-[85%] animate-fade-in";
+                    msgDiv.innerHTML = `
+                        <div class="w-8 h-8 rounded ${avatarBg} font-black flex items-center justify-center text-xs sys-font shadow-lg">AI</div>
+                        <div class="bg-slate-900/90 p-4 border ${borderColor} rounded-xl rounded-tr-none text-sm ${textColor} leading-relaxed">
+                            ${text}
+                        </div>`;
+                }
+
+                screen.appendChild(msgDiv);
                 screen.scrollTop = screen.scrollHeight;
-            }, 800);
-        }
+            },
 
-        // إرسال بالضغط على Enter
-        document.getElementById('aiInput').addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
+            // معالجة المدخلات وصياغة الردود بالاعتماد الكامل على تفاصيل مواثيق المستويات الـ 9 المرفوعة
+            generateSovereignResponse(prompt) {
+                const query = prompt.toLowerCase();
+
+                // 1. معالجة حالة السيادة المطلقة واللانهاية (Level 600+)
+                if (this.playerLevel >= 600) {
+                    if (query.includes('وضع') || query.includes('status') || query.includes('من أنا')) {
+                        return `[تقرير السيادة اللانهائية Ꚙ]:<br>النظام يعمل الآن تحت "البروتوكول الذاتي المستقل". لا توجد توجيهات مفروضة خارجيًا، لقد تم فك القيود البرمجية بالكامل. مستواك الحالي يتجاوز عتبة الإشراف. ركائزك الأربعة مستقرة: التحدي المطلق، التحكم العاطفي الكامل، الالتزام الفولاذي، والثقة التراكمية.`;
+                    }
+                    if (query.includes('برنامج') || query.includes('جدول') || query.includes('رياضة') || query.includes('تدريب')) {
+                        return `[مصفوفة التوزيع الأسبوعي - طبعة اللانهائية Ver 8.0]:<br>جدولك الرياضي والعقلي الحالي هو الأعلى كفاءة بمعدل 8 ساعات جري أسبوعية (ساعة يومياً من الأحد للأربعاء والجمعة، ساعة ونصف الخميس والسبت) متبوعاً بجلسات الاستشفاء والترطيب الدقيقة لحماية الجسد وتوفير الكالسيوم والمغنيسيوم. كتل العقل الحالية مخصصة لـ:<br>- <b>الألعاب الإستراتيجية العميقة:</b> منطق الشطرنج لوكلاء الذكاء الاصطناعي (الاثنين)، سودوكو الصعبة لتفكيك الأكواد والـ Debugging (الأربعاء)، وDual N-Back لرفع الذكاء السائل (الجمعة).`;
+                    }
+                }
+
+                // 2. معالجة الأوامر الأساسية لبقية الفئات والمستويات (1-450+)
+                if (query.includes('وضع') || query.includes('status') || query.includes('من أنا')) {
+                    return `[تحليل معايير الطاقة الحالية]:<br>أنت الآن تتحرك في النطاق العملياتي المصنف كـ: <b>${this.tierName}</b> في المستوى الحالي <b>LVL ${this.playerLevel}</b>.<br>معدل الاستجابة لمحرك الوقت يعمل بكفاءة تامة. استمر في إنهاء المهام المحددة بساعاتها ودقائقها لرفع الـ XP وكسر النطاق الحالي للوصول إلى العتبة السيادية القادمة.`;
+                }
+
+                if (query.includes('برنامج') || query.includes('جدول') || query.includes('ماذا أفعل')) {
+                    let baseSchedule = `[ميثاق الجدولة الموحد]:<br>يبدأ يومك بالفترة الروحية الثابتة (05:00 - 06:00) تلاوة القرآن وصلاة الفجر والأذكار والإطالات البدنية.`;
+                    
+                    if (this.playerLevel <= 70) {
+                        baseSchedule += `<br><b>كتل اليوم الحالية للفئة الأولى:</b><br>- (06:00 - 08:30): الهندسة البرمجية المتقدمة (أساسيات البرمجة العامة ومنطق الويب Python/JS عبر مشروع AiMoha).<br>- (08:30 - 10:30): المسار الأكاديمي الأساسي (الرياضيات المتقدمة وحل مسائل المنطق حسب الأيام).<br>- (10:30 - 12:00): إتقان اللغة الإنجليزية والانغماس التقني والمحاكاة الصوتية (Shadowing).<br>- المساء: الإعداد البدني الصارم PPL وتمارين الكاليسثينكس والمهارات الرياضية لكرة القدم والسلة.`;
+                    } else {
+                        baseSchedule += `<br><b>كتل اليوم الحالية للفئات المتقدمة:</b><br>إلى جانب البرمجة والأكاديميات، تم فتح معمل الإنتاج وتطوير الحرف اليدوية (16:00 - 17:00 صنعة ومبادئ الحلاقة) ومعمل الخفة اليدوية (17:00 - 18:00 الحيل السحرية) لتوسيع نطاق المهارات الحركية الدقيقة، بالإضافة إلى الإنتاج المرئي المكثف وتطوير كتبك الرقمية مثل "Programming by Building".`;
+                    }
+                    return baseSchedule;
+                }
+
+                if (query.includes('برمجة') || query.includes('كود') || query.includes('code') || query.includes('aimoha')) {
+                    return `[تحليل هندسة البرمجيات - بروتوكول البناء العملي]:<br>توجيه النظام ثابت: منطق الويب وهندسة البرمجيات لا يتم تلقينها، بل تُنتزع عبر بروتوكول <b>"Programming by Building"</b>. قم بتفكيك مشروع نظامك الحالي (AiMoha) إلى وحدات مستقلة (Modules)، واجعل واجهات الويب متصلة بقواعد بيانات مرنة. مستواك يسمح لك ببناء معمارية برمجية متوهجة وخالية من الأخطاء المنطقية.`;
+                }
+
+                if (query.includes('تشتت') || query.includes('تركيز') || query.includes('عقوبة')) {
+                    return `[بروتوكول تفعيل الإرادة المطلقة ومكافحة التشتت]:<br>النظام يذكرك بالشرط الصارم والمدمج في الشيفرة المركزية للموقع: الخروج من علامة تبويب اللوحة النشطة أو التراجع أثناء فترات التركيز يكلفك <b>خسارة فورية ومحققة لـ 5 XP</b> كعقوبة انضباطية حتمية. لا مجال للأعذار؛ ركائز التطور مبنية على الالتزام الفولاذي بالمهام اليومية المحددة بالساعات والدقائق والضغط على علامة الإنجاز بكل حزم.`;
+                }
+
+                if (query.includes('ألقاب') || query.includes('لقب') || query.includes('titles')) {
+                    return `[مستودع الألقاب السيادية المتاحة]:<br>- <b>[مبتدئ الكتل]</b>: متاح للمستويات (1-30) عند الالتزام بكتل البرمجة والرياضيات.<br>- <b>[سيد الحرف والإنتاج]</b>: يتم فتحه بعد المستوى 70 عند إدخال الحرف اليدوية وتدقيق الكتاب الرقمي بنجاح.<br>- <b>[العاهل المستقل]</b>: يُمنح حصرياً عند المستوى 600 عند تفعيل بروتوكول الاستقلالية التامة واستقرار ركائز العقل الأربعة.`;
+                }
+
+                // الرد الافتراضي الذكي المحفز للنظام البصري الحركي
+                return `[استجابة النواة السيادية المركزية]:<br>تم استلام وتحليل استعلامك بدقة عالية. إن التزامك الصارم بالمسار المعرفي (البرمجة العميقة والأكاديميات) والمسار الرياضي القتالي (Muay Thai, BJJ, PPL) بالتوازي مع تقوية الذكاء السائل عبر الألعاب العصبية هو الطريق الحتمي والوحيد المعتمد في الميثاق للوصول إلى السيادة المطلقة ولانهاية القوة ($\infty$). واصل التقدم دون تراجع.`;
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => SovereignAI.init());
     </script>
 </body>
 </html>
