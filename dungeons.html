@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign System | Brain Training Dungeons</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet"></link>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --sys-cyan: #00f0ff;
+            --sys-purple: #9d4edd;
+            --sys-bg-dark: #02040a;
+        }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--sys-bg-dark); color: #fff; }
+        .sys-font { font-family: 'Rajdhani', sans-serif; }
+        .neon-border { border: 1px solid rgba(0, 240, 255, 0.2); box-shadow: 0 0 15px rgba(0, 240, 255, 0.05); }
+        .neon-border-purple { border: 1px solid rgba(157, 78, 221, 0.2); box-shadow: 0 0 15px rgba(157, 78, 221, 0.05); }
+    </style>
+</head>
+<body class="min-h-screen p-6 bg-radial-gradient">
+
+    <header class="max-w-6xl mx-auto mb-8 p-4 bg-slate-900/60 backdrop-blur border border-slate-800 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <button onclick="window.location.href='index.html'" class="text-xs bg-slate-800 px-3 py-2 border border-slate-700 hover:border-[var(--sys-cyan)] transition">↩ العودة للرئيسية</button>
+            <h1 class="sys-font text-xl font-black tracking-widest text-[var(--sys-cyan)] uppercase">🧠 BRAIN TRAINING DUNGEONS</h1>
+        </div>
+        <div class="flex items-center gap-6 sys-font">
+            <div class="text-right">
+                <span class="text-xs text-slate-400 block">MONARCH LEVEL</span>
+                <span id="currentLevel" class="text-xl font-bold text-[var(--sys-cyan)]">1</span>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-slate-400 block">INT STAT</span>
+                <span id="stat-int" class="text-xl font-bold text-[var(--sys-purple)]">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="p-6 bg-slate-950/80 border border-slate-900 neon-border flex flex-col justify-between rounded-lg relative overflow-hidden group">
+            <div class="absolute top-0 right-0 bg-[var(--sys-cyan)] text-black font-black text-[10px] px-3 py-1 sys-font tracking-wider">RANK: B</div>
+            <div>
+                <h2 class="text-xl font-black text-white mb-2">زنزانة السودوكو (Sudoku Crypt)</h2>
+                <p class="text-xs text-slate-400 mb-6 leading-relaxed">تحدي المنطق الرياضي الشامل ومصفوفات الأرقام. تجاوز الألغاز لكسر قيود التفكير الخطي وجني نقاط INT حقيقية.</p>
+            </div>
+            <div class="bg-black/40 p-4 border border-slate-900 mb-6 text-center rounded">
+                <span class="text-xs text-[var(--sys-cyan)] font-mono sys-font">[STATUS: LOCKED - READY TO CORE]</span>
+            </div>
+            <button onclick="enterGame('Sudoku')" class="w-full py-3 bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] font-bold text-sm tracking-widest uppercase hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300">ENTER DUNGEON</button>
+        </div>
+
+        <div class="p-6 bg-slate-950/80 border border-slate-900 neon-border-purple flex flex-col justify-between rounded-lg relative overflow-hidden group">
+            <div class="absolute top-0 right-0 bg-[var(--sys-purple)] text-black font-black text-[10px] px-3 py-1 sys-font tracking-wider">RANK: A</div>
+            <div>
+                <h2 class="text-xl font-black text-white mb-2">تكتيكات الشطرنج (Grandmaster's Maze)</h2>
+                <p class="text-xs text-slate-400 mb-6 leading-relaxed">توقع حركات الخصم، حل مواقف كش مات المعقدة، وبناء عقلية استراتيجية قادرة على إدارة ميثاقك اليومي بسلاسة الفرسان.</p>
+            </div>
+            <div class="bg-black/40 p-4 border border-slate-900 mb-6 text-center rounded">
+                <span class="text-xs text-[var(--sys-purple)] font-mono sys-font">[STATUS: LOCKED - READY TO CORE]</span>
+            </div>
+            <button onclick="enterGame('Chess')" class="w-full py-3 bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)] text-[var(--sys-purple)] font-bold text-sm tracking-widest uppercase hover:bg-[var(--sys-purple)] hover:text-black transition duration-300">ENTER DUNGEON</button>
+        </div>
+
+        <div class="p-6 bg-slate-950/80 border border-slate-900 neon-border flex flex-col justify-between rounded-lg relative overflow-hidden group">
+            <div class="absolute top-0 right-0 bg-rose-600 text-white font-black text-[10px] px-3 py-1 sys-font tracking-wider">RANK: S</div>
+            <div>
+                <h2 class="text-xl font-black text-white mb-2">الذاكرة العاملة (Dual N-Back Vortex)</h2>
+                <p class="text-xs text-slate-400 mb-6 leading-relaxed">التدريب العلمي الصارم المعتمد عالمياً لتوسيع الذاكرة قصيرة المدى وزيادة سيولتك الذهنية والذكاء السائل بشكل حاد.</p>
+            </div>
+            <div class="bg-black/40 p-4 border border-slate-900 mb-6 text-center rounded">
+                <span class="text-xs text-rose-500 font-mono sys-font">[STATUS: LOCKED - READY TO CORE]</span>
+            </div>
+            <button onclick="enterGame('N-Back')" class="w-full py-3 bg-rose-950/20 border border-rose-600 text-rose-500 font-bold text-sm tracking-widest uppercase hover:bg-rose-600 hover:text-white transition duration-300">ENTER DUNGEON</button>
+        </div>
+<div id="dungeonModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/95 backdrop-blur-md transition-all">
+        <div id="gameArena" class="sl-panel p-8 w-full max-w-lg mx-4 text-center border-2 border-[var(--sys-cyan)] rounded-xl relative overflow-hidden">
+            </div>
+    </div>
+    </main>
+
+    <script>
+// ==========================================
+        // 1. SAFE STATE SYNC (مزامنة دقيقة مع الرئيسية)
+        // ==========================================
+        const PlayerState = {
+            data: {},
+            init() {
+                // استخدام نفس المفتاح الخاص بالصفحة الرئيسية
+                const saved = localStorage.getItem('monarch_system_data');
+                if(saved) {
+                    this.data = JSON.parse(saved);
+                } else {
+                    this.data = { level: 1, xp: 0, ap: 0, stats: { str: 10, agi: 10, vit: 10, int: 10, sen: 10 }, gold: 0, authority: 0, lethality: 0 };
+                }
+                this.updateUI();
+            },
+            save() {
+                // حفظ البيانات في نفس المفتاح
+                localStorage.setItem('monarch_system_data', JSON.stringify(this.data));
+                this.updateUI();
+            },
+            updateUI() {
+                if(document.getElementById('currentLevel')) document.getElementById('currentLevel').textContent = this.data.level || 1;
+                if(document.getElementById('stat-int')) document.getElementById('stat-int').textContent = this.data.stats?.int || 10;
+            },
+            reward(xpGain, intGain) {
+                this.data.xp = (this.data.xp || 0) + xpGain;
+                
+                if (!this.data.stats) this.data.stats = {int: 10};
+                this.data.stats.int = (this.data.stats.int || 10) + intGain;
+                
+                const currentLvl = this.data.level || 1;
+                const nextXpRequired = currentLvl * 100;
+                
+                if(this.data.xp >= nextXpRequired) {
+                    this.data.xp -= nextXpRequired;
+                    this.data.level = currentLvl + 1;
+                    this.data.ap = (this.data.ap || 0) + 3; // إعطاء 3 نقاط AP عند الارتقاء
+                }
+                this.save();
+            }
+        };
+
+        // ==========================================
+        // 2. DUNGEON ENGINE (محرك تشغيل الألعاب)
+        // ==========================================
+        const DungeonEngine = {
+            openModal() {
+                document.getElementById('dungeonModal').classList.remove('hidden');
+                document.getElementById('dungeonModal').classList.add('flex');
+            },
+            closeModal() {
+                document.getElementById('dungeonModal').classList.add('hidden');
+                document.getElementById('dungeonModal').classList.remove('flex');
+                NBackGame.stop(); // إيقاف اللعبة إذا أغلقت النافذة
+            },
+            showRewardScreen(gameName, xpGain, intGain) {
+                const arena = document.getElementById('gameArena');
+                arena.innerHTML = `
+                    <div class="py-8 animate-pulse">
+                        <div class="text-6xl mb-4">👑</div>
+                        <h2 class="text-3xl font-black text-white mb-2 drop-shadow-[0_0_10px_var(--sys-cyan)]">DUNGEON CLEARED</h2>
+                        <p class="text-slate-300 mb-6">تم قهر زنزانة ${gameName} بنجاح.</p>
+                        <div class="flex justify-center gap-6 mb-8">
+                            <div class="text-2xl font-bold text-[var(--sys-cyan)]">+${xpGain} EXP</div>
+                            <div class="text-2xl font-bold text-[var(--sys-purple)]">+${intGain} INT</div>
+                        </div>
+                        <button onclick="DungeonEngine.closeModal()" class="px-8 py-3 bg-[var(--sys-cyan)] text-black font-black uppercase tracking-widest hover:bg-cyan-400 transition">Return to Vault</button>
+                    </div>
+                `;
+                // منح المكافأة الفعلية للنظام
+                PlayerState.reward(xpGain, intGain);
+            }
+        };
+
+        // ==========================================
+        // 3. DUAL N-BACK (زنزانة الذاكرة العاملة - S-Rank)
+        // ==========================================
+        const NBackGame = {
+            sequence: [], currentIndex: 0, maxSteps: 12, score: 0, timer: null, isPlaying: false,
+            
+            init() {
+                DungeonEngine.openModal();
+                const arena = document.getElementById('gameArena');
+                arena.style.borderColor = '#e11d48'; // لون الرتبة S (أحمر/وردي)
+                arena.innerHTML = `
+                    <div class="sys-font text-rose-500 tracking-[0.3em] text-xs mb-2">S-RANK MEMORY TRIAL</div>
+                    <h2 class="text-2xl font-black text-white mb-2">Dual N-Back (1-Back)</h2>
+                    <p class="text-xs text-slate-400 mb-6">هل المربع الحالي يطابق المربع السابق تماماً؟ ركز جيداً.</p>
+                    
+                    <div id="nbackGrid" class="grid grid-cols-3 gap-2 w-48 h-48 mx-auto mb-6">
+                        ${Array.from({length: 9}).map((_, i) => `<div class="bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200" id="cell-${i}"></div>`).join('')}
+                    </div>
+                    
+                    <div id="nbackMsg" class="h-6 text-sm font-bold text-rose-500 mb-4">النقاط: 0 / 3 (مطلوبة للفوز)</div>
+                    
+                    <div class="flex gap-3">
+                        <button id="btnMatch" onclick="NBackGame.match()" class="flex-1 py-3 bg-rose-600 text-white font-bold uppercase text-xs opacity-50 pointer-events-none transition">Match (تطابق)</button>
+                        <button id="btnStart" onclick="NBackGame.start()" class="flex-1 py-3 bg-slate-800 text-white font-bold uppercase text-xs hover:bg-slate-700 transition">Start Trial</button>
+                    </div>
+                    <button onclick="DungeonEngine.closeModal()" class="mt-4 text-xs text-slate-500 hover:text-white uppercase tracking-widest">Escape Dungeon</button>
+                `;
+            },
+            
+            start() {
+                if (this.isPlaying) return;
+                this.isPlaying = true;
+                this.sequence = []; this.currentIndex = 0; this.score = 0;
+                document.getElementById('btnStart').style.display = 'none';
+                document.getElementById('btnMatch').classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('nbackMsg').textContent = `النقاط: 0 / 3 (مطلوبة للفوز)`;
+                document.getElementById('nbackMsg').className = "h-6 text-sm font-bold text-slate-300 mb-4";
+                this.nextFlash();
+            },
+            
+            nextFlash() {
+                if (this.currentIndex >= this.maxSteps) { this.endGame(); return; }
+                
+                // تنظيف الشبكة
+                for(let i=0; i<9; i++) document.getElementById(`cell-${i}`).className = "bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200";
+                
+                // إضاءة مربع جديد
+                const randomPos = Math.floor(Math.random() * 9);
+                this.sequence.push(randomPos);
+                
+                const cell = document.getElementById(`cell-${randomPos}`);
+                if (cell) {
+                    cell.className = "bg-[var(--sys-cyan)] border-2 border-[var(--sys-cyan)] rounded-lg transition-colors duration-100 shadow-[0_0_15px_var(--sys-cyan)]";
+                }
+                
+                this.currentIndex++;
+                
+                // إطفاء المربع وإكمال السلسلة
+                this.timer = setTimeout(() => {
+                    if (cell) cell.className = "bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200";
+                    this.timer = setTimeout(() => this.nextFlash(), 800);
+                }, 600);
+            },
+            
+            match() {
+                if (!this.isPlaying || this.currentIndex < 2) return;
+                const currentPos = this.sequence[this.currentIndex - 1];
+                const prevPos = this.sequence[this.currentIndex - 2];
+                
+                const msg = document.getElementById('nbackMsg');
+                if (currentPos === prevPos) {
+                    this.score++;
+                    msg.textContent = `تطابق صحيح! النقاط: ${this.score} / 3`;
+                    msg.style.color = '#10b981'; // أخضر
+                } else {
+                    msg.textContent = `خطأ! التركيز يتلاشى...`;
+                    msg.style.color = '#e11d48'; // أحمر
+                }
+                setTimeout(() => msg.style.color = '#cbd5e1', 500);
+            },
+            
+            stop() { clearTimeout(this.timer); this.isPlaying = false; },
+            
+            endGame() {
+                this.stop();
+                if (this.score >= 3) {
+                    // الفوز! منح 150 EXP و +2 INT
+                    DungeonEngine.showRewardScreen('Dual N-Back', 150, 2);
+                } else {
+                    document.getElementById('nbackMsg').textContent = `فشلت المحاكمة. لم تصل للنقاط المطلوبة.`;
+                    document.getElementById('nbackMsg').style.color = '#e11d48';
+                    document.getElementById('btnStart').style.display = 'block';
+                    document.getElementById('btnStart').textContent = 'Retry (إعادة)';
+                    document.getElementById('btnMatch').classList.add('opacity-50', 'pointer-events-none');
+                }
+            }
+        };
+
+        // ==========================================
+        // التوجيه (Routing)
+        // ==========================================
+        function enterGame(gameName) {
+            if(gameName === 'N-Back') {
+                NBackGame.init();
+            } else {
+                // سنقوم ببرمجة الشطرنج والسودوكو في الخطوة القادمة
+                alert(`زنزانة [${gameName}] قيد التجهيز. الرجاء تجربة زنزانة Dual N-Back أولاً!`);
+            }
+        }
+
+        // تشغيل التهيئة عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', () => PlayerState.init());
+    </script>
+</body>
+</html>

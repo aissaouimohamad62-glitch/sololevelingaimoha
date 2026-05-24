@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign System | AI Sovereign Advisor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet"></link>
+    <style>
+        :root {
+            --sys-cyan: #00f0ff;
+            --sys-purple: #9d4edd;
+            --sys-bg-dark: #02040a;
+        }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--sys-bg-dark); color: #fff; }
+        .sys-font { font-family: 'Rajdhani', sans-serif; }
+        .glow-text { text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-6">
+
+    <header class="max-w-4xl w-full mx-auto p-4 bg-slate-900/40 border border-slate-800 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <button onclick="window.location.href='index.html'" class="text-xs bg-slate-800 px-3 py-2 border border-slate-700 hover:border-[var(--sys-cyan)] transition">↩ العودة للرئيسية</button>
+            <h1 class="sys-font text-lg font-black tracking-widest text-[var(--sys-cyan)] uppercase">👑 AI SOVEREIGN ADVISOR</h1>
+        </div>
+        <span class="sys-font text-xs text-emerald-400 font-mono animate-pulse">[SYSTEM ONLINE]</span>
+    </header>
+
+    <main class="max-w-4xl w-full mx-auto my-6 flex-1 bg-slate-950/60 border border-slate-900 flex flex-col justify-between overflow-hidden rounded-lg">
+        <div id="chatScreen" class="p-6 overflow-y-auto space-y-4 flex-1 h-[60vh]">
+            <div class="flex gap-3 max-w-[80%]">
+                <div class="w-8 h-8 rounded bg-[var(--sys-cyan)] text-black font-black flex items-center justify-center text-xs sys-font">AI</div>
+                <div class="bg-slate-900 p-4 border border-slate-800 rounded-lg text-sm text-slate-300 leading-relaxed">
+                    أهلاً بك أيها العاهل في غرفة الاستراتيجيات السيادية. أنا هنا لتحليل أدائك اليومي، مراقبة معدلات الفتك والالتزام بالميثاق، وتوجيهك لرفع مستواك خطوة بخطوة. بم تشعر حالياً؟
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-black/40 border-t border-slate-900 flex gap-4">
+            <input id="aiInput" type="text" placeholder="أرسل تقريرك أو استفسارك الاستراتيجي للمستشار..." class="flex-1 bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:outline-none focus:border-[var(--sys-cyan)] transition">
+            <button onclick="sendMessage()" class="px-6 bg-[var(--sys-cyan)] text-black font-black text-xs uppercase tracking-widest hover:bg-cyan-400 transition">TRANSMIT</button>
+        </div>
+    </main>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('aiInput');
+            const screen = document.getElementById('chatScreen');
+            if(!input.value.trim()) return;
+
+            // رسالة المستخدم
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex gap-3 max-w-[80%] mr-auto flex-row-reverse";
+            userDiv.innerHTML = `
+                <div class="w-8 h-8 rounded bg-[var(--sys-purple)] text-white font-black flex items-center justify-center text-xs sys-font">MC</div>
+                <div class="bg-[var(--sys-purple)]/10 p-4 border border-[var(--sys-purple)]/30 rounded-lg text-sm text-slate-200">${input.value}</div>
+            `;
+            screen.appendChild(userDiv);
+            screen.scrollTop = screen.scrollHeight;
+            
+            const prompt = input.value;
+            input.value = '';
+
+            // محاكاة استجابة النظام ريثما نربطه بالكامل بالذكاء الاصطناعي الأسطوري لاحقاً
+            setTimeout(() => {
+                const sysDiv = document.createElement('div');
+                sysDiv.className = "flex gap-3 max-w-[80%]";
+                sysDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded bg-[var(--sys-cyan)] text-black font-black flex items-center justify-center text-xs sys-font">AI</div>
+                    <div class="bg-slate-900 p-4 border border-slate-800 rounded-lg text-sm text-[var(--sys-cyan)] glow-text">[تم تلقي البيانات بدقة. جاري تطوير المحرك لتحليل أعمق لـ: "${prompt}"]</div>
+                `;
+                screen.appendChild(sysDiv);
+                screen.scrollTop = screen.scrollHeight;
+            }, 800);
+        }
+
+        // إرسال بالضغط على Enter
+        document.getElementById('aiInput').addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
+    </script>
+</body>
+</html>
