@@ -17,7 +17,39 @@
         .sys-font { font-family: 'Rajdhani', sans-serif; }
         .neon-border { border: 1px solid rgba(0, 240, 255, 0.2); box-shadow: 0 0 15px rgba(0, 240, 255, 0.05); }
         .neon-border-purple { border: 1px solid rgba(157, 78, 221, 0.2); box-shadow: 0 0 15px rgba(157, 78, 221, 0.05); }
+    
     </style>
+
+
+<script>
+    const SystemCore = {
+        init() {
+            // 1. استعادة الهالة فوراً
+            const savedAura = localStorage.getItem('sovereign-aura') || 'dark';
+            this.applyTheme(savedAura);
+            
+            // 2. تفعيل حالة اللاعب (PlayerState) إذا وجد
+            if(window.PlayerState) window.PlayerState.init();
+        },
+        applyTheme(themeName) {
+            const root = document.documentElement;
+            // مصفوفة الألوان (يجب أن تكون موحدة في كل الملفات)
+            const themes = {
+                dark: {'--sys-cyan': '#00f0ff', '--sys-purple': '#9d4edd', '--sys-bg-dark': '#02040a', 'isLight': false},
+                lightning: {'--sys-cyan': '#0284c7', '--sys-purple': '#f97316', '--sys-bg-dark': '#f8fafc', 'isLight': true},
+                crimson: {'--sys-cyan': '#ff003c', '--sys-purple': '#7f1d1d', '--sys-bg-dark': '#080102', 'isLight': false},
+                nature: {'--sys-cyan': '#10b981', '--sys-purple': '#ec4899', '--sys-bg-dark': '#f4fbf7', 'isLight': true}
+            };
+            const theme = themes[themeName] || themes.dark;
+            Object.keys(theme).forEach(key => {
+                if(key !== 'isLight') root.style.setProperty(key, theme[key]);
+            });
+            if(theme.isLight) document.body.classList.add('light-mode');
+            else document.body.classList.remove('light-mode');
+        }
+    };
+    window.addEventListener('DOMContentLoaded', () => SystemCore.init());
+</script>
 </head>
 <body class="min-h-screen p-6 bg-radial-gradient">
 
@@ -124,7 +156,7 @@
             }
         };
 
-        // ==========================================
+    // ==========================================
         // 2. DUNGEON ENGINE (محرك تشغيل الألعاب)
         // ==========================================
         const DungeonEngine = {
@@ -135,12 +167,25 @@
             closeModal() {
                 document.getElementById('dungeonModal').classList.add('hidden');
                 document.getElementById('dungeonModal').classList.remove('flex');
-                NBackGame.stop(); // إيقاف اللعبة إذا أغلقت النافذة
+                if(typeof NBackGame !== 'undefined') NBackGame.stop(); 
             },
             showRewardScreen(gameName, xpGain, intGain) {
+                let playerState = { exp: 0, int: 10, level: 1 };
+                const savedState = localStorage.getItem('sovereign_player_state') || localStorage.getItem('player_state');
+                
+                if (savedState) {
+                    playerState = JSON.parse(savedState);
+                }
+
+                playerState.exp = (playerState.exp || 0) + xpGain;
+                playerState.int = (playerState.int || 10) + intGain;
+
+                localStorage.setItem('sovereign_player_state', JSON.stringify(playerState));
+                localStorage.setItem('player_state', JSON.stringify(playerState));
+
                 const arena = document.getElementById('gameArena');
                 arena.innerHTML = `
-                    <div class="py-8 animate-pulse">
+                    <div class="py-8 animate-pulse text-center">
                         <div class="text-6xl mb-4">👑</div>
                         <h2 class="text-3xl font-black text-white mb-2 drop-shadow-[0_0_10px_var(--sys-cyan)]">DUNGEON CLEARED</h2>
                         <p class="text-slate-300 mb-6">تم قهر زنزانة ${gameName} بنجاح.</p>
@@ -151,10 +196,15 @@
                         <button onclick="DungeonEngine.closeModal()" class="px-8 py-3 bg-[var(--sys-cyan)] text-black font-black uppercase tracking-widest hover:bg-cyan-400 transition">Return to Vault</button>
                     </div>
                 `;
-                // منح المكافأة الفعلية للنظام
-                PlayerState.reward(xpGain, intGain);
+                
+                if(typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                if(typeof window.SoundEffects !== 'undefined' && typeof window.SoundEffects.playLevelUp === 'function') window.SoundEffects.playLevelUp();
+                
+                if(typeof PlayerState !== 'undefined' && typeof PlayerState.reward === 'function') {
+                    PlayerState.reward(xpGain, intGain);
+                }
             }
-        };
+        }; // <--- القوس الحرج الذي كان مفقوداً في كودك
 
         // ==========================================
         // 3. DUAL N-BACK (زنزانة الذاكرة العاملة - S-Rank)
@@ -253,21 +303,182 @@
                 }
             }
         };
+// ==========================================
+        // 4. CHESS TACTICS (زنزانة الشطرنج - A-Rank)
+        // ==========================================
+        const ChessGame = {
+            knightPos: { r: 0, c: 0 },
+            validMoves: [],
+            foundMoves: 0,
+            isPlaying: false,
 
+            init() {
+                DungeonEngine.openModal();
+                const arena = document.getElementById('gameArena');
+                arena.style.borderColor = 'var(--sys-purple)'; // لون الرتبة A
+                
+                // تهيئة اللوحة وتوليد موقع الحصان العشوائي
+                this.generateBoard();
+
+                arena.innerHTML = `
+                    <div class="sys-font text-[var(--sys-purple)] tracking-[0.3em] text-xs mb-2">A-RANK TACTICAL TRIAL</div>
+                    <h2 class="text-2xl font-black text-white mb-2">رؤية الفارس (Knight's Vision)</h2>
+                    <p class="text-xs text-slate-400 mb-6">حدد جميع المربعات المتاحة لحركة الحصان ♞ في الرقعة. خطأ واحد ينهي المحاكمة.</p>
+                    
+                    <div id="chessGrid" class="grid grid-cols-8 gap-0.5 w-64 h-64 mx-auto mb-6 border-2 border-slate-700 bg-slate-800 p-0.5 shadow-[0_0_15px_rgba(157,78,221,0.2)]">
+                        ${this.renderGrid()}
+                    </div>
+                    
+                    <div id="chessMsg" class="h-6 text-sm font-bold text-[var(--sys-purple)] mb-4">التحركات المكتشفة: 0 / ${this.validMoves.length}</div>
+                    
+                    <div class="flex gap-3">
+                        <button id="btnChessStart" onclick="ChessGame.start()" class="flex-1 py-3 bg-[var(--sys-purple)] text-white font-bold uppercase text-xs hover:bg-purple-600 transition shadow-lg">بدء المحاكمة</button>
+                    </div>
+                    <button onclick="DungeonEngine.closeModal()" class="mt-4 text-xs text-slate-500 hover:text-white uppercase tracking-widest transition">Escape Dungeon</button>
+                `;
+            },
+
+            generateBoard() {
+                // وضع الحصان في مكان عشوائي استراتيجي
+                this.knightPos.r = Math.floor(Math.random() * 6) + 1;
+                this.knightPos.c = Math.floor(Math.random() * 6) + 1;
+                
+                // حساب الحركات الممكنة للحصان حرف (L)
+                const moves = [
+                    [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                    [1, -2], [1, 2], [2, -1], [2, 1]
+                ];
+                
+                this.validMoves = [];
+                moves.forEach(m => {
+                    const nr = this.knightPos.r + m[0];
+                    const nc = this.knightPos.c + m[1];
+                    if(nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                        this.validMoves.push(`${nr}-${nc}`);
+                    }
+                });
+                this.foundMoves = 0;
+                this.isPlaying = false;
+            },
+
+            renderGrid() {
+                let html = '';
+                for(let r = 0; r < 8; r++) {
+                    for(let c = 0; c < 8; c++) {
+                        const isLight = (r + c) % 2 === 0;
+                        const bgColor = isLight ? 'bg-slate-300' : 'bg-slate-500';
+                        const isKnight = (r === this.knightPos.r && c === this.knightPos.c);
+                        const content = isKnight ? '<span class="text-3xl text-slate-900 drop-shadow-md">♞</span>' : '';
+                        
+                        html += `<div id="sq-${r}-${c}" onclick="ChessGame.clickSquare(${r}, ${c})" class="${bgColor} w-full h-full flex items-center justify-center cursor-pointer transition-colors duration-200 ${isKnight ? 'pointer-events-none' : ''}">${content}</div>`;
+                    }
+                }
+                return html;
+            },
+
+            start() {
+                this.isPlaying = true;
+                document.getElementById('btnChessStart').style.display = 'none';
+                document.getElementById('chessMsg').textContent = `التحركات المكتشفة: 0 / ${this.validMoves.length}`;
+                document.getElementById('chessMsg').className = "h-6 text-sm font-bold text-slate-300 mb-4";
+            },
+
+            clickSquare(r, c) {
+                if(!this.isPlaying) return;
+                
+                const sqId = `${r}-${c}`;
+                const el = document.getElementById(`sq-${r}-${c}`);
+                const msg = document.getElementById('chessMsg');
+
+                // التحقق مما إذا كانت الحركة صحيحة
+                if(this.validMoves.includes(sqId)) {
+                    if(!el.classList.contains('bg-[var(--sys-purple)]')) {
+                        el.classList.remove('bg-slate-300', 'bg-slate-500');
+                        el.classList.add('bg-[var(--sys-purple)]');
+                        this.foundMoves++;
+                        msg.textContent = `التحركات المكتشفة: ${this.foundMoves} / ${this.validMoves.length}`;
+                        
+                        // تأثير صوتي عند النجاح في الضغط
+                        if(typeof window.SoundEffects !== 'undefined') window.SoundEffects.playSystemClick();
+
+                        if(this.foundMoves === this.validMoves.length) {
+                            this.win();
+                        }
+                    }
+                } else {
+                    // حركة خاطئة
+                    el.classList.remove('bg-slate-300', 'bg-slate-500');
+                    el.classList.add('bg-rose-600');
+                    this.lose();
+                }
+            },
+
+            win() {
+                this.isPlaying = false;
+                setTimeout(() => {
+                    // الفوز يمنحك 200 XP و 3 INT نقاط ذكاء لأنها رتبة A
+                    DungeonEngine.showRewardScreen('تكتيكات الشطرنج (Knight)', 200, 3);
+                }, 500);
+            },
+
+            lose() {
+                this.isPlaying = false;
+                const msg = document.getElementById('chessMsg');
+                msg.textContent = "خطأ تكتيكي! المحاكمة فشلت.";
+                msg.style.color = '#e11d48'; // أحمر
+                
+                const btn = document.getElementById('btnChessStart');
+                btn.style.display = 'block';
+                btn.textContent = "Retry (توليد رقعة جديدة)";
+                
+                // تحديث اللوحة عند إعادة المحاولة
+                btn.onclick = () => {
+                    this.generateBoard();
+                    document.getElementById('chessGrid').innerHTML = this.renderGrid();
+                    this.start();
+                    btn.onclick = ChessGame.start; 
+                };
+            }
+        };
+        // ==========================================
+// 5. SUDOKU CRYPT (زنزانة السودوكو - S-Rank)
+// ==========================================
+const SudokuGame = {
+    init() {
+        DungeonEngine.openModal();
+        const arena = document.getElementById('gameArena');
+        arena.innerHTML = `
+            <h2 class="text-xl font-black text-white mb-2">فك شفرة السودوكو (S-Rank)</h2>
+            <p class="text-xs text-slate-400 mb-4">أدخل الأرقام الصحيحة لفك الشفرة.</p>
+            <div id="sudokuGrid" class="grid grid-cols-3 gap-2 w-48 h-48 mx-auto mb-4">
+                ${Array(9).fill(0).map((_, i) => `<input type="number" class="w-14 h-14 bg-slate-800 text-center text-white border border-slate-600 focus:border-[var(--sys-purple)] outline-none">`).join('')}
+            </div>
+            <button onclick="DungeonEngine.showRewardScreen('Sudoku Decryption', 500, 5)" class="w-full py-2 bg-[var(--sys-purple)] font-bold text-xs uppercase">تأكيد الحل</button>
+        `;
+    }
+};
         // ==========================================
         // التوجيه (Routing)
         // ==========================================
-        function enterGame(gameName) {
-            if(gameName === 'N-Back') {
-                NBackGame.init();
-            } else {
-                // سنقوم ببرمجة الشطرنج والسودوكو في الخطوة القادمة
-                alert(`زنزانة [${gameName}] قيد التجهيز. الرجاء تجربة زنزانة Dual N-Back أولاً!`);
-            }
-        }
+   // ==========================================
+        // التوجيه (Routing) لفتح الزنزانات
+        // ==========================================
+  function enterGame(gameName) {
+    const arena = document.getElementById('dungeonArena');
+    if(gameName === 'N-Back') {
+        NBackGame.init();
+    } else if (gameName === 'Chess') {
+        arena.innerHTML = `<div class="p-6 text-center"><h2>رقعة الشطرنج الاستراتيجية</h2><p>قريباً: المحرك الذكي مفعّل. حالياً: ركز على تحليل الخصم.</p></div>`;
+    } else if (gameName === 'Sudoku') {
+        arena.innerHTML = `<div class="p-6 text-center"><h2>مستوى السودوكو (S-Rank)</h2><p>الشبكة قيد التوليد... استعد للتحليل.</p></div>`;
+    }
+}
 
         // تشغيل التهيئة عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', () => PlayerState.init());
-    </script>
+   
+   </script>
+   
+    
 </body>
 </html>
