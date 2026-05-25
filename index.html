@@ -668,7 +668,7 @@ const AuraThemes = {
 };
 
 const SoundEffects = {
-    bgMusic: new Audio('SHADOWBORN.mp3'),
+    bgMusic: new Audio('Kingdom_of_Iron.mp3'),
     clickAudio: null,
     init() {
         this.bgMusic.loop = true;
@@ -741,22 +741,33 @@ const DirectiveTimer = {
     timerInterval: null,
     isRunning: false,
     
-    start() {
+    start(savedStartTime) {
         if (this.isRunning) return;
-        this.startTime = Date.now();
+        
+        // ✅ استخدام الوقت المحفوظ أو الوقت الحالي
+        this.startTime = savedStartTime || Date.now();
         this.isRunning = true;
-        this.timerInterval = setInterval(() => this.update(), 1000);
+        
+        // حفظ الوقت في LocalStorage للاستمرارية
+        localStorage.setItem('directive_start_time', this.startTime.toString());
+        
+        // تحديث فوري
         this.update();
+        
+        // بدء التحديث كل ثانية
+        this.timerInterval = setInterval(() => this.update(), 1000);
     },
     
     stop() {
         clearInterval(this.timerInterval);
         this.isRunning = false;
         this.startTime = null;
+        localStorage.removeItem('directive_start_time');
     },
     
     update() {
         if (!this.startTime) return;
+        
         const elapsed = Date.now() - this.startTime;
         const timerEl = document.getElementById('directiveTimer');
         const progressEl = document.getElementById('directiveProgressBar');
@@ -765,7 +776,7 @@ const DirectiveTimer = {
             timerEl.textContent = this.formatTime(elapsed);
         }
         
-        // تحديث شريط التقدم (دائري افتراضياً لـ 25 دقيقة = Pomodoro)
+        // تحديث شريط التقدم (Pomodoro افتراضي 25 دقيقة)
         if (progressEl) {
             const progress = Math.min((elapsed / (25 * 60 * 1000)) * 100, 100);
             progressEl.style.width = `${progress}%`;
@@ -799,30 +810,32 @@ const AnimePopup = {
     playerXP: 0,
     playerGold: 0,
     
-    show(title, description, timeLimit, rewardXP) {
-        if(window.SoundEffects) SoundEffects.playSystemClick();
-        this.syncPlayerState();
-        
-        this.currentQuest = { 
-            title, 
-            rewardXP, 
-            timeLimit,
-            type: this.inferQuestType(title),
-            details: description,
-            acceptedAt: null
-        };
-        
-        document.getElementById('animePopupTitle').textContent = title;
-        document.getElementById('animePopupDesc').innerHTML = description;
-        document.getElementById('animePopupTime').textContent = `TIME: ${timeLimit}`;
-        document.getElementById('animePopupReward').textContent = `REWARD: +${rewardXP} EXP`;
-        
-        const targetEl = document.getElementById('directiveTargetTime');
-        if (targetEl) targetEl.textContent = timeLimit;
-        
-        const modal = document.getElementById('animeSystemPopup');
-        modal.classList.remove('hidden');
-    },
+   show(title, description, timeLimit, rewardXP) {
+    if(window.SoundEffects) SoundEffects.playSystemClick();
+    this.syncPlayerState();
+    
+    this.currentQuest = { 
+        title: title, 
+        rewardXP: rewardXP || 10, 
+        timeLimit: timeLimit || "25:00",
+        type: this.inferQuestType(title),
+        details: description,
+        acceptedAt: null,
+        active: false
+    };
+    
+    // ✅ تحديث الواجهة المنبثقة
+    document.getElementById('animePopupTitle').textContent = title;
+    document.getElementById('animePopupDesc').innerHTML = description;
+    document.getElementById('animePopupTime').textContent = `TIME: ${this.currentQuest.timeLimit}`;
+    document.getElementById('animePopupReward').textContent = `REWARD: +${this.currentQuest.rewardXP} EXP`;
+    
+    // ✅ تحديث الشريط السفلي المستهدف
+    document.getElementById('directiveTargetTime').textContent = this.currentQuest.timeLimit;
+    
+    const modal = document.getElementById('animeSystemPopup');
+    modal.classList.remove('hidden');
+},
     
     inferQuestType(title) {
         const t = title.toLowerCase();
@@ -844,29 +857,33 @@ const AnimePopup = {
         }
     },
     
-    acceptQuest() {
-        if(window.SoundEffects) SoundEffects.playSystemClick();
-        document.getElementById('animeSystemPopup').classList.add('hidden');
+   acceptQuest() {
+    if(window.SoundEffects) SoundEffects.playSystemClick();
+    document.getElementById('animeSystemPopup').classList.add('hidden');
+    
+    if(this.currentQuest) {
+        // ✅ تأكيد: إضافة timestamp قبل الحفظ
+        this.currentQuest.acceptedAt = Date.now();
+        this.currentQuest.active = true;
         
-        if(this.currentQuest) {
-            this.currentQuest.acceptedAt = Date.now();
-            
-            // ✅ الإصلاح الرئيسي: تمرير المهمة إلى المحرك المركزي
-            if(window.SovereignEngine && typeof SovereignEngine.acceptQuest === 'function') {
-                SovereignEngine.acceptQuest(this.currentQuest);
-            } else {
-                this.fallbackAcceptQuest();
-            }
-            
-            document.getElementById('activeDirectiveText').textContent = this.currentQuest.title;
-            document.getElementById('activeDirectiveBar').classList.remove('hidden');
-            
-            DirectiveTimer.start();
-            this.questStartTime = Date.now();
-            
-            if(window.Toast) Toast.show('تم تفعيل المهمة في النظام المركزي', 'success');
+        // ✅ حفظ في LocalStorage فوراً
+        localStorage.setItem('sovereign_active_quest', JSON.stringify(this.currentQuest));
+        
+        // ✅ تمرير للمحرك المركزي إن وجد
+        if(window.SovereignEngine && typeof SovereignEngine.acceptQuest === 'function') {
+            SovereignEngine.acceptQuest(this.currentQuest);
         }
-    },
+        
+        // ✅ تحديث واجهة المستخدم فوراً
+        document.getElementById('activeDirectiveText').textContent = this.currentQuest.title;
+        document.getElementById('activeDirectiveBar').classList.remove('hidden');
+        
+        // ✅ بدء العداد مع الوقت المحفوظ
+        DirectiveTimer.start(this.currentQuest.acceptedAt);
+        
+        if(window.Toast) Toast.show('تم تفعيل المهمة: ' + this.currentQuest.title, 'success');
+    }
+},
     
     fallbackAcceptQuest() {
         localStorage.setItem('sovereign_active_quest', JSON.stringify(this.currentQuest));
@@ -1425,13 +1442,27 @@ const SovereignEngine = {
     triggerQuestPopup(quest) {
         AnimePopup.show(quest.title, quest.details, "NOW", this.config.weights[quest.type] || 10);
     },
-   acceptQuest(quest) {
+ acceptQuest(quest) {
+    if(!quest) return;
+    
+    // ✅ ضمان وجود acceptedAt
+    if(!quest.acceptedAt) quest.acceptedAt = Date.now();
+    quest.active = true;
+    
     this.state.activeQuest = quest;
-    // ✅ إضافة timestamp لحساب الوقت لاحقاً
-    if(quest) quest.acceptedAt = Date.now();
     localStorage.setItem('sovereign_active_quest', JSON.stringify(quest));
-    this.activateDirectiveBar();
-    this.logToSystem('quest', `تم قبول المهمة: ${quest.title} | النوع: ${quest.type || 'unknown'} | المكافأة الأساسية: ${quest.rewardXP || 0} XP`);
+    
+    // ✅ تحديث الواجهة
+    document.getElementById('activeDirectiveText').textContent = quest.title;
+    document.getElementById('activeDirectiveBar').classList.remove('hidden');
+    
+    const targetEl = document.getElementById('directiveTargetTime');
+    if(targetEl && quest.timeLimit) targetEl.textContent = quest.timeLimit;
+    
+    // ✅ بدء العداد
+    if(window.DirectiveTimer) DirectiveTimer.start(quest.acceptedAt);
+    
+    this.logToSystem('quest', `تم قبول المهمة: ${quest.title}`);
 },
     activateDirectiveBar() {
         let bar = document.getElementById('activeDirectiveBar');
@@ -1499,22 +1530,38 @@ const SovereignEngine = {
         if (lvlEl) lvlEl.innerText = this.state.playerLevel;
         if (ttlEl) ttlEl.innerText = `TITLE: ${this.state.activeTitle}`;
     },
-  checkActiveQuestOnLoad() {
+checkActiveQuestOnLoad() {
     const saved = localStorage.getItem('sovereign_active_quest');
+    const savedStartTime = localStorage.getItem('directive_start_time');
+    
     if (saved) { 
         try {
-            this.state.activeQuest = JSON.parse(saved);
-            this.activateDirectiveBar();
-            // ✅ إعادة تشغيل العداد إذا كانت المهمة لا تزال نشطة
-            if(this.state.activeQuest && window.DirectiveTimer) {
-                DirectiveTimer.start();
+            const quest = JSON.parse(saved);
+            this.state.activeQuest = quest;
+            
+            // ✅ استعادة واجهة المستخدم
+            document.getElementById('activeDirectiveText').textContent = quest.title || '...';
+            document.getElementById('activeDirectiveBar').classList.remove('hidden');
+            
+            // ✅ تحديث الوقت المستهدف
+            const targetEl = document.getElementById('directiveTargetTime');
+            if(targetEl && quest.timeLimit) {
+                targetEl.textContent = quest.timeLimit;
+            }
+            
+            // ✅ استئناف العداد
+            if(quest.acceptedAt && window.DirectiveTimer) {
+                DirectiveTimer.start(quest.acceptedAt);
+            } else if (savedStartTime && window.DirectiveTimer) {
+                // fallback للإصدارات القديمة
+                DirectiveTimer.start(parseInt(savedStartTime));
             }
         } catch(e) {
-            console.error('[SovereignEngine] فشل تحميل المهمة النشطة', e);
+            console.error('[SovereignEngine] فشل استعادة المهمة', e);
             localStorage.removeItem('sovereign_active_quest');
         }
     }
-},
+}
 };
 
 // ==========================================
@@ -1950,5 +1997,4 @@ window.SovereignTimer = SovereignTimer;
 window.HolographicModal = HolographicModal;</script>
 </body>
 </html>
-
 
