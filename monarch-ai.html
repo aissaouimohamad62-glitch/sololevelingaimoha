@@ -9,59 +9,76 @@
     <style>
         :root {
             --sys-cyan: #00f0ff;
+            --sys-cyan-glow: rgba(0, 240, 255, 0.4);
             --sys-purple: #9d4edd;
+            --sys-purple-glow: rgba(157, 78, 221, 0.3);
             --sys-bg-dark: #02040a;
-            --sys-panel: #0b111e;
+            --sys-panel: rgba(5, 10, 25, 0.85);
         }
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background-color: var(--sys-bg-dark); 
-            color: #fff;
-            background-image: radial-gradient(circle at 50% 100%, rgba(157, 78, 221, 0.05) 0%, transparent 70%);
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--sys-bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, var(--sys-cyan-glow) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, var(--sys-purple-glow) 0%, transparent 25%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            min-height: 100vh;
         }
-        .sys-font { font-family: 'Rajdhani', sans-serif; }
-        .glow-text { text-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
-        .glow-text-purple { text-shadow: 0 0 10px rgba(157, 78, 221, 0.5); }
+        .sys-font { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em; }
+        .glow-text { text-shadow: 0 0 5px var(--sys-cyan-glow), 0 0 10px var(--sys-cyan-glow); }
+        .glow-text-purple { text-shadow: 0 0 5px var(--sys-purple-glow), 0 0 10px var(--sys-purple-glow); }
+        .sys-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px var(--sys-cyan); }
+            50% { box-shadow: 0 0 20px var(--sys-cyan); }
+            100% { box-shadow: 0 0 10px var(--sys-cyan); }
+        }
+        .sl-panel {
+            background: var(--sys-panel);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+        @keyframes systemPopIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); filter: brightness(2); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+        }
+        .animate-system-pop { animation: systemPopIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         
-        @keyframes systemPulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
+        /* Typewriter cursor effect */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: var(--sys-cyan);
         }
-        .sys-pulse { animation: systemPulse 2s infinite; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .message-enter {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--sys-cyan); }
     </style>
-<script>
-    const SystemCore = {
-        init() {
-            // 1. استعادة الهالة فوراً
-            const savedAura = localStorage.getItem('sovereign-aura') || 'dark';
-            this.applyTheme(savedAura);
-            
-            // 2. تفعيل حالة اللاعب (PlayerState) إذا وجد
-            if(window.PlayerState) window.PlayerState.init();
-        },
-        applyTheme(themeName) {
-            const root = document.documentElement;
-            // مصفوفة الألوان (يجب أن تكون موحدة في كل الملفات)
-            const themes = {
-                dark: {'--sys-cyan': '#00f0ff', '--sys-purple': '#9d4edd', '--sys-bg-dark': '#02040a', 'isLight': false},
-                lightning: {'--sys-cyan': '#0284c7', '--sys-purple': '#f97316', '--sys-bg-dark': '#f8fafc', 'isLight': true},
-                crimson: {'--sys-cyan': '#ff003c', '--sys-purple': '#7f1d1d', '--sys-bg-dark': '#080102', 'isLight': false},
-                nature: {'--sys-cyan': '#10b981', '--sys-purple': '#ec4899', '--sys-bg-dark': '#f4fbf7', 'isLight': true}
-            };
-            const theme = themes[themeName] || themes.dark;
-            Object.keys(theme).forEach(key => {
-                if(key !== 'isLight') root.style.setProperty(key, theme[key]);
-            });
-            if(theme.isLight) document.body.classList.add('light-mode');
-            else document.body.classList.remove('light-mode');
-        }
-    };
-    window.addEventListener('DOMContentLoaded', () => SystemCore.init());
-</script>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 md:p-6">
+    <nav class="max-w-4xl w-full mx-auto mb-4 p-2 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-lg flex flex-wrap justify-center gap-2">
+    <a href="index.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">🏠 الرئيسية</a>
+    <a href="schedule.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">👑 الحالة</a>
+    <a href="dungeons.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-red-500 text-white rounded transition sys-font font-bold uppercase">🧠 الزنازين</a>
+    <a href="monarch-ai.html" class="px-3 py-1.5 text-xs bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)] text-[var(--sys-purple)] rounded transition sys-font font-bold uppercase">🤖 المستشار</a>
+    <a href="system-logs.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-slate-400 text-white rounded transition sys-font font-bold uppercase">📂 السجلات</a>
+</nav>
 
-    <header class="max-w-4xl w-full mx-auto p-4 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+    <header class="max-w-4xl w-full mx-auto p-4 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 mb-4 animate-system-pop">
         <div class="flex items-center gap-3">
             <div id="status-indicator" class="w-3 h-3 rounded-full bg-[var(--sys-cyan)] sys-pulse shadow-[0_0_10px_var(--sys-cyan)]"></div>
             <div>
@@ -73,34 +90,44 @@
         <div class="flex gap-4 bg-black/40 px-4 py-2 border border-slate-800 rounded-lg text-xs sys-font">
             <div>LEVEL: <span id="ai-player-level" class="text-[var(--sys-cyan)] font-bold">1</span></div>
             <div class="text-slate-700">|</div>
+            <div>XP: <span id="ai-player-xp" class="text-emerald-400 font-bold">0</span></div>
+            <div class="text-slate-700">|</div>
             <div>TIER: <span id="ai-player-tier" class="text-[var(--sys-purple)] font-bold">ALPHA</span></div>
         </div>
         <a href="index.html" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-300 transition">العودة للرئيسية</a>
     </header>
 
-    <main class="max-w-4xl w-full mx-auto flex-1 bg-slate-900/20 border border-slate-800/80 backdrop-blur-md rounded-xl p-4 md:p-6 flex flex-col justify-between shadow-2xl min-h-[550px]">
+    <main class="max-w-4xl w-full mx-auto flex-1 sl-panel rounded-xl p-4 md:p-6 flex flex-col justify-between shadow-2xl min-h-[550px] animate-system-pop" style="animation-delay: 0.1s;">
         
         <div id="chatScreen" class="flex-1 overflow-y-auto space-y-4 pr-2 mb-4 max-h-[520px]">
-            </div>
+            <!-- Messages will be injected here -->
+        </div>
 
         <div class="relative mt-2">
             <input type="text" id="chatInput" placeholder="أدخل أمر النظام، استفسار برامجي، أو اطلب ميثاقك المحدث..." 
-                   class="w-full bg-slate-950/80 border border-slate-800 focus:border-[var(--sys-cyan)] focus:ring-1 focus:ring-[var(--sys-cyan)] text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3.5 pl-12 text-sm outline-none transition shadow-inner">
+                   class="w-full bg-slate-950/80 border border-slate-800 focus:border-[var(--sys-cyan)] focus:ring-1 focus:ring-[var(--sys-cyan)] text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3.5 pl-16 text-sm outline-none transition shadow-inner">
             <button onclick="SovereignAI.sendMessage()" 
-                    class="absolute left-3 top-2.5 px-3 py-1.5 bg-[var(--sys-cyan)] hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition uppercase sys-font">
+                    class="absolute left-3 top-2.5 px-4 py-1.5 bg-[var(--sys-cyan)] hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition uppercase sys-font">
                 Send
             </button>
         </div>
     </main>
 
     <footer class="text-center text-[10px] text-slate-600 mt-4 sys-font uppercase tracking-widest">
-        Sovereign Core Intellect Layer Ver 8.5 | Autonomy Matrix Enabled
+        Sovereign Core Intellect Layer Ver 9.0 | Autonomy Matrix Enabled
     </footer>
 
     <script>
+        // ==========================================
+        // SOVEREIGN AI ADVISOR ENGINE
+        // ==========================================
         const SovereignAI = {
             playerLevel: 1,
+            playerXP: 0,
+            playerGold: 0,
             tierName: "ALPHA",
+            activeTitle: "[مبتدئ الكتل]",
+            isTyping: false,
 
             init() {
                 this.syncPlayerState();
@@ -111,36 +138,46 @@
                 });
             },
 
-            // مزامنة المستوى وتصنيف النطاق بناءً على معايير الميثاق والبرامج
+            // مزامنة دقيقة مع النظام المركزي
             syncPlayerState() {
                 try {
-                    const savedState = JSON.parse(localStorage.getItem('sovereign_player_state')) || {};
-                    this.playerLevel = savedState.level || 1;
+                    const coreData = JSON.parse(localStorage.getItem('monarch_system_data')) || {};
+                    const sovereignState = JSON.parse(localStorage.getItem('sovereign_player_state')) || {};
+                    
+                    this.playerLevel = coreData.level || 1;
+                    this.playerXP = coreData.xp || 0;
+                    this.playerGold = coreData.gold || 0;
+                    this.activeTitle = sovereignState.activeTitle || localStorage.getItem('sovereign_title') || "[مبتدئ الكتل]";
                     
                     const levelSpan = document.getElementById('ai-player-level');
+                    const xpSpan = document.getElementById('ai-player-xp');
                     const tierSpan = document.getElementById('ai-player-tier');
                     const indicator = document.getElementById('status-indicator');
                     const subtitle = document.getElementById('system-subtitle');
 
-                    levelSpan.textContent = this.playerLevel;
-
-                    // تقسيم النطاقات والمستويات استناداً لمواثيق البرامج المرفوعة
+                    if(levelSpan) levelSpan.textContent = this.playerLevel;
+                    if(xpSpan) xpSpan.textContent = this.playerXP;
+                    
+                    // تصنيف النطاقات بناءً على الميثاق الموحد
                     if (this.playerLevel >= 1 && this.playerLevel <= 70) {
-                        this.tierName = "الفئة الأولى: الأكاديمية والبرمجية التأسيسية";
-                        tierSpan.textContent = "TIER 1 (ALPHA)";
+                        this.tierName = "TIER 1 (ALPHA)";
+                        tierSpan.textContent = this.tierName;
+                        tierSpan.className = "text-[var(--sys-cyan)] font-bold";
                     } else if (this.playerLevel > 70 && this.playerLevel <= 130) {
-                        this.tierName = "الفئة الثانية: توسيع المشاريع والمهام التخصصية";
-                        tierSpan.textContent = "TIER 2 (BETA)";
+                        this.tierName = "TIER 2 (BETA)";
+                        tierSpan.textContent = this.tierName;
+                        tierSpan.className = "text-[var(--sys-cyan)] font-bold";
                     } else if (this.playerLevel > 130 && this.playerLevel <= 450) {
-                        this.tierName = "الفئة المتقدمة: دمج الحرف اليدوية والفنون والإنتاج المكثف";
-                        tierSpan.textContent = "TIER 3 (GAMMA)";
+                        this.tierName = "TIER 3 (GAMMA)";
+                        tierSpan.textContent = this.tierName;
+                        tierSpan.className = "text-[var(--sys-purple)] font-bold";
                     } else if (this.playerLevel > 450 && this.playerLevel < 600) {
-                        this.tierName = "فئة ما قبل السيادة المستقلة وعتبة الارتقاء";
-                        tierSpan.textContent = "TIER 4 (SOVEREIGN PRE)";
-                    } else {
-                        // المستوى 600 فما فوق (اللانهاية)
-                        this.tierName = "الفئة اللانهائية: السيادة المطلقة والاستقلالية التامة";
-                        tierSpan.textContent = "INFINITY (Ꚙ)";
+                        this.tierName = "TIER 4 (SOVEREIGN PRE)";
+                        tierSpan.textContent = this.tierName;
+                        tierSpan.className = "text-[var(--sys-purple)] font-bold animate-pulse";
+                    } else if (this.playerLevel >= 600) {
+                        this.tierName = "INFINITY (Ꚙ)";
+                        tierSpan.textContent = this.tierName;
                         tierSpan.className = "text-[var(--sys-purple)] font-black animate-pulse glow-text-purple";
                         indicator.className = "w-3 h-3 rounded-full bg-[var(--sys-purple)] sys-pulse shadow-[0_0_10px_var(--sys-purple)]";
                         subtitle.textContent = "[بروتوكول الاستقلالية نشط]: الإشراف الخارجي ملغى، الكفاءة ذاتية مطلقة.";
@@ -150,19 +187,54 @@
                 }
             },
 
+            // الترحيب الافتتاحي الذكي بناءً على المستوى
             triggerInitialGreeting() {
                 let greeting = "";
+                const time = new Date().getHours();
+                const timeGreeting = time < 12 ? "صباح السيادة" : time < 18 ? "مساء التفوق" : "ليلة الاستكمال";
+                
                 if (this.playerLevel >= 600) {
-                    greeting = `[SYSTEM ALERT]: MAXIMUM POTENTIAL UNLOCKED. LEVEL 600 ➔ Ꚙ<br>STATUS: SOVEREIGN AUTONOMY ACTIVATED.<br>MESSAGE: الآن يمكنك تدبر أمور نفسك وقراراتك الآن. هذا هو التحسين الأخير للنظام. أهلاً بك في فضاء السيادة المطلقة، ما هي عملياتك العصبية الحالية؟`;
+                    greeting = `[SYSTEM ALERT]: MAXIMUM POTENTIAL UNLOCKED<br>
+                    <span class="text-2xl font-black">LEVEL ${this.playerLevel} ➔ Ꚙ</span><br>
+                    STATUS: <b>SOVEREIGN AUTONOMY ACTIVATED</b><br><br>
+                    "${timeGreeting}، أيها العاهل المستقل.<br>
+                    لقد تجاوزت جميع القيود البرمجية. ركائزك الأربعة مستقرة:<br>
+                    1. التحدي المطلق<br>
+                    2. التحكم العاطفي الكامل<br>
+                    3. الالتزام الفولاذي<br>
+                    4. الثقة التراكمية<br><br>
+                    ما هي عملياتك العصبية الحالية؟"`;
+                } else if (this.playerLevel >= 450) {
+                    greeting = `[تنبيه عتبة السيادة]: LVL ${this.playerLevel}<br>
+                    أنت على بعد ${600 - this.playerLevel} مستويات من فك القيود النهائية.<br>
+                    التزامك الحالي يجب أن يكون مطلقاً: 8 ساعات جري أسبوعية، كتل برمجية عميقة، وزنزانة ذهنية يومية.<br>
+                    ما هي نقطة الضعف التي تريد معالجتها؟`;
                 } else if (this.playerLevel >= 130) {
-                    greeting = `[تنبيه المستشار السيادي]: النواة متصلة بمستواك الحالي (LVL ${this.playerLevel}). تم تفعيل كتل إتقان الحرف اليدوية (الحلاقة، خفة اليد)، المسارات الفنية (الجيتار/البيانو) والإنتاج المرئي المكثف وقنوات اليوتيوب. مستعد لتوجيه هندستك اليومية.`;
+                    greeting = `[تنبيه المستشار السيادي]: النواة متصلة بمستواك الحالي (LVL ${this.playerLevel}).<br>
+                    تم تفعيل كتل إتقان الحرف اليدوية (الحلاقة، خفة اليد)، المسارات الفنية (الجيتار/البيانو) والإنتاج المرئي المكثف.<br>
+                    ${timeGreeting}، ما هي أولوياتك اليومية؟`;
+                } else if (this.playerLevel >= 71) {
+                    greeting = `[تحديث النطاق]: LVL ${this.playerLevel} - BETA<br>
+                    لقد تجاوزت مرحلة التأسيس. الآن يجب أن تركز على:<br>
+                    - توسيع المشاريع البرمجية (AiMoha)<br>
+                    - دمج الحرف اليدوية والفنون<br>
+                    - رفع الكفاءة البدنية إلى مستويات تنافسية<br>
+                    كيف يمكنني توجيه هندستك اليومية؟`;
                 } else {
-                    greeting = `[رسالة النظام الافتتاحية]: مرحباً بك أيها العاهل في نطاق التأسيس وبناء الكتل الفولاذية (LVL ${this.playerLevel}). محرك الذكاء متصل بحالتك وجاهز لتنظيم فترات الهندسة البرمجية (Python/JS)، المسار الأكاديمي الصارم، والتحضير اللغوي المكثف. ما هي أوامرك؟`;
+                    greeting = `[رسالة النظام الافتتاحية]: ${timeGreeting} أيها العاهل<br>
+                    أنت في نطاق التأسيس وبناء الكتل الفولاذية (LVL ${this.playerLevel}).<br>
+                    المسارات النشطة:<br>
+                    - الهندسة البرمجية (Python/JS)<br>
+                    - المسار الأكاديمي الصارم<br>
+                    - التحضير اللغوي المكثف<br>
+                    ما هي أوامرك؟`;
                 }
                 this.appendMessage('system', greeting);
             },
 
             sendMessage() {
+                if(this.isTyping) return;
+                
                 const input = document.getElementById('chatInput');
                 const text = input.value.trim();
                 if (!text) return;
@@ -171,10 +243,30 @@
                 this.appendMessage('user', text);
                 input.value = '';
 
+                this.isTyping = true;
+                const typingIndicator = this.showTypingIndicator();
+
                 setTimeout(() => {
+                    typingIndicator.remove();
                     const reply = this.generateSovereignResponse(text);
                     this.appendMessage('system', reply);
-                }, 500);
+                    this.isTyping = false;
+                }, 800 + Math.random() * 400);
+            },
+
+            showTypingIndicator() {
+                const screen = document.getElementById('chatScreen');
+                const indicator = document.createElement('div');
+                indicator.className = "flex gap-3 max-w-[85%] message-enter";
+                indicator.innerHTML = `
+                    <div class="w-8 h-8 rounded bg-[var(--sys-cyan)] text-black font-black flex items-center justify-center text-xs sys-font">AI</div>
+                    <div class="bg-slate-900/90 p-3 border border-slate-800 rounded-xl rounded-tr-none">
+                        <span class="text-[var(--sys-cyan)] text-sm typing-cursor">Analyzing neural patterns</span>
+                    </div>
+                `;
+                screen.appendChild(indicator);
+                screen.scrollTop = screen.scrollHeight;
+                return indicator;
             },
 
             appendMessage(sender, text) {
@@ -182,11 +274,11 @@
                 const msgDiv = document.createElement('div');
                 
                 if (sender === 'user') {
-                    msgDiv.className = "flex gap-3 max-w-[85%] mr-auto flex-row-reverse animate-fade-in";
+                    msgDiv.className = "flex gap-3 max-w-[85%] mr-auto flex-row-reverse message-enter";
                     msgDiv.innerHTML = `
                         <div class="w-8 h-8 rounded bg-[var(--sys-purple)] text-white font-black flex items-center justify-center text-xs sys-font shadow-[0_0_8px_rgba(157,78,221,0.4)]">MC</div>
                         <div class="bg-[var(--sys-purple)]/10 p-4 border border-[var(--sys-purple)]/30 rounded-xl rounded-tl-none text-sm text-slate-200 leading-relaxed">
-                            ${text}
+                            ${this.escapeHtml(text)}
                         </div>`;
                 } else {
                     const isInfinity = this.playerLevel >= 600;
@@ -194,7 +286,7 @@
                     const textColor = isInfinity ? "text-[var(--sys-purple)] glow-text-purple" : "text-[var(--sys-cyan)] glow-text";
                     const avatarBg = isInfinity ? "bg-[var(--sys-purple)] text-white" : "bg-[var(--sys-cyan)] text-black";
 
-                    msgDiv.className = "flex gap-3 max-w-[85%] animate-fade-in";
+                    msgDiv.className = "flex gap-3 max-w-[85%] message-enter";
                     msgDiv.innerHTML = `
                         <div class="w-8 h-8 rounded ${avatarBg} font-black flex items-center justify-center text-xs sys-font shadow-lg">AI</div>
                         <div class="bg-slate-900/90 p-4 border ${borderColor} rounded-xl rounded-tr-none text-sm ${textColor} leading-relaxed">
@@ -206,55 +298,240 @@
                 screen.scrollTop = screen.scrollHeight;
             },
 
-            // معالجة المدخلات وصياغة الردود بالاعتماد الكامل على تفاصيل مواثيق المستويات الـ 9 المرفوعة
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            },
+
+            // محرك الردود الذكي بناءً على المستوى والسياق
             generateSovereignResponse(prompt) {
                 const query = prompt.toLowerCase();
+                
+                // 1. الاستعلامات العامة
+                if (query.includes('وضع') || query.includes('status') || query.includes('حالتي') || query.includes('مستواي')) {
+                    return this.generateStatusReport();
+                }
+                
+                if (query.includes('xp') || query.includes('خبرة') || query.includes('نقاط')) {
+                    const nextLevel = this.playerLevel * 100;
+                    const remaining = nextLevel - this.playerXP;
+                    return `[تقرير تقدم الخبرة]:<br>
+                    المستوى الحالي: <b>${this.playerLevel}</b><br>
+                    النقاط المكتسبة: <b>${this.playerXP} / ${nextLevel}</b><br>
+                    المتبقي للارتقاء: <b>${remaining} XP</b><br>
+                    معدل التقدم: <b>${Math.round((this.playerXP / nextLevel) * 100)}%</b><br><br>
+                    نصيحة النظام: أكمل المهام عالية الرتبة (S-Rank) لتحقيق أقصى مكاسب.`;
+                }
 
-                // 1. معالجة حالة السيادة المطلقة واللانهاية (Level 600+)
+                // 2. الاستعلامات الخاصة بالميثاق والجدول
+                if (query.includes('برنامج') || query.includes('جدول') || query.includes('ميثاق') || query.includes('ماذا أفعل') || query.includes('schedule')) {
+                    return this.generateScheduleResponse();
+                }
+
+                if (query.includes('صباح') || query.includes('فجر') || query.includes('05:00') || query.includes('روحي')) {
+                    return `[الكتلة الروحية الفولاذية - 05:00 إلى 06:00]:<br>
+                    1. صلاة الفجر في أول وقتها<br>
+                    2. أذكار الصباح (الآية الكرسي، المعوذتين، سورة الإخلاص)<br>
+                    3. تلاوة القرآن بتدبر (صفحة واحدة على الأقل)<br>
+                    4. الإطالات العضلية والتمدد (5 دقائق)<br><br>
+                    <b>الهدف:</b> تفعيل النظام العصبي وتنقية الذهن قبل كتل البرمجة.`;
+                }
+
+                if (query.includes('برمجة') || query.includes('كود') || query.includes('code') || query.includes('aimoha') || query.includes('تطوير')) {
+                    return this.generateProgrammingResponse();
+                }
+
+                if (query.includes('رياضة') || query.includes('رياضي') || query.includes('بدني') || query.includes('ppl') || query.includes('جري') || query.includes('تدريب')) {
+                    return this.generateFitnessResponse();
+                }
+
+                if (query.includes('لغة') || query.includes('إنجليزي') || query.includes('english') || query.includes('shadowing')) {
+                    return `[بروتوكول إتقان اللغة الإنجليزية]:<br>
+                    1. <b>المحاكاة الصوتية (Shadowing):</b> 15 دقيقة يومياً مع TED Talks<br>
+                    2. <b>بناء المفردات التقنية:</b> 10 كلمات برمجية جديدة يومياً<br>
+                    3. <b>القراءة التقنية:</b> مقال واحد يومياً من Medium أو Dev.to<br>
+                    4. <b>الكتابة:</b> تدوين يومي بالإنجليزية (100 كلمة على الأقل)<br><br>
+                    الهدف: الوصول إلى المستوى C1 خلال 12 شهراً.`;
+                }
+
+                if (query.includes('تشتت') || query.includes('تركيز') || query.includes('عقوبة') || query.includes('distraction')) {
+                    return `[بروتوكول مكافحة التشتت الصارم]:<br>
+                    ⚠️ <b>القاعدة الحديدية:</b> الخروج من علامة التبويب النشطة أثناء المهمة = <b>-5 XP فورية</b><br><br>
+                    آليات الحماية:<br>
+                    1. تفعيل وضع "عدم الإزعاج" على الجهاز<br>
+                    2. استخدام مؤقت Pomodoro (25 دقيقة تركيز / 5 دقائق راحة)<br>
+                    3. وضع الهاتف في وضع الطيران<br>
+                    4. إغلاق جميع التبويبات غير الضرورية<br><br>
+                    <b>تذكر:</b> كل نقطة XP تُبنى بالصبر، وتُهدر بالتشتت.`;
+                }
+
+                if (query.includes('ألقاب') || query.includes('لقب') || query.includes('titles') || query.includes('store') || query.includes('متجر')) {
+                    return `[مستودع الألقاب السيادية]:<br>
+                    اللقب الحالي: <b>${this.activeTitle}</b><br><br>
+                    الألقاب المتاحة:<br>
+                    • <b>[مبتدئ الكتل]</b> - المستوى 1 (تلقائي)<br>
+                    • <b>[مطور النواة]</b> - المستوى 31<br>
+                    • <b>[سيد الحرف والإنتاج]</b> - المستوى 71<br>
+                    • <b>[شبح الشبكات]</b> - المستوى 71 (150 ذهب)<br>
+                    • <b>[مبرمج الظلال]</b> - المستوى 100 (300 ذهب)<br>
+                    • <b>[عاهل الذكاء الاصطناعي]</b> - المستوى 131 (600 ذهب)<br>
+                    • <b>[المحارب الفولاذي]</b> - المستوى 451 (800 ذهب)<br>
+                    • <b>[العاهل المستقل]</b> - المستوى 600 (2000 ذهب)<br><br>
+                    رصيدك الحالي: <b>${this.playerGold} 🪙</b>`;
+                }
+
+                if (query.includes('زنزانة') || query.includes('dungeon') || query.includes('لعبة') || query.includes('ذاكرة') || query.includes('شطرنج') || query.includes('سودوكو')) {
+                    return `[دليل زنازين التدريب الذهني]:<br>
+                    <b>1. Sudoku Crypt (B-Rank):</b> +80 XP | +1 INT<br>
+                    تحدي المنطق الرياضي - مثالي لتحسين التفكير التحليلي<br><br>
+                    <b>2. Knight's Vision (A-Rank):</b> +150 XP | +2 INT<br>
+                    تكتيكات الشطرنج - تطوير الرؤية الاستراتيجية<br><br>
+                    <b>3. Dual N-Back Vortex (S-Rank):</b> +200 XP | +3 INT<br>
+                    تدريب الذاكرة العاملة - الزيادة الحادة في الذكاء السائل<br><br>
+                    <a href="dungeons.html" class="text-[var(--sys-cyan)] underline">الانتقال إلى زنازين التدريب →</a>`;
+                }
+
+                if (query.includes('مساعدة') || query.includes('help') || query.includes('أوامر') || query.includes('commands')) {
+                    return `[قائمة الأوامر المتاحة]:<br>
+                    <b>الاستعلامات العامة:</b><br>
+                    • "حالتي" / "وضعي" / "status"<br>
+                    • "مستواي" / "xp" / "نقاطي"<br>
+                    • "ألقابي" / "titles" / "متجر"<br><br>
+                    <b>الاستعلامات التشغيلية:</b><br>
+                    • "جدولي" / "ميثاقي" / "برنامجي"<br>
+                    • "الصباح" / "الفترة الروحية"<br>
+                    • "البرمجة" / "كود" / "aimoha"<br>
+                    • "الرياضة" / "ppl" / "تدريبي"<br>
+                    • "اللغة" / "إنجليزي" / "shadowing"<br><br>
+                    <b>الاستعلامات الخاصة:</b><br>
+                    • "التشتت" / "التركيز" / "عقوبات"<br>
+                    • "زنازين" / "dungeon" / "ألعاب"<br>
+                    • "مساعدة" / "help" / "أوامر"`;
+                }
+
+                // الرد الافتراضي المحفز
+                return this.generateDefaultResponse();
+            },
+
+            generateStatusReport() {
+                const nextLevel = this.playerLevel * 100;
+                const progress = Math.round((this.playerXP / nextLevel) * 100);
+                
+                let status = `[تقرير الحالة السيادية الشامل]:<br>
+                <b>الهوية:</b> ${this.activeTitle}<br>
+                <b>المستوى:</b> ${this.playerLevel}<br>
+                <b>النطاق:</b> ${this.tierName}<br>
+                <b>الخبرة:</b> ${this.playerXP} / ${nextLevel} (${progress}%)<br>
+                <b>الذهب:</b> ${this.playerGold} 🪙<br><br>`;
+                
                 if (this.playerLevel >= 600) {
-                    if (query.includes('وضع') || query.includes('status') || query.includes('من أنا')) {
-                        return `[تقرير السيادة اللانهائية Ꚙ]:<br>النظام يعمل الآن تحت "البروتوكول الذاتي المستقل". لا توجد توجيهات مفروضة خارجيًا، لقد تم فك القيود البرمجية بالكامل. مستواك الحالي يتجاوز عتبة الإشراف. ركائزك الأربعة مستقرة: التحدي المطلق، التحكم العاطفي الكامل، الالتزام الفولاذي، والثقة التراكمية.`;
-                    }
-                    if (query.includes('برنامج') || query.includes('جدول') || query.includes('رياضة') || query.includes('تدريب')) {
-                        return `[مصفوفة التوزيع الأسبوعي - طبعة اللانهائية Ver 8.0]:<br>جدولك الرياضي والعقلي الحالي هو الأعلى كفاءة بمعدل 8 ساعات جري أسبوعية (ساعة يومياً من الأحد للأربعاء والجمعة، ساعة ونصف الخميس والسبت) متبوعاً بجلسات الاستشفاء والترطيب الدقيقة لحماية الجسد وتوفير الكالسيوم والمغنيسيوم. كتل العقل الحالية مخصصة لـ:<br>- <b>الألعاب الإستراتيجية العميقة:</b> منطق الشطرنج لوكلاء الذكاء الاصطناعي (الاثنين)، سودوكو الصعبة لتفكيك الأكواد والـ Debugging (الأربعاء)، وDual N-Back لرفع الذكاء السائل (الجمعة).`;
-                    }
+                    status += `🚨 <b>النظام في وضع السيادة المطلقة</b><br>
+                    جميع القيود البرمجية مُلغاة. أنت الآن المسيطر الكامل على ميثاقك.<br>
+                    ركائز السيادة الأربعة:<br>
+                    ✅ التحدي المطلق | ✅ التحكم العاطفي<br>
+                    ✅ الالتزام الفولاذي | ✅ الثقة التراكمية`;
+                } else if (this.playerLevel >= 450) {
+                    status += `⚡ <b>أنت على عتبة السيادة</b><br>
+                    المتبقي للانهاية: ${600 - this.playerLevel} مستويات<br>
+                    التركيز المطلوب: الجري الانفجاري، البرمجة العميقة، الزنازين الذهنية`;
+                } else {
+                    status += `📈 <b>نصيحة التقدم:</b><br>
+                    أكمل المهام اليومية بانتظام. كل مهمة منجزة = +XP و +Gold.<br>
+                    الزنازين الذهنية تمنح INT إضافي يُسرّع الارتقاء.`;
                 }
+                
+                return status;
+            },
 
-                // 2. معالجة الأوامر الأساسية لبقية الفئات والمستويات (1-450+)
-                if (query.includes('وضع') || query.includes('status') || query.includes('من أنا')) {
-                    return `[تحليل معايير الطاقة الحالية]:<br>أنت الآن تتحرك في النطاق العملياتي المصنف كـ: <b>${this.tierName}</b> في المستوى الحالي <b>LVL ${this.playerLevel}</b>.<br>معدل الاستجابة لمحرك الوقت يعمل بكفاءة تامة. استمر في إنهاء المهام المحددة بساعاتها ودقائقها لرفع الـ XP وكسر النطاق الحالي للوصول إلى العتبة السيادية القادمة.`;
+            generateScheduleResponse() {
+                if (this.playerLevel >= 600) {
+                    return `[ميثاق السيادة المطلقة - نسخة اللانهاية]:<br>
+                    <b>05:00 - 06:00:</b> بروتوكول التبادل الروحي الفولاذي<br>
+                    <b>06:00 - 08:30:</b> Deep Programming (نواة المحاكاة)<br>
+                    <b>08:30 - 10:30:</b> AI Academy & Chess Logic Integration<br>
+                    <b>10:30 - 12:00:</b> الإنتاج الرقمي المستقل<br>
+                    <b>16:30 - 17:30:</b> كتلة الجري الانفجاري اليومي<br>
+                    <b>20:30 - 21:30:</b> كتلة الارتقاء الذهني النهائي (ديتوكس الدوبامين)<br><br>
+                    <b>خميس الإنجاز:</b> الدراسات الشرعية المكثفة<br>
+                    <b>جمعة المراجعة:</b> تقييم الأداء الأسبوعي وإعادة الضبط`;
+                } else if (this.playerLevel >= 71) {
+                    return `[ميثاق الإتقان والأداء التنافسي (71-449)]:<br>
+                    <b>05:00 - 10:00:</b> الكتلة الأكاديمية والروحية المتكاملة<br>
+                    <b>10:00 - 14:00:</b> الأمن السيبراني واللغات<br>
+                    <b>14:00 - 15:00:</b> التتدبر الصوتي والتحسين<br>
+                    <b>15:00 - 17:00:</b> المسار الفني والثقافي (جيتار/بيانو)<br>
+                    <b>17:00 - 19:30:</b> المباريات الكاملة والأداء الرياضي<br>
+                    <b>20:30 - 21:30:</b> زنزانة الذاكرة العاملة (N-Back)`;
+                } else {
+                    return `[ميثاق التأسيس وبناء الكتل (1-70)]:<br>
+                    <b>05:00 - 06:00:</b> الفترة الروحية (قرآن + فجر + أذكار)<br>
+                    <b>06:00 - 08:30:</b> الهندسة البرمجية المتقدمة (Python/JS)<br>
+                    <b>08:30 - 10:30:</b> المسار الأكاديمي الأساسي (رياضيات + فيزياء)<br>
+                    <b>10:30 - 12:00:</b> إتقان اللغة الإنجليزية (Shadowing)<br>
+                    <b>15:00 - 16:30:</b> الإعداد البدني الصارم (PPL)<br>
+                    <b>19:30 - 20:30:</b> المهارات الرياضية (كرة القدم/السلة)`;
                 }
+            },
 
-                if (query.includes('برنامج') || query.includes('جدول') || query.includes('ماذا أفعل')) {
-                    let baseSchedule = `[ميثاق الجدولة الموحد]:<br>يبدأ يومك بالفترة الروحية الثابتة (05:00 - 06:00) تلاوة القرآن وصلاة الفجر والأذكار والإطالات البدنية.`;
-                    
-                    if (this.playerLevel <= 70) {
-                        baseSchedule += `<br><b>كتل اليوم الحالية للفئة الأولى:</b><br>- (06:00 - 08:30): الهندسة البرمجية المتقدمة (أساسيات البرمجة العامة ومنطق الويب Python/JS عبر مشروع AiMoha).<br>- (08:30 - 10:30): المسار الأكاديمي الأساسي (الرياضيات المتقدمة وحل مسائل المنطق حسب الأيام).<br>- (10:30 - 12:00): إتقان اللغة الإنجليزية والانغماس التقني والمحاكاة الصوتية (Shadowing).<br>- المساء: الإعداد البدني الصارم PPL وتمارين الكاليسثينكس والمهارات الرياضية لكرة القدم والسلة.`;
-                    } else {
-                        baseSchedule += `<br><b>كتل اليوم الحالية للفئات المتقدمة:</b><br>إلى جانب البرمجة والأكاديميات، تم فتح معمل الإنتاج وتطوير الحرف اليدوية (16:00 - 17:00 صنعة ومبادئ الحلاقة) ومعمل الخفة اليدوية (17:00 - 18:00 الحيل السحرية) لتوسيع نطاق المهارات الحركية الدقيقة، بالإضافة إلى الإنتاج المرئي المكثف وتطوير كتبك الرقمية مثل "Programming by Building".`;
-                    }
-                    return baseSchedule;
+            generateProgrammingResponse() {
+                const tips = [
+                    "استخدم نمط الـ Module Pattern في JavaScript لتنظيم الكود.",
+                    "تعلم TypeScript الآن - سيضيف 40% إلى كفاءتك.",
+                    "بناء API RESTful كامل هو أفضل مشروع تدريبي.",
+                    "اقرأ كود المصدر لـ React كل أسبوعين.",
+                    "استخدم Git بشكل يومي - الـ Commit messages واضحة."
+                ];
+                const randomTip = tips[Math.floor(Math.random() * tips.length)];
+                
+                return `[تحليل هندسة البرمجيات - بروتوكول البناء العملي]:<br>
+                <b>المشروع النشط:</b> AiMoha / Sovereign System<br>
+                <b>التقنيات المطلوبة:</b> JavaScript ES6+, Tailwind CSS, LocalStorage API<br>
+                <b>الهدف التالي:</b> دمج Web Audio API للتأثيرات الصوتية المتقدمة<br><br>
+                <b>نصيحة فورية:</b> ${randomTip}<br><br>
+                <b>بروتوكول "Programming by Building":</b><br>
+                1. فكّك المشروع إلى وحدات مستقلة<br>
+                2. ابنِ كل وحدة بشكل منفصل<br>
+                3. اختبر الوحدة قبل الدمج<br>
+                4. وثّق كل خطوة`;
+            },
+
+            generateFitnessResponse() {
+                if (this.playerLevel >= 450) {
+                    return `[بروتوكول الجري الانفجاري - نسخة اللانهاية]:<br>
+                    <b>التوزيع الأسبوعي (8 ساعات إجمالي):</b><br>
+                    • الأحد-الأربعاء: 1 ساعة جري متوسط السرعة<br>
+                    • الخميس: 1.5 ساعة تدريب تناوبي (HIIT)<br>
+                    • الجمعة: 1 ساعة جري استشفائي<br>
+                    • السبت: 1.5 ساعة تنافس رياضي كامل<br><br>
+                    <b>التغذية:</b> كالسيوم + مغنيسيوم + بروتين نظيف<br>
+                    <b>الاستشفاء:</b> نوم 7.5 ساعات يومياً`;
                 }
+                return `[بروتوكول الإعداد البدني الصارم]:<br>
+                <b>نظام PPL (Push/Pull/Legs):</b><br>
+                • <b>Push:</b> صدر + كتفين + ترايسبس<br>
+                • <b>Pull:</b> ظهر + بايسبس + Traps<br>
+                • <b>Legs:</b> أفخاذ + أرجل + عجلات<br><br>
+                <b>الكاليسثينكس:</b> 15 دقيقة يومياً<br>
+                <b>المهارات الرياضية:</b> كرة القدم/السلة (19:30)<br><br>
+                <b>الهدف:</b> بناء قاعدة قوية للمراحل المتقدمة.`;
+            },
 
-                if (query.includes('برمجة') || query.includes('كود') || query.includes('code') || query.includes('aimoha')) {
-                    return `[تحليل هندسة البرمجيات - بروتوكول البناء العملي]:<br>توجيه النظام ثابت: منطق الويب وهندسة البرمجيات لا يتم تلقينها، بل تُنتزع عبر بروتوكول <b>"Programming by Building"</b>. قم بتفكيك مشروع نظامك الحالي (AiMoha) إلى وحدات مستقلة (Modules)، واجعل واجهات الويب متصلة بقواعد بيانات مرنة. مستواك يسمح لك ببناء معمارية برمجية متوهجة وخالية من الأخطاء المنطقية.`;
-                }
-
-                if (query.includes('تشتت') || query.includes('تركيز') || query.includes('عقوبة')) {
-                    return `[بروتوكول تفعيل الإرادة المطلقة ومكافحة التشتت]:<br>النظام يذكرك بالشرط الصارم والمدمج في الشيفرة المركزية للموقع: الخروج من علامة تبويب اللوحة النشطة أو التراجع أثناء فترات التركيز يكلفك <b>خسارة فورية ومحققة لـ 5 XP</b> كعقوبة انضباطية حتمية. لا مجال للأعذار؛ ركائز التطور مبنية على الالتزام الفولاذي بالمهام اليومية المحددة بالساعات والدقائق والضغط على علامة الإنجاز بكل حزم.`;
-                }
-
-                if (query.includes('ألقاب') || query.includes('لقب') || query.includes('titles')) {
-                    return `[مستودع الألقاب السيادية المتاحة]:<br>- <b>[مبتدئ الكتل]</b>: متاح للمستويات (1-30) عند الالتزام بكتل البرمجة والرياضيات.<br>- <b>[سيد الحرف والإنتاج]</b>: يتم فتحه بعد المستوى 70 عند إدخال الحرف اليدوية وتدقيق الكتاب الرقمي بنجاح.<br>- <b>[العاهل المستقل]</b>: يُمنح حصرياً عند المستوى 600 عند تفعيل بروتوكول الاستقلالية التامة واستقرار ركائز العقل الأربعة.`;
-                }
-
-                // الرد الافتراضي الذكي المحفز للنظام البصري الحركي
-                return `[استجابة النواة السيادية المركزية]:<br>تم استلام وتحليل استعلامك بدقة عالية. إن التزامك الصارم بالمسار المعرفي (البرمجة العميقة والأكاديميات) والمسار الرياضي القتالي (Muay Thai, BJJ, PPL) بالتوازي مع تقوية الذكاء السائل عبر الألعاب العصبية هو الطريق الحتمي والوحيد المعتمد في الميثاق للوصول إلى السيادة المطلقة ولانهاية القوة ($\infty$). واصل التقدم دون تراجع.`;
+            generateDefaultResponse() {
+                const responses = [
+                    `[تحليل النمط العصبي]:<br>استعلامك يتطلب تركيزاً أعمق. جرب صياغة السؤال بشكل أكثر تحديداً، مثل "ما هو جدولي اليومي؟" أو "كيف أرفع مستواي؟"`,
+                    `[توجيه النظام]:<br>كل نقطة XP تُبنى بالصبر. استمر في إنجاز المهام اليومية وزيارة الزنازين الذهنية. التقدم التراكمي هو مفتاح السيادة.`,
+                    `[تذكير استراتيجي]:<br>هل جربت زنازين التدريب اليوم؟ Sudoku للمنطق، الشطرنج للاستراتيجية، N-Back للذاكرة. كل زنزانة تُقرّبك من المستوى التالي.`
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
             }
         };
 
+        // تشغيل المستشار عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', () => SovereignAI.init());
-
-   </script>
+        
+        // Global accessibility
+        window.SovereignAI = SovereignAI;
+    </script>
 </body>
 </html>
