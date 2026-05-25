@@ -5,57 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sovereign System | Brain Training Dungeons</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --sys-cyan: #00f0ff;
+            --sys-cyan-glow: rgba(0, 240, 255, 0.4);
             --sys-purple: #9d4edd;
+            --sys-purple-glow: rgba(157, 78, 221, 0.3);
             --sys-bg-dark: #02040a;
+            --sys-panel: rgba(5, 10, 25, 0.85);
         }
-        body { font-family: 'Cairo', sans-serif; background-color: var(--sys-bg-dark); color: #fff; }
-        .sys-font { font-family: 'Rajdhani', sans-serif; }
-        .neon-border { border: 1px solid rgba(0, 240, 255, 0.2); box-shadow: 0 0 15px rgba(0, 240, 255, 0.05); }
-        .neon-border-purple { border: 1px solid rgba(157, 78, 221, 0.2); box-shadow: 0 0 15px rgba(157, 78, 221, 0.05); }
-    
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--sys-bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, var(--sys-cyan-glow) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, var(--sys-purple-glow) 0%, transparent 25%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+        .sys-font { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em; }
+        .sl-panel {
+            background: var(--sys-panel);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.1);
+            position: relative;
+        }
+        .sl-panel::before, .sl-panel::after {
+            content: ''; position: absolute; width: 20px; height: 20px; pointer-events: none;
+        }
+        .sl-panel::before { top: -2px; left: -2px; border-top: 3px solid var(--sys-cyan); border-left: 3px solid var(--sys-cyan); }
+        .sl-panel::after { bottom: -2px; right: -2px; border-bottom: 3px solid var(--sys-cyan); border-right: 3px solid var(--sys-cyan); }
+        
+        .neon-border-cyan { border-color: var(--sys-cyan); box-shadow: 0 0 10px var(--sys-cyan-glow), 0 0 20px var(--sys-cyan-glow); }
+        .neon-border-purple { border-color: var(--sys-purple); box-shadow: 0 0 10px var(--sys-purple-glow), 0 0 20px var(--sys-purple-glow); }
+        .neon-border-rose { border-color: #e11d48; box-shadow: 0 0 10px rgba(225, 29, 72, 0.4), 0 0 20px rgba(225, 29, 72, 0.3); }
+        
+        @keyframes systemPopIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); filter: brightness(2); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+        }
+        .animate-system-pop { animation: systemPopIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        
+        .dungeon-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dungeon-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 240, 255, 0.2);
+        }
+        
+        .sudoku-cell {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sudoku-cell:hover:not(.fixed) { background: rgba(0, 240, 255, 0.1); }
+        .sudoku-cell.selected { background: rgba(0, 240, 255, 0.2); box-shadow: inset 0 0 10px var(--sys-cyan-glow); }
+        .sudoku-cell.error { background: rgba(225, 29, 72, 0.3); color: #fca5a5; }
+        .sudoku-cell.success { background: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+        .sudoku-cell.fixed { color: var(--sys-cyan); cursor: default; }
+        
+        .chess-square {
+            transition: all 0.2s;
+        }
+        .chess-square:hover {
+            background: rgba(157, 78, 221, 0.3) !important;
+        }
+        .chess-square.valid-move {
+            background: rgba(16, 185, 129, 0.4) !important;
+            animation: pulse-valid 1.5s infinite;
+        }
+        @keyframes pulse-valid {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--sys-cyan); }
     </style>
-
-
-<script>
-    const SystemCore = {
-        init() {
-            // 1. استعادة الهالة فوراً
-            const savedAura = localStorage.getItem('sovereign-aura') || 'dark';
-            this.applyTheme(savedAura);
-            
-            // 2. تفعيل حالة اللاعب (PlayerState) إذا وجد
-            if(window.PlayerState) window.PlayerState.init();
-        },
-        applyTheme(themeName) {
-            const root = document.documentElement;
-            // مصفوفة الألوان (يجب أن تكون موحدة في كل الملفات)
-            const themes = {
-                dark: {'--sys-cyan': '#00f0ff', '--sys-purple': '#9d4edd', '--sys-bg-dark': '#02040a', 'isLight': false},
-                lightning: {'--sys-cyan': '#0284c7', '--sys-purple': '#f97316', '--sys-bg-dark': '#f8fafc', 'isLight': true},
-                crimson: {'--sys-cyan': '#ff003c', '--sys-purple': '#7f1d1d', '--sys-bg-dark': '#080102', 'isLight': false},
-                nature: {'--sys-cyan': '#10b981', '--sys-purple': '#ec4899', '--sys-bg-dark': '#f4fbf7', 'isLight': true}
-            };
-            const theme = themes[themeName] || themes.dark;
-            Object.keys(theme).forEach(key => {
-                if(key !== 'isLight') root.style.setProperty(key, theme[key]);
-            });
-            if(theme.isLight) document.body.classList.add('light-mode');
-            else document.body.classList.remove('light-mode');
-        }
-    };
-    window.addEventListener('DOMContentLoaded', () => SystemCore.init());
-</script>
 </head>
-<body class="min-h-screen p-6 bg-radial-gradient">
+<body class="min-h-screen p-6">
+    <nav class="max-w-6xl mx-auto mb-4 p-2 bg-slate-900/60 backdrop-blur border border-slate-800 rounded-lg flex flex-wrap justify-center gap-2">
+    <a href="index.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">🏠 الرئيسية</a>
+    <a href="schedule.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">👑 الحالة</a>
+    <a href="dungeons.html" class="px-3 py-1.5 text-xs bg-red-900/20 border border-red-600/50 text-red-400 rounded transition sys-font font-bold uppercase">🧠 الزنازين</a>
+    <a href="monarch-ai.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-purple)] text-white rounded transition sys-font font-bold uppercase">🤖 المستشار</a>
+    <a href="system-logs.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-slate-400 text-white rounded transition sys-font font-bold uppercase">📂 السجلات</a>
+</nav>
 
-    <header class="max-w-6xl mx-auto mb-8 p-4 bg-slate-900/60 backdrop-blur border border-slate-800 flex justify-between items-center">
+    <header class="max-w-6xl mx-auto mb-8 p-4 bg-slate-900/60 backdrop-blur border border-slate-800 flex justify-between items-center rounded-lg animate-system-pop">
         <div class="flex items-center gap-4">
-            <button onclick="window.location.href='index.html'" class="text-xs bg-slate-800 px-3 py-2 border border-slate-700 hover:border-[var(--sys-cyan)] transition">↩ العودة للرئيسية</button>
+            <button onclick="window.location.href='index.html'" class="text-xs bg-slate-800 px-3 py-2 border border-slate-700 hover:border-[var(--sys-cyan)] transition text-white rounded">↩ العودة للرئيسية</button>
             <h1 class="sys-font text-xl font-black tracking-widest text-[var(--sys-cyan)] uppercase">🧠 BRAIN TRAINING DUNGEONS</h1>
         </div>
         <div class="flex items-center gap-6 sys-font">
@@ -65,82 +114,92 @@
             </div>
             <div class="text-right">
                 <span class="text-xs text-slate-400 block">INT STAT</span>
-                <span id="stat-int" class="text-xl font-bold text-[var(--sys-purple)]">0</span>
+                <span id="stat-int" class="text-xl font-bold text-[var(--sys-purple)]">10</span>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-slate-400 block">XP</span>
+                <span id="player-xp" class="text-xl font-bold text-emerald-400">0</span>
             </div>
         </div>
     </header>
 
     <main class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        <div class="p-6 bg-slate-950/80 border border-slate-900 neon-border flex flex-col justify-between rounded-lg relative overflow-hidden group">
+        <!-- Sudoku Dungeon -->
+        <div class="dungeon-card p-6 bg-slate-950/80 border border-slate-900 neon-border-cyan flex flex-col justify-between rounded-lg relative overflow-hidden group">
             <div class="absolute top-0 right-0 bg-[var(--sys-cyan)] text-black font-black text-[10px] px-3 py-1 sys-font tracking-wider">RANK: B</div>
             <div>
                 <h2 class="text-xl font-black text-white mb-2">زنزانة السودوكو (Sudoku Crypt)</h2>
                 <p class="text-xs text-slate-400 mb-6 leading-relaxed">تحدي المنطق الرياضي الشامل ومصفوفات الأرقام. تجاوز الألغاز لكسر قيود التفكير الخطي وجني نقاط INT حقيقية.</p>
             </div>
             <div class="bg-black/40 p-4 border border-slate-900 mb-6 text-center rounded">
-                <span class="text-xs text-[var(--sys-cyan)] font-mono sys-font">[STATUS: LOCKED - READY TO CORE]</span>
+                <span class="text-xs text-[var(--sys-cyan)] font-mono sys-font">[REWARDS: +80 XP | +1 INT]</span>
             </div>
-            <button onclick="enterGame('Sudoku')" class="w-full py-3 bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] font-bold text-sm tracking-widest uppercase hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300">ENTER DUNGEON</button>
+            <button onclick="SudokuGame.init()" class="w-full py-3 bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] font-bold text-sm tracking-widest uppercase hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300">ENTER DUNGEON</button>
         </div>
 
-        <div class="p-6 bg-slate-950/80 border border-slate-900 neon-border-purple flex flex-col justify-between rounded-lg relative overflow-hidden group">
+        <!-- Chess Dungeon -->
+        <div class="dungeon-card p-6 bg-slate-950/80 border border-slate-900 neon-border-purple flex flex-col justify-between rounded-lg relative overflow-hidden group">
             <div class="absolute top-0 right-0 bg-[var(--sys-purple)] text-black font-black text-[10px] px-3 py-1 sys-font tracking-wider">RANK: A</div>
             <div>
                 <h2 class="text-xl font-black text-white mb-2">تكتيكات الشطرنج (Grandmaster's Maze)</h2>
                 <p class="text-xs text-slate-400 mb-6 leading-relaxed">توقع حركات الخصم، حل مواقف كش مات المعقدة، وبناء عقلية استراتيجية قادرة على إدارة ميثاقك اليومي بسلاسة الفرسان.</p>
             </div>
             <div class="bg-black/40 p-4 border border-slate-900 mb-6 text-center rounded">
-                <span class="text-xs text-[var(--sys-purple)] font-mono sys-font">[STATUS: LOCKED - READY TO CORE]</span>
+                <span class="text-xs text-[var(--sys-purple)] font-mono sys-font">[REWARDS: +150 XP | +2 INT]</span>
             </div>
-            <button onclick="enterGame('Chess')" class="w-full py-3 bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)] text-[var(--sys-purple)] font-bold text-sm tracking-widest uppercase hover:bg-[var(--sys-purple)] hover:text-black transition duration-300">ENTER DUNGEON</button>
+            <button onclick="ChessGame.init()" class="w-full py-3 bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)] text-[var(--sys-purple)] font-bold text-sm tracking-widest uppercase hover:bg-[var(--sys-purple)] hover:text-black transition duration-300">ENTER DUNGEON</button>
         </div>
 
-        <div class="p-6 bg-slate-950/80 border border-slate-900 neon-border flex flex-col justify-between rounded-lg relative overflow-hidden group">
+        <!-- N-Back Dungeon -->
+        <div class="dungeon-card p-6 bg-slate-950/80 border border-slate-900 neon-border-rose flex flex-col justify-between rounded-lg relative overflow-hidden group">
             <div class="absolute top-0 right-0 bg-rose-600 text-white font-black text-[10px] px-3 py-1 sys-font tracking-wider">RANK: S</div>
             <div>
                 <h2 class="text-xl font-black text-white mb-2">الذاكرة العاملة (Dual N-Back Vortex)</h2>
                 <p class="text-xs text-slate-400 mb-6 leading-relaxed">التدريب العلمي الصارم المعتمد عالمياً لتوسيع الذاكرة قصيرة المدى وزيادة سيولتك الذهنية والذكاء السائل بشكل حاد.</p>
             </div>
             <div class="bg-black/40 p-4 border border-slate-900 mb-6 text-center rounded">
-                <span class="text-xs text-rose-500 font-mono sys-font">[STATUS: LOCKED - READY TO CORE]</span>
+                <span class="text-xs text-rose-500 font-mono sys-font">[REWARDS: +200 XP | +3 INT]</span>
             </div>
-            <button onclick="enterGame('N-Back')" class="w-full py-3 bg-rose-950/20 border border-rose-600 text-rose-500 font-bold text-sm tracking-widest uppercase hover:bg-rose-600 hover:text-white transition duration-300">ENTER DUNGEON</button>
+            <button onclick="NBackGame.init()" class="w-full py-3 bg-rose-950/20 border border-rose-600 text-rose-500 font-bold text-sm tracking-widest uppercase hover:bg-rose-600 hover:text-white transition duration-300">ENTER DUNGEON</button>
         </div>
-<div id="dungeonModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/95 backdrop-blur-md transition-all">
-        <div id="gameArena" class="sl-panel p-8 w-full max-w-lg mx-4 text-center border-2 border-[var(--sys-cyan)] rounded-xl relative overflow-hidden">
-            </div>
-    </div>
     </main>
 
+    <!-- Dungeon Modal -->
+    <div id="dungeonModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/95 backdrop-blur-md transition-all">
+        <div id="gameArena" class="sl-panel p-8 w-full max-w-lg mx-4 text-center rounded-xl relative overflow-hidden animate-system-pop">
+            <!-- Dynamic content injected here -->
+        </div>
+    </div>
+
     <script>
-// ==========================================
-        // 1. SAFE STATE SYNC (مزامنة دقيقة مع الرئيسية)
+        // ==========================================
+        // 1. PLAYER STATE SYNC (مزامنة دقيقة مع النظام المركزي)
         // ==========================================
         const PlayerState = {
-            data: {},
+            data: { level: 1, xp: 0, ap: 0, stats: { str: 10, agi: 10, vit: 10, int: 10, sen: 10 }, gold: 0, authority: 0, lethality: 0 },
+            
             init() {
-                // استخدام نفس المفتاح الخاص بالصفحة الرئيسية
                 const saved = localStorage.getItem('monarch_system_data');
                 if(saved) {
                     this.data = JSON.parse(saved);
-                } else {
-                    this.data = { level: 1, xp: 0, ap: 0, stats: { str: 10, agi: 10, vit: 10, int: 10, sen: 10 }, gold: 0, authority: 0, lethality: 0 };
                 }
                 this.updateUI();
             },
+            
             save() {
-                // حفظ البيانات في نفس المفتاح
                 localStorage.setItem('monarch_system_data', JSON.stringify(this.data));
                 this.updateUI();
             },
+            
             updateUI() {
                 if(document.getElementById('currentLevel')) document.getElementById('currentLevel').textContent = this.data.level || 1;
                 if(document.getElementById('stat-int')) document.getElementById('stat-int').textContent = this.data.stats?.int || 10;
+                if(document.getElementById('player-xp')) document.getElementById('player-xp').textContent = this.data.xp || 0;
             },
+            
             reward(xpGain, intGain) {
                 this.data.xp = (this.data.xp || 0) + xpGain;
-                
                 if (!this.data.stats) this.data.stats = {int: 10};
                 this.data.stats.int = (this.data.stats.int || 10) + intGain;
                 
@@ -150,42 +209,42 @@
                 if(this.data.xp >= nextXpRequired) {
                     this.data.xp -= nextXpRequired;
                     this.data.level = currentLvl + 1;
-                    this.data.ap = (this.data.ap || 0) + 3; // إعطاء 3 نقاط AP عند الارتقاء
+                    this.data.ap = (this.data.ap || 0) + 3;
+                    
+                    // Dispatch level up event for cross-page sync
+                    window.dispatchEvent(new CustomEvent('playerLevelUp', { detail: { level: this.data.level } }));
                 }
                 this.save();
+                
+                // Sync with SovereignEngine if available
+                if(window.SovereignEngine && typeof window.SovereignEngine.logToSystem === 'function') {
+                    window.SovereignEngine.logToSystem('quest', `تم قهر الزنزانة: مكافأة +${xpGain} XP و +${intGain} INT`);
+                }
             }
         };
 
-    // ==========================================
-        // 2. DUNGEON ENGINE (محرك تشغيل الألعاب)
+        // ==========================================
+        // 2. DUNGEON ENGINE (محرك تشغيل الزنازين)
         // ==========================================
         const DungeonEngine = {
             openModal() {
-                document.getElementById('dungeonModal').classList.remove('hidden');
-                document.getElementById('dungeonModal').classList.add('flex');
+                const modal = document.getElementById('dungeonModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
             },
+            
             closeModal() {
-                document.getElementById('dungeonModal').classList.add('hidden');
-                document.getElementById('dungeonModal').classList.remove('flex');
-                if(typeof NBackGame !== 'undefined') NBackGame.stop(); 
+                const modal = document.getElementById('dungeonModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                if(typeof NBackGame !== 'undefined') NBackGame.stop();
+                if(typeof SudokuGame !== 'undefined') SudokuGame.stop();
             },
+            
             showRewardScreen(gameName, xpGain, intGain) {
-                let playerState = { exp: 0, int: 10, level: 1 };
-                const savedState = localStorage.getItem('sovereign_player_state') || localStorage.getItem('player_state');
-                
-                if (savedState) {
-                    playerState = JSON.parse(savedState);
-                }
-
-                playerState.exp = (playerState.exp || 0) + xpGain;
-                playerState.int = (playerState.int || 10) + intGain;
-
-                localStorage.setItem('sovereign_player_state', JSON.stringify(playerState));
-                localStorage.setItem('player_state', JSON.stringify(playerState));
-
                 const arena = document.getElementById('gameArena');
                 arena.innerHTML = `
-                    <div class="py-8 animate-pulse text-center">
+                    <div class="py-8 text-center animate-system-pop">
                         <div class="text-6xl mb-4">👑</div>
                         <h2 class="text-3xl font-black text-white mb-2 drop-shadow-[0_0_10px_var(--sys-cyan)]">DUNGEON CLEARED</h2>
                         <p class="text-slate-300 mb-6">تم قهر زنزانة ${gameName} بنجاح.</p>
@@ -193,117 +252,214 @@
                             <div class="text-2xl font-bold text-[var(--sys-cyan)]">+${xpGain} EXP</div>
                             <div class="text-2xl font-bold text-[var(--sys-purple)]">+${intGain} INT</div>
                         </div>
-                        <button onclick="DungeonEngine.closeModal()" class="px-8 py-3 bg-[var(--sys-cyan)] text-black font-black uppercase tracking-widest hover:bg-cyan-400 transition">Return to Vault</button>
+                        <button onclick="DungeonEngine.closeModal()" class="px-8 py-3 bg-[var(--sys-cyan)] text-black font-black uppercase tracking-widest hover:bg-cyan-400 transition rounded">Return to Vault</button>
                     </div>
                 `;
                 
-                if(typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-                if(typeof window.SoundEffects !== 'undefined' && typeof window.SoundEffects.playLevelUp === 'function') window.SoundEffects.playLevelUp();
+                if(typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#00f0ff', '#9d4edd', '#ffffff'] });
                 
                 if(typeof PlayerState !== 'undefined' && typeof PlayerState.reward === 'function') {
                     PlayerState.reward(xpGain, intGain);
                 }
+            },
+            
+            showFailScreen(gameName, retryCallback) {
+                const arena = document.getElementById('gameArena');
+                arena.innerHTML = `
+                    <div class="py-8 text-center animate-system-pop">
+                        <div class="text-6xl mb-4">💀</div>
+                        <h2 class="text-3xl font-black text-rose-500 mb-2">DUNGEON FAILED</h2>
+                        <p class="text-slate-300 mb-6">لم تتمكن من قهر زنزانة ${gameName}.</p>
+                        <div class="flex justify-center gap-4">
+                            <button onclick="${retryCallback}" class="px-6 py-3 bg-rose-600 text-white font-black uppercase tracking-widest hover:bg-rose-500 transition rounded">Retry</button>
+                            <button onclick="DungeonEngine.closeModal()" class="px-6 py-3 bg-slate-800 text-white font-black uppercase tracking-widest hover:bg-slate-700 transition rounded">Escape</button>
+                        </div>
+                    </div>
+                `;
             }
-        }; // <--- القوس الحرج الذي كان مفقوداً في كودك
+        };
 
         // ==========================================
-        // 3. DUAL N-BACK (زنزانة الذاكرة العاملة - S-Rank)
+        // 3. SUDOKU CRYPT (زنزانة السودوكو - B-Rank)
         // ==========================================
-        const NBackGame = {
-            sequence: [], currentIndex: 0, maxSteps: 12, score: 0, timer: null, isPlaying: false,
+        const SudokuGame = {
+            grid: [],
+            solution: [],
+            selectedCell: null,
+            isPlaying: false,
             
             init() {
                 DungeonEngine.openModal();
+                this.generatePuzzle();
+                this.render();
+                this.isPlaying = true;
+            },
+            
+            stop() {
+                this.isPlaying = false;
+            },
+            
+            generatePuzzle() {
+                // Generate a valid 4x4 Sudoku solution
+                this.solution = [
+                    [1, 2, 3, 4],
+                    [3, 4, 1, 2],
+                    [2, 1, 4, 3],
+                    [4, 3, 2, 1]
+                ];
+                
+                // Shuffle rows and columns for variety
+                this.shuffleSudoku();
+                
+                // Create puzzle by removing some numbers
+                this.grid = this.solution.map(row => 
+                    row.map(num => Math.random() > 0.5 ? num : 0)
+                );
+            },
+            
+            shuffleSudoku() {
+                // Shuffle rows within bands
+                for(let band = 0; band < 2; band++) {
+                    const rows = [band * 2, band * 2 + 1];
+                    if(Math.random() > 0.5) {
+                        [this.solution[rows[0]], this.solution[rows[1]]] = 
+                        [this.solution[rows[1]], this.solution[rows[0]]];
+                    }
+                }
+                // Shuffle columns within stacks
+                for(let stack = 0; stack < 2; stack++) {
+                    if(Math.random() > 0.5) {
+                        for(let row of this.solution) {
+                            [row[stack * 2], row[stack * 2 + 1]] = 
+                            [row[stack * 2 + 1], row[stack * 2]];
+                        }
+                    }
+                }
+            },
+            
+            render() {
                 const arena = document.getElementById('gameArena');
-                arena.style.borderColor = '#e11d48'; // لون الرتبة S (أحمر/وردي)
                 arena.innerHTML = `
-                    <div class="sys-font text-rose-500 tracking-[0.3em] text-xs mb-2">S-RANK MEMORY TRIAL</div>
-                    <h2 class="text-2xl font-black text-white mb-2">Dual N-Back (1-Back)</h2>
-                    <p class="text-xs text-slate-400 mb-6">هل المربع الحالي يطابق المربع السابق تماماً؟ ركز جيداً.</p>
+                    <div class="sys-font text-[var(--sys-cyan)] tracking-[0.3em] text-xs mb-2">LOGIC TRIAL // B-RANK</div>
+                    <h2 class="text-2xl font-black text-white mb-2">Tactical Sudoku (4x4)</h2>
+                    <p class="text-xs text-slate-400 mb-6">املأ المصفوفة بأرقام 1-4 دون تكرار في أي صف أو عمود.</p>
                     
-                    <div id="nbackGrid" class="grid grid-cols-3 gap-2 w-48 h-48 mx-auto mb-6">
-                        ${Array.from({length: 9}).map((_, i) => `<div class="bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200" id="cell-${i}"></div>`).join('')}
+                    <div id="sudokuGrid" class="grid grid-cols-4 gap-1 w-64 h-64 mx-auto mb-6 bg-slate-800 p-2 rounded-lg border border-slate-700">
+                        ${this.grid.map((row, r) => 
+                            row.map((num, c) => {
+                                const isFixed = num !== 0;
+                                const borderClass = (r === 1 ? 'border-b-2 border-b-slate-600 ' : '') + 
+                                                   (c === 1 ? 'border-r-2 border-r-slate-600 ' : '');
+                                return `<div 
+                                    id="sudoku-${r}-${c}"
+                                    onclick="SudokuGame.selectCell(${r}, ${c})"
+                                    class="sudoku-cell ${isFixed ? 'fixed' : ''} ${borderClass} bg-slate-900 text-white rounded"
+                                >${num !== 0 ? num : ''}</div>`;
+                            }).join('')
+                        ).join('')}
                     </div>
                     
-                    <div id="nbackMsg" class="h-6 text-sm font-bold text-rose-500 mb-4">النقاط: 0 / 3 (مطلوبة للفوز)</div>
+                    <div id="sudokuMsg" class="h-6 text-sm font-bold text-rose-500 mb-4"></div>
+                    
+                    <div class="flex gap-2 justify-center mb-4">
+                        ${[1, 2, 3, 4].map(n => `
+                            <button onclick="SudokuGame.inputNumber(${n})" 
+                                class="w-12 h-12 bg-slate-800 border border-slate-600 text-white font-bold text-lg hover:bg-[var(--sys-cyan)] hover:text-black hover:border-[var(--sys-cyan)] transition rounded">
+                                ${n}
+                            </button>
+                        `).join('')}
+                    </div>
                     
                     <div class="flex gap-3">
-                        <button id="btnMatch" onclick="NBackGame.match()" class="flex-1 py-3 bg-rose-600 text-white font-bold uppercase text-xs opacity-50 pointer-events-none transition">Match (تطابق)</button>
-                        <button id="btnStart" onclick="NBackGame.start()" class="flex-1 py-3 bg-slate-800 text-white font-bold uppercase text-xs hover:bg-slate-700 transition">Start Trial</button>
+                        <button onclick="SudokuGame.check()" class="flex-1 py-3 bg-[var(--sys-cyan)]/20 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] font-bold uppercase tracking-widest text-xs hover:bg-[var(--sys-cyan)] hover:text-black transition rounded">Check Matrix</button>
+                        <button onclick="SudokuGame.clearCell()" class="px-4 py-3 bg-slate-800 border border-slate-600 text-white font-bold uppercase tracking-widest text-xs hover:border-rose-500 hover:text-rose-500 transition rounded">Clear</button>
+                        <button onclick="DungeonEngine.closeModal()" class="px-4 py-3 bg-slate-800 border border-slate-600 text-white font-bold uppercase tracking-widest text-xs hover:border-white transition rounded">Escape</button>
                     </div>
-                    <button onclick="DungeonEngine.closeModal()" class="mt-4 text-xs text-slate-500 hover:text-white uppercase tracking-widest">Escape Dungeon</button>
                 `;
             },
             
-            start() {
-                if (this.isPlaying) return;
-                this.isPlaying = true;
-                this.sequence = []; this.currentIndex = 0; this.score = 0;
-                document.getElementById('btnStart').style.display = 'none';
-                document.getElementById('btnMatch').classList.remove('opacity-50', 'pointer-events-none');
-                document.getElementById('nbackMsg').textContent = `النقاط: 0 / 3 (مطلوبة للفوز)`;
-                document.getElementById('nbackMsg').className = "h-6 text-sm font-bold text-slate-300 mb-4";
-                this.nextFlash();
+            selectCell(r, c) {
+                if(!this.isPlaying) return;
+                if(this.grid[r][c] !== 0) return; // Can't select fixed cells
+                
+                // Remove previous selection
+                document.querySelectorAll('.sudoku-cell').forEach(cell => cell.classList.remove('selected'));
+                
+                this.selectedCell = {r, c};
+                document.getElementById(`sudoku-${r}-${c}`).classList.add('selected');
             },
             
-            nextFlash() {
-                if (this.currentIndex >= this.maxSteps) { this.endGame(); return; }
+            inputNumber(num) {
+                if(!this.isPlaying || !this.selectedCell) return;
                 
-                // تنظيف الشبكة
-                for(let i=0; i<9; i++) document.getElementById(`cell-${i}`).className = "bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200";
+                const {r, c} = this.selectedCell;
+                this.grid[r][c] = num;
                 
-                // إضاءة مربع جديد
-                const randomPos = Math.floor(Math.random() * 9);
-                this.sequence.push(randomPos);
+                const cell = document.getElementById(`sudoku-${r}-${c}`);
+                cell.textContent = num;
+                cell.classList.remove('selected');
                 
-                const cell = document.getElementById(`cell-${randomPos}`);
-                if (cell) {
-                    cell.className = "bg-[var(--sys-cyan)] border-2 border-[var(--sys-cyan)] rounded-lg transition-colors duration-100 shadow-[0_0_15px_var(--sys-cyan)]";
+                // Clear error states
+                document.querySelectorAll('.sudoku-cell').forEach(cell => cell.classList.remove('error', 'success'));
+                document.getElementById('sudokuMsg').textContent = '';
+            },
+            
+            clearCell() {
+                if(!this.isPlaying || !this.selectedCell) return;
+                
+                const {r, c} = this.selectedCell;
+                this.grid[r][c] = 0;
+                
+                const cell = document.getElementById(`sudoku-${r}-${c}`);
+                cell.textContent = '';
+                cell.classList.remove('selected');
+            },
+            
+            check() {
+                if(!this.isPlaying) return;
+                
+                let isCorrect = true;
+                let isFilled = true;
+                
+                // Check if filled
+                for(let r = 0; r < 4; r++) {
+                    for(let c = 0; c < 4; c++) {
+                        if(this.grid[r][c] === 0) {
+                            isFilled = false;
+                            document.getElementById(`sudoku-${r}-${c}`).classList.add('error');
+                        }
+                    }
                 }
                 
-                this.currentIndex++;
-                
-                // إطفاء المربع وإكمال السلسلة
-                this.timer = setTimeout(() => {
-                    if (cell) cell.className = "bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200";
-                    this.timer = setTimeout(() => this.nextFlash(), 800);
-                }, 600);
-            },
-            
-            match() {
-                if (!this.isPlaying || this.currentIndex < 2) return;
-                const currentPos = this.sequence[this.currentIndex - 1];
-                const prevPos = this.sequence[this.currentIndex - 2];
-                
-                const msg = document.getElementById('nbackMsg');
-                if (currentPos === prevPos) {
-                    this.score++;
-                    msg.textContent = `تطابق صحيح! النقاط: ${this.score} / 3`;
-                    msg.style.color = '#10b981'; // أخضر
-                } else {
-                    msg.textContent = `خطأ! التركيز يتلاشى...`;
-                    msg.style.color = '#e11d48'; // أحمر
+                if(!isFilled) {
+                    document.getElementById('sudokuMsg').textContent = "Must fill all cells first!";
+                    return;
                 }
-                setTimeout(() => msg.style.color = '#cbd5e1', 500);
-            },
-            
-            stop() { clearTimeout(this.timer); this.isPlaying = false; },
-            
-            endGame() {
-                this.stop();
-                if (this.score >= 3) {
-                    // الفوز! منح 150 EXP و +2 INT
-                    DungeonEngine.showRewardScreen('Dual N-Back', 150, 2);
+                
+                // Check correctness
+                for(let r = 0; r < 4; r++) {
+                    for(let c = 0; c < 4; c++) {
+                        if(this.grid[r][c] !== this.solution[r][c]) {
+                            isCorrect = false;
+                            document.getElementById(`sudoku-${r}-${c}`).classList.add('error');
+                        } else {
+                            document.getElementById(`sudoku-${r}-${c}`).classList.add('success');
+                        }
+                    }
+                }
+                
+                if(isCorrect) {
+                    setTimeout(() => DungeonEngine.showRewardScreen('Sudoku Crypt', 80, 1), 500);
                 } else {
-                    document.getElementById('nbackMsg').textContent = `فشلت المحاكمة. لم تصل للنقاط المطلوبة.`;
-                    document.getElementById('nbackMsg').style.color = '#e11d48';
-                    document.getElementById('btnStart').style.display = 'block';
-                    document.getElementById('btnStart').textContent = 'Retry (إعادة)';
-                    document.getElementById('btnMatch').classList.add('opacity-50', 'pointer-events-none');
+                    document.getElementById('sudokuMsg').textContent = "Errors in matrix! Check highlighted cells.";
+                    setTimeout(() => {
+                        document.querySelectorAll('.sudoku-cell').forEach(cell => cell.classList.remove('error', 'success'));
+                    }, 2000);
                 }
             }
         };
-// ==========================================
+
+        // ==========================================
         // 4. CHESS TACTICS (زنزانة الشطرنج - A-Rank)
         // ==========================================
         const ChessGame = {
@@ -313,37 +469,15 @@
             isPlaying: false,
 
             init() {
-                DungeonEngine.openModal();
-                const arena = document.getElementById('gameArena');
-                arena.style.borderColor = 'var(--sys-purple)'; // لون الرتبة A
-                
-                // تهيئة اللوحة وتوليد موقع الحصان العشوائي
                 this.generateBoard();
-
-                arena.innerHTML = `
-                    <div class="sys-font text-[var(--sys-purple)] tracking-[0.3em] text-xs mb-2">A-RANK TACTICAL TRIAL</div>
-                    <h2 class="text-2xl font-black text-white mb-2">رؤية الفارس (Knight's Vision)</h2>
-                    <p class="text-xs text-slate-400 mb-6">حدد جميع المربعات المتاحة لحركة الحصان ♞ في الرقعة. خطأ واحد ينهي المحاكمة.</p>
-                    
-                    <div id="chessGrid" class="grid grid-cols-8 gap-0.5 w-64 h-64 mx-auto mb-6 border-2 border-slate-700 bg-slate-800 p-0.5 shadow-[0_0_15px_rgba(157,78,221,0.2)]">
-                        ${this.renderGrid()}
-                    </div>
-                    
-                    <div id="chessMsg" class="h-6 text-sm font-bold text-[var(--sys-purple)] mb-4">التحركات المكتشفة: 0 / ${this.validMoves.length}</div>
-                    
-                    <div class="flex gap-3">
-                        <button id="btnChessStart" onclick="ChessGame.start()" class="flex-1 py-3 bg-[var(--sys-purple)] text-white font-bold uppercase text-xs hover:bg-purple-600 transition shadow-lg">بدء المحاكمة</button>
-                    </div>
-                    <button onclick="DungeonEngine.closeModal()" class="mt-4 text-xs text-slate-500 hover:text-white uppercase tracking-widest transition">Escape Dungeon</button>
-                `;
+                this.render();
+                this.isPlaying = true;
             },
-
+            
             generateBoard() {
-                // وضع الحصان في مكان عشوائي استراتيجي
                 this.knightPos.r = Math.floor(Math.random() * 6) + 1;
                 this.knightPos.c = Math.floor(Math.random() * 6) + 1;
                 
-                // حساب الحركات الممكنة للحصان حرف (L)
                 const moves = [
                     [-2, -1], [-2, 1], [-1, -2], [-1, 2],
                     [1, -2], [1, 2], [2, -1], [2, 1]
@@ -358,7 +492,29 @@
                     }
                 });
                 this.foundMoves = 0;
-                this.isPlaying = false;
+            },
+
+            render() {
+                DungeonEngine.openModal();
+                const arena = document.getElementById('gameArena');
+                arena.style.borderColor = 'var(--sys-purple)';
+                
+                arena.innerHTML = `
+                    <div class="sys-font text-[var(--sys-purple)] tracking-[0.3em] text-xs mb-2">A-RANK TACTICAL TRIAL</div>
+                    <h2 class="text-2xl font-black text-white mb-2">Knight's Vision</h2>
+                    <p class="text-xs text-slate-400 mb-6">حدد جميع المربعات المتاحة لحركة الحصان ♞. خطأ واحد ينهي المحاكمة.</p>
+                    
+                    <div id="chessGrid" class="grid grid-cols-8 gap-0.5 w-72 h-72 mx-auto mb-6 border-2 border-slate-700 bg-slate-800 p-1 rounded-lg shadow-[0_0_15px_rgba(157,78,221,0.2)]">
+                        ${this.renderGrid()}
+                    </div>
+                    
+                    <div id="chessMsg" class="h-6 text-sm font-bold text-[var(--sys-purple)] mb-4">Discovered: 0 / ${this.validMoves.length}</div>
+                    
+                    <div class="flex gap-3">
+                        <button id="btnChessStart" onclick="ChessGame.start()" class="flex-1 py-3 bg-[var(--sys-purple)] text-white font-bold uppercase text-xs hover:bg-purple-600 transition shadow-lg rounded">Begin Trial</button>
+                        <button onclick="DungeonEngine.closeModal()" class="px-4 py-3 bg-slate-800 border border-slate-600 text-white font-bold uppercase tracking-widest text-xs hover:border-white transition rounded">Escape</button>
+                    </div>
+                `;
             },
 
             renderGrid() {
@@ -370,7 +526,8 @@
                         const isKnight = (r === this.knightPos.r && c === this.knightPos.c);
                         const content = isKnight ? '<span class="text-3xl text-slate-900 drop-shadow-md">♞</span>' : '';
                         
-                        html += `<div id="sq-${r}-${c}" onclick="ChessGame.clickSquare(${r}, ${c})" class="${bgColor} w-full h-full flex items-center justify-center cursor-pointer transition-colors duration-200 ${isKnight ? 'pointer-events-none' : ''}">${content}</div>`;
+                        html += `<div id="sq-${r}-${c}" onclick="ChessGame.clickSquare(${r}, ${c})" 
+                            class="chess-square ${bgColor} w-full h-full flex items-center justify-center cursor-pointer transition-colors duration-200 ${isKnight ? 'pointer-events-none' : ''}">${content}</div>`;
                     }
                 }
                 return html;
@@ -379,7 +536,7 @@
             start() {
                 this.isPlaying = true;
                 document.getElementById('btnChessStart').style.display = 'none';
-                document.getElementById('chessMsg').textContent = `التحركات المكتشفة: 0 / ${this.validMoves.length}`;
+                document.getElementById('chessMsg').textContent = `Discovered: 0 / ${this.validMoves.length}`;
                 document.getElementById('chessMsg').className = "h-6 text-sm font-bold text-slate-300 mb-4";
             },
 
@@ -390,23 +547,19 @@
                 const el = document.getElementById(`sq-${r}-${c}`);
                 const msg = document.getElementById('chessMsg');
 
-                // التحقق مما إذا كانت الحركة صحيحة
                 if(this.validMoves.includes(sqId)) {
-                    if(!el.classList.contains('bg-[var(--sys-purple)]')) {
+                    if(!el.classList.contains('bg-emerald-500')) {
                         el.classList.remove('bg-slate-300', 'bg-slate-500');
-                        el.classList.add('bg-[var(--sys-purple)]');
+                        el.classList.add('bg-emerald-500');
                         this.foundMoves++;
-                        msg.textContent = `التحركات المكتشفة: ${this.foundMoves} / ${this.validMoves.length}`;
+                        msg.textContent = `Discovered: ${this.foundMoves} / ${this.validMoves.length}`;
+                        msg.className = "h-6 text-sm font-bold text-emerald-400 mb-4";
                         
-                        // تأثير صوتي عند النجاح في الضغط
-                        if(typeof window.SoundEffects !== 'undefined') window.SoundEffects.playSystemClick();
-
                         if(this.foundMoves === this.validMoves.length) {
-                            this.win();
+                            setTimeout(() => this.win(), 300);
                         }
                     }
                 } else {
-                    // حركة خاطئة
                     el.classList.remove('bg-slate-300', 'bg-slate-500');
                     el.classList.add('bg-rose-600');
                     this.lose();
@@ -415,70 +568,141 @@
 
             win() {
                 this.isPlaying = false;
-                setTimeout(() => {
-                    // الفوز يمنحك 200 XP و 3 INT نقاط ذكاء لأنها رتبة A
-                    DungeonEngine.showRewardScreen('تكتيكات الشطرنج (Knight)', 200, 3);
-                }, 500);
+                setTimeout(() => DungeonEngine.showRewardScreen('Knight\'s Vision', 150, 2), 500);
             },
 
             lose() {
                 this.isPlaying = false;
                 const msg = document.getElementById('chessMsg');
-                msg.textContent = "خطأ تكتيكي! المحاكمة فشلت.";
-                msg.style.color = '#e11d48'; // أحمر
+                msg.textContent = "Tactical Error! Trial Failed.";
+                msg.className = "h-6 text-sm font-bold text-rose-500 mb-4";
                 
-                const btn = document.getElementById('btnChessStart');
-                btn.style.display = 'block';
-                btn.textContent = "Retry (توليد رقعة جديدة)";
-                
-                // تحديث اللوحة عند إعادة المحاولة
-                btn.onclick = () => {
-                    this.generateBoard();
-                    document.getElementById('chessGrid').innerHTML = this.renderGrid();
-                    this.start();
-                    btn.onclick = ChessGame.start; 
-                };
+                setTimeout(() => {
+                    DungeonEngine.showFailScreen('Knight\'s Vision', 'ChessGame.init()');
+                }, 1000);
             }
         };
-        // ==========================================
-// 5. SUDOKU CRYPT (زنزانة السودوكو - S-Rank)
-// ==========================================
-const SudokuGame = {
-    init() {
-        DungeonEngine.openModal();
-        const arena = document.getElementById('gameArena');
-        arena.innerHTML = `
-            <h2 class="text-xl font-black text-white mb-2">فك شفرة السودوكو (S-Rank)</h2>
-            <p class="text-xs text-slate-400 mb-4">أدخل الأرقام الصحيحة لفك الشفرة.</p>
-            <div id="sudokuGrid" class="grid grid-cols-3 gap-2 w-48 h-48 mx-auto mb-4">
-                ${Array(9).fill(0).map((_, i) => `<input type="number" class="w-14 h-14 bg-slate-800 text-center text-white border border-slate-600 focus:border-[var(--sys-purple)] outline-none">`).join('')}
-            </div>
-            <button onclick="DungeonEngine.showRewardScreen('Sudoku Decryption', 500, 5)" class="w-full py-2 bg-[var(--sys-purple)] font-bold text-xs uppercase">تأكيد الحل</button>
-        `;
-    }
-};
-        // ==========================================
-        // التوجيه (Routing)
-        // ==========================================
-   // ==========================================
-        // التوجيه (Routing) لفتح الزنزانات
-        // ==========================================
-  function enterGame(gameName) {
-    const arena = document.getElementById('dungeonArena');
-    if(gameName === 'N-Back') {
-        NBackGame.init();
-    } else if (gameName === 'Chess') {
-        arena.innerHTML = `<div class="p-6 text-center"><h2>رقعة الشطرنج الاستراتيجية</h2><p>قريباً: المحرك الذكي مفعّل. حالياً: ركز على تحليل الخصم.</p></div>`;
-    } else if (gameName === 'Sudoku') {
-        arena.innerHTML = `<div class="p-6 text-center"><h2>مستوى السودوكو (S-Rank)</h2><p>الشبكة قيد التوليد... استعد للتحليل.</p></div>`;
-    }
-}
 
-        // تشغيل التهيئة عند تحميل الصفحة
-        window.addEventListener('DOMContentLoaded', () => PlayerState.init());
-   
-   </script>
-   
-    
+        // ==========================================
+        // 5. DUAL N-BACK (زنزانة الذاكرة - S-Rank)
+        // ==========================================
+        const NBackGame = {
+            sequence: [], currentIndex: 0, maxSteps: 12, score: 0, timer: null, isPlaying: false,
+            
+            init() {
+                DungeonEngine.openModal();
+                const arena = document.getElementById('gameArena');
+                arena.style.borderColor = '#e11d48';
+                
+                arena.innerHTML = `
+                    <div class="sys-font text-rose-500 tracking-[0.3em] text-xs mb-2">S-RANK MEMORY TRIAL</div>
+                    <h2 class="text-2xl font-black text-white mb-2">Dual N-Back (1-Back)</h2>
+                    <p class="text-xs text-slate-400 mb-6">هل المربع الحالي يطابق المربع السابق تماماً؟ اضغط "Match" عند التطابق.</p>
+                    
+                    <div id="nbackGrid" class="grid grid-cols-3 gap-2 w-48 h-48 mx-auto mb-6">
+                        ${Array.from({length: 9}).map((_, i) => 
+                            `<div class="bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200" id="cell-${i}"></div>`
+                        ).join('')}
+                    </div>
+                    
+                    <div id="nbackMsg" class="h-6 text-sm font-bold text-slate-300 mb-4">Score: 0 / 3 (Required to Win)</div>
+                    
+                    <div class="flex gap-3">
+                        <button id="btnMatch" onclick="NBackGame.match()" class="flex-1 py-3 bg-rose-600 text-white font-bold uppercase text-xs opacity-50 pointer-events-none transition rounded">Match</button>
+                        <button id="btnStart" onclick="NBackGame.start()" class="flex-1 py-3 bg-slate-800 text-white font-bold uppercase text-xs hover:bg-slate-700 transition rounded">Start Trial</button>
+                    </div>
+                    <button onclick="DungeonEngine.closeModal()" class="mt-4 text-xs text-slate-500 hover:text-white uppercase tracking-widest">Escape Dungeon</button>
+                `;
+            },
+            
+            start() {
+                if (this.isPlaying) return;
+                this.isPlaying = true;
+                this.sequence = []; this.currentIndex = 0; this.score = 0;
+                document.getElementById('btnStart').style.display = 'none';
+                document.getElementById('btnMatch').classList.remove('opacity-50', 'pointer-events-none');
+                document.getElementById('nbackMsg').textContent = `Score: 0 / 3 (Required to Win)`;
+                document.getElementById('nbackMsg').className = "h-6 text-sm font-bold text-slate-300 mb-4";
+                this.nextFlash();
+            },
+            
+            nextFlash() {
+                if (this.currentIndex >= this.maxSteps) { this.endGame(); return; }
+                
+                for(let i=0; i<9; i++) {
+                    document.getElementById(`cell-${i}`).className = "bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200";
+                }
+                
+                const randomPos = Math.floor(Math.random() * 9);
+                this.sequence.push(randomPos);
+                
+                const cell = document.getElementById(`cell-${randomPos}`);
+                if (cell) {
+                    cell.className = "bg-[var(--sys-cyan)] border-2 border-[var(--sys-cyan)] rounded-lg transition-colors duration-100 shadow-[0_0_15px_var(--sys-cyan)]";
+                }
+                
+                this.currentIndex++;
+                
+                this.timer = setTimeout(() => {
+                    if (cell) cell.className = "bg-slate-900 border-2 border-slate-700 rounded-lg transition-colors duration-200";
+                    this.timer = setTimeout(() => this.nextFlash(), 800);
+                }, 600);
+            },
+            
+            match() {
+                if (!this.isPlaying || this.currentIndex < 2) return;
+                const currentPos = this.sequence[this.currentIndex - 1];
+                const prevPos = this.sequence[this.currentIndex - 2];
+                
+                const msg = document.getElementById('nbackMsg');
+                if (currentPos === prevPos) {
+                    this.score++;
+                    msg.textContent = `Correct! Score: ${this.score} / 3`;
+                    msg.className = "h-6 text-sm font-bold text-emerald-400 mb-4";
+                } else {
+                    msg.textContent = `Wrong! Focus fading...`;
+                    msg.className = "h-6 text-sm font-bold text-rose-500 mb-4";
+                }
+                setTimeout(() => {
+                    if(this.isPlaying) msg.className = "h-6 text-sm font-bold text-slate-300 mb-4";
+                }, 500);
+            },
+            
+            stop() { clearTimeout(this.timer); this.isPlaying = false; },
+            
+            endGame() {
+                this.stop();
+                if (this.score >= 3) {
+                    DungeonEngine.showRewardScreen('Dual N-Back Vortex', 200, 3);
+                } else {
+                    document.getElementById('nbackMsg').textContent = `Trial Failed. Score: ${this.score}/3`;
+                    document.getElementById('nbackMsg').className = "h-6 text-sm font-bold text-rose-500 mb-4";
+                    document.getElementById('btnStart').style.display = 'block';
+                    document.getElementById('btnStart').textContent = 'Retry';
+                    document.getElementById('btnMatch').classList.add('opacity-50', 'pointer-events-none');
+                }
+            }
+        };
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            PlayerState.init();
+            
+            // Listen for level up events from other pages
+            window.addEventListener('playerLevelUp', (e) => {
+                Toast.show(`Level Up detected! Now Level ${e.detail.level}`, 'success');
+                PlayerState.init(); // Refresh data
+            });
+        });
+        
+        // Global accessibility
+        window.PlayerState = PlayerState;
+        window.DungeonEngine = DungeonEngine;
+        window.SudokuGame = SudokuGame;
+        window.ChessGame = ChessGame;
+        window.NBackGame = NBackGame;
+    </script>
 </body>
 </html>
