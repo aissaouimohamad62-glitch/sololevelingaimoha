@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign System | Active Quests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sys-cyan: #00f0ff;
+            --sys-cyan-glow: rgba(0, 240, 255, 0.4);
+            --sys-purple: #9d4edd;
+            --sys-purple-glow: rgba(157, 78, 221, 0.3);
+            --sys-bg-dark: #02040a;
+            --sys-panel: rgba(5, 10, 25, 0.85);
+        }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--sys-bg-dark);
+            background-image: \r
+                radial-gradient(circle at 15% 50%, var(--sys-cyan-glow) 0%, transparent 25%),\r
+                radial-gradient(circle at 85% 50%, var(--sys-purple-glow) 0%, transparent 25%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+        .font-mono {
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .sovereign-panel {
+            background: var(--sys-panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px var(--sys-cyan-glow);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        <header class="sovereign-panel rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-2 border-[var(--sys-cyan)]">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-lg bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] flex items-center justify-center text-xl shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                    📜
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-wide text-white">SOVEREIGN SYSTEM</h1>
+                    <p class="text-xs text-[var(--sys-cyan)] font-mono tracking-widest">ACTIVE QUESTS MONITOR</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6 bg-slate-950/60 px-6 py-3 rounded-lg border border-slate-800">
+                <div class="text-center">
+                    <span class="block text-[10px] text-slate-500 font-mono">LEVEL</span>
+                    <span id="player-level" class="text-xl font-bold text-white font-mono">1</span>
+                </div>
+                <div class="h-8 w-[1px] bg-slate-800"></div>
+                <div class="text-right min-w-[120px]">
+                    <span class="block text-[10px] text-slate-500 font-mono">EXP PROGRESS</span>
+                    <div class="w-full bg-slate-800 h-2 rounded-full mt-1 overflow-hidden">
+                        <div id="player-xp-bar" class="bg-[var(--sys-cyan)] h-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="flex flex-wrap gap-2 justify-center md:justify-start">
+            <a href="index.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                🏠 DASHBOARD (الرئيسية)
+            </a>
+            <a href="monarch-ai.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                🧠 MONARCH AI (المستشار)
+            </a>
+            <a href="system-logs.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                📊 SYSTEM LOGS (السجلات)
+            </a>
+        </nav>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="lg:col-span-2 space-y-6">
+                <div class="sovereign-panel rounded-xl p-6 min-h-[300px] flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+                            <h2 class="text-md font-bold text-white flex items-center gap-2">
+                                <span class="animate-pulse inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                                بروتوكول المهمة النشطة الحالية
+                            </h2>
+                            <span id="quest-category" class="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-[var(--sys-cyan)] border border-slate-700">NONE</span>
+                        </div>
+
+                        <div id="no-quest-state" class="text-center py-12 space-y-4">
+                            <p class="text-slate-500 text-sm">لا يوجد أي بروتوكول مهمة نشط حالياً في الذاكرة المركزية.</p>
+                            <a href="index.html" class="inline-block px-6 py-2 text-xs font-bold bg-cyan-950/40 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300">
+                                استدعاء مهمة من لوحة التحكم ⚡
+                            </a>
+                        </div>
+
+                        <div id="active-quest-state" class="hidden space-y-4">
+                            <div>
+                                <h3 id="quest-title" class="text-xl font-black text-slate-100">اسم المهمة النشطة</h3>
+                                <p id="quest-desc" class="text-sm text-slate-400 mt-2 leading-relaxed">تفاصيل ووصف المهمة...</p>
+                            </div>
+
+                            <div class="p-4 bg-slate-950/80 rounded-lg border border-slate-800/80 space-y-2">
+                                <span class="text-[10px] text-slate-500 font-mono block">REWARDS MATRIX (عوائد التطهير)</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-slate-400">نقاط الخبرة:</span>
+                                    <span id="quest-xp-reward" class="text-sm font-bold text-[var(--sys-cyan)] font-mono">+0 XP</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1 pt-2">
+                                <div class="flex justify-between text-xs font-mono text-slate-400">
+                                    <span>PROGRESS TIMER</span>
+                                    <span id="quest-timer-text">00:00:00</span>
+                                </div>
+                                <div class="w-full bg-slate-950 h-2 rounded-full border border-slate-800 overflow-hidden">
+                                    <div id="quest-timer-bar" class="bg-gradient-to-r from-[var(--sys-cyan)] to-[var(--sys-purple)] h-full transition-all duration-1000" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="quest-actions" class="hidden flex gap-3 pt-6 border-t border-slate-800/60 mt-6">
+                        <button onclick="QuestManager.completeActiveQuest()" class="flex-1 py-3 bg-emerald-950/40 border border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-black transition duration-300 font-bold text-sm rounded shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                            ✔️ إتمام البروتوكول بنجاح
+                        </button>
+                        <button onclick="QuestManager.cancelActiveQuest()" class="py-3 px-6 bg-rose-950/20 border border-rose-500/50 text-rose-400 hover:bg-rose-500 hover:text-white transition duration-300 text-sm rounded">
+                            ❌ إلغاء وتطهير
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="sovereign-panel rounded-xl p-6 space-y-4">
+                    <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">📋 ميثاق الاستقرار الموحد</h3>
+                    <ul class="text-xs text-slate-400 space-y-3 list-disc list-inside">
+                        <li>تم تطهير النظام بالكامل من كتل المتجر والزنزانات الافتراضية لمنع تشتت التركيز الرقمي.</li>
+                        <li>الاعتماد الكلي الآن مبني على الالتزام بالمهام الحقيقية وتوثيقها مباشرة لرفع المستوى الـ XP.</li>
+                        <li>إلغاء عقوبات التهرب لضمان مرونة قصوى مع الاستمرار الفعلي واليومي.</li>
+                    </ul>
+                </div>
+
+                <div class="sovereign-panel rounded-xl p-6 space-y-3">
+                    <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2">📜 سجلات العمليات الفورية</h3>
+                    <div id="local-logs-container" class="space-y-2 max-h-[180px] overflow-y-auto pr-1 text-[11px] font-mono">
+                        </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ==========================================\r
+        // SYSTEM CORE STATE (XP & LEVEL ONLY)\r
+        // ==========================================\r
+        const PlayerState = {
+            data: {
+                level: 1,
+                xp: 0
+            },
+            init() {
+                const saved = localStorage.getItem('monarch_system_data');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        this.data.level = parsed.level || 1;
+                        this.data.xp = parsed.xp || 0;
+                    } catch (e) {
+                        console.error("Error parsing system data:", e);
+                    }
+                } else {
+                    this.save();
+                }
+                this.updateUI();
+            },
+            save() {
+                // حفظ البيانات النظيفة دون استدعاء أي كتل عملات مفقودة من الأنظمة القديمة
+                localStorage.setItem('monarch_system_data', JSON.stringify({
+                    level: this.data.level,
+                    xp: this.data.xp
+                }));
+            },
+            addXp(amount) {
+                this.data.xp += amount;
+                let xpNeeded = this.data.level * 100;
+                while (this.data.xp >= xpNeeded) {
+                    this.data.xp -= xpNeeded;
+                    this.data.level++;
+                    xpNeeded = this.data.level * 100;
+                    this.triggerLevelUpEffects();
+                }
+                this.save();
+                this.updateUI();
+            },
+            triggerLevelUpEffects() {
+                if (typeof QuestManager !== 'undefined') {
+                    QuestManager.logAction('system', `🚀 ترقية سيادية كبرى! تم بلوغ المستوى [ ${this.data.level} ]`);
+                }
+            },
+            updateUI() {
+                const lvlEl = document.getElementById('player-level');
+                const barEl = document.getElementById('player-xp-bar');
+                
+                if (lvlEl) lvlEl.textContent = this.data.level;
+                if (barEl) {
+                    let xpNeeded = this.data.level * 100;
+                    let percentage = Math.min((this.data.xp / xpNeeded) * 100, 100);
+                    barEl.style.width = `${percentage}%`;
+                }
+            }
+        };
+
+        // ==========================================\r
+        // QUEST MANAGER PROTOCOL\r
+        // ==========================================\r
+        const QuestManager = {
+            activeQuest: null,
+            timerInterval: null,
+
+            init() {
+                const savedActive = localStorage.getItem('sovereign_active_quest');
+                if (savedActive) {
+                    try {
+                        this.activeQuest = JSON.parse(savedActive);
+                    } catch(e) {
+                        this.activeQuest = null;
+                    }
+                } else {
+                    this.activeQuest = null;
+                }
+
+                this.render();
+                this.renderLogs();
+            },
+
+            render() {
+                const noQuestState = document.getElementById('no-quest-state');
+                const activeQuestState = document.getElementById('active-quest-state');
+                const actionsEl = document.getElementById('quest-actions');
+
+                if (!this.activeQuest) {
+                    if (noQuestState) noQuestState.classList.remove('hidden');
+                    if (activeQuestState) activeQuestState.classList.add('hidden');
+                    if (actionsEl) actionsEl.classList.add('hidden');
+                    clearInterval(this.timerInterval);
+                } else {
+                    if (noQuestState) noQuestState.classList.add('hidden');
+                    if (activeQuestState) activeQuestState.classList.remove('hidden');
+                    if (actionsEl) actionsEl.classList.remove('hidden');
+
+                    document.getElementById('quest-title').textContent = this.activeQuest.title || 'مهمة سيادية نشطة';
+                    document.getElementById('quest-desc').textContent = this.activeQuest.desc || 'لا يوجد وصف متاح.';
+                    document.getElementById('quest-category').textContent = (this.activeQuest.category || 'GENERAL').toUpperCase();
+                    document.getElementById('quest-xp-reward').textContent = `+${this.activeQuest.xp || 50} XP`;
+
+                    this.startTimer();
+                }
+            },
+
+            startTimer() {
+                clearInterval(this.timerInterval);
+                const timerText = document.getElementById('quest-timer-text');
+                const timerBar = document.getElementById('quest-timer-bar');
+                
+                const startTimeKey = localStorage.getItem('directive_start_time') || Date.now();
+                if (!localStorage.getItem('directive_start_time')) {
+                    localStorage.setItem('directive_start_time', startTimeKey);
+                }
+
+                const durationMinutes = this.activeQuest.duration || 60; 
+                const totalDurationMs = durationMinutes * 60 * 1000;
+
+                const updateTimer = () => {
+                    const elapsed = Date.now() - parseInt(startTimeKey);
+                    const remaining = totalDurationMs - elapsed;
+
+                    if (remaining <= 0) {
+                        if (timerText) timerText.textContent = "00:00:00 - وقت المهمة اكتمل";
+                        if (timerBar) timerBar.style.width = "100%";
+                        clearInterval(this.timerInterval);
+                        return;
+                    }
+
+                    const secs = Math.floor((remaining / 1000) % 60);
+                    const mins = Math.floor((remaining / (1000 * 60)) % 60);
+                    const hrs = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+
+                   if (timerText) {
+    timerText.textContent = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+                    if (timerBar) {
+                        let pct = (remaining / totalDurationMs) * 100;
+                        timerBar.style.width = `${pct}%`;
+                    }
+                };
+
+                updateTimer();
+                this.timerInterval = setInterval(updateTimer, 1000);
+            },
+
+            completeActiveQuest() {
+                if (!this.activeQuest) return;
+
+                const xpReward = parseInt(this.activeQuest.xp) || 50;
+                PlayerState.addXp(xpReward);
+
+                this.logAction('complete', `إتمام المهمة النشطة [${this.activeQuest.title || 'مجهولة'}]: +${xpReward} XP`);
+                
+                this.clearQuestMemory();
+                alert(`🎉 تم إتمام البروتوكول بنجاح! اكتسبت +${xpReward} XP`);
+                this.init();
+            },
+
+            cancelActiveQuest() {
+                if (!this.activeQuest) return;
+
+                this.logAction('system', `تم إلغاء بروتوكول المهمة [${this.activeQuest.title || 'مجهولة'}] بنجاح دون عقوبات.`);
+                this.clearQuestMemory();
+                this.init();
+            },
+
+            clearQuestMemory() {
+                localStorage.removeItem('sovereign_active_quest');
+                localStorage.removeItem('directive_start_time');
+                this.activeQuest = null;
+            },
+
+            logAction(action, detail) {
+                const logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
+                logs.unshift({
+                    id: 'log_' + Date.now(),
+                    timestamp: new Date().toLocaleTimeString('ar-EG'),
+                    type: action === 'complete' ? 'quest' : 'system',
+                    message: detail
+                });
+                localStorage.setItem('sovereign_system_logs', JSON.stringify(logs.slice(0, 100)));
+                this.renderLogs();
+            },
+
+            renderLogs() {
+                const container = document.getElementById('local-logs-container');
+                if (!container) return;
+
+                const logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
+                if (logs.length === 0) {
+                    container.innerHTML = `<p class="text-slate-600 text-center">السجل فارغ حالياً.</p>`;
+                    return;
+                }
+
+                container.innerHTML = logs.slice(0, 15).map(log => {
+                    let color = log.type === 'quest' ? 'text-emerald-400' : 'text-[var(--sys-cyan)]';
+                    return `<div class="p-1.5 bg-slate-950/40 border border-slate-900 rounded mb-1">
+                        <span class="text-slate-500">[${log.timestamp}]</span> 
+                        <span class="${color}">${log.message}</span>
+                    </div>`;
+                }).join('');
+            }
+        };
+
+        // INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            PlayerState.init();
+            QuestManager.init();
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'monarch_system_data' || e.key === 'sovereign_active_quest' || e.key === 'sovereign_system_logs') {
+                    PlayerState.init();
+                    QuestManager.init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

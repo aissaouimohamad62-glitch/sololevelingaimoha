@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign System | Brain & Body Stats</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sys-cyan: #00f0ff;
+            --sys-cyan-glow: rgba(0, 240, 255, 0.4);
+            --sys-purple: #9d4edd;
+            --sys-purple-glow: rgba(157, 78, 221, 0.3);
+            --sys-bg-dark: #02040a;
+            --sys-panel: rgba(5, 10, 25, 0.85);
+        }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--sys-bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, var(--sys-cyan-glow) 0%, transparent 25%),
+                radial-gradient(circle at 85% 50%, var(--sys-purple-glow) 0%, transparent 25%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+        .font-mono {
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .sovereign-panel {
+            background: var(--sys-panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        .stat-bar-container {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        .stat-fill {
+            transition: width 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        <header class="sovereign-panel rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-2 border-[var(--sys-cyan)]">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-lg bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] flex items-center justify-center text-xl shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                    🧠
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-wide text-white">SOVEREIGN SYSTEM</h1>
+                    <p class="text-xs text-[var(--sys-cyan)] font-mono tracking-widest">COGNITIVE & PHYSICAL STATS</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6 bg-slate-950/60 px-6 py-3 rounded-lg border border-slate-800">
+                <div class="text-center">
+                    <span class="block text-[10px] text-slate-500 font-mono">LEVEL</span>
+                    <span id="player-level" class="text-xl font-bold text-white font-mono">1</span>
+                </div>
+                <div class="h-8 w-[1px] bg-slate-800"></div>
+                <div class="text-right min-w-[120px]">
+                    <span class="block text-[10px] text-slate-500 font-mono">EXP PROGRESS</span>
+                    <div class="w-full bg-slate-800 h-2 rounded-full mt-1 overflow-hidden">
+                        <div id="player-xp-bar" class="bg-[var(--sys-cyan)] h-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="flex flex-wrap gap-2 justify-center md:justify-start">
+            <a href="index.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                🏠 DASHBOARD
+            </a>
+            <a href="active-quests.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                ⚔️ ACTIVE QUESTS
+            </a>
+            <a href="brain-stats.html" class="px-4 py-2 text-xs font-mono bg-cyan-950/40 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded font-bold shadow-[0_0_10px_rgba(0,240,255,0.1)]">
+                🧠 BRAIN STATS
+            </a>
+            <a href="monarch-ai.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                🤖 MONARCH AI
+            </a>
+            <a href="system-logs.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                📊 SYSTEM LOGS
+            </a>
+        </nav>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="lg:col-span-2 space-y-4">
+                <div class="sovereign-panel rounded-xl p-6">
+                    <h2 class="text-lg font-bold text-white border-b border-slate-800 pb-3 mb-6 flex items-center gap-2">
+                        <span class="text-[var(--sys-cyan)]">✦</span> مصفوفة السمات السيادية
+                    </h2>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-200">🧠 الذكاء (Intelligence)</h3>
+                                    <p class="text-[10px] text-slate-500 font-mono">البرمجة، الذكاء الاصطناعي، التحليل المعرفي</p>
+                                </div>
+                                <span id="stat-int-val" class="text-xl font-black text-[var(--sys-cyan)] font-mono">10</span>
+                            </div>
+                            <div class="h-3 stat-bar-container rounded-full">
+                                <div id="stat-int-bar" class="stat-fill bg-blue-500 h-full w-0 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-200">👁️ الإدراك (Perception)</h3>
+                                    <p class="text-[10px] text-slate-500 font-mono">التركيز العميق، ديتوكس الدوبامين، الملاحظة</p>
+                                </div>
+                                <span id="stat-per-val" class="text-xl font-black text-purple-400 font-mono">10</span>
+                            </div>
+                            <div class="h-3 stat-bar-container rounded-full">
+                                <div id="stat-per-bar" class="stat-fill bg-purple-500 h-full w-0 shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-200">⚔️ القوة (Strength)</h3>
+                                    <p class="text-[10px] text-slate-500 font-mono">الأوزان، الضغط، القوة الانفجارية</p>
+                                </div>
+                                <span id="stat-str-val" class="text-xl font-black text-rose-500 font-mono">10</span>
+                            </div>
+                            <div class="h-3 stat-bar-container rounded-full">
+                                <div id="stat-str-bar" class="stat-fill bg-rose-500 h-full w-0 shadow-[0_0_10px_rgba(244,63,94,0.5)]"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-200">🛡️ التحمل (Vitality)</h3>
+                                    <p class="text-[10px] text-slate-500 font-mono">الصيام، العمل الشاق المستمر، الانضباط</p>
+                                </div>
+                                <span id="stat-vit-val" class="text-xl font-black text-emerald-500 font-mono">10</span>
+                            </div>
+                            <div class="h-3 stat-bar-container rounded-full">
+                                <div id="stat-vit-bar" class="stat-fill bg-emerald-500 h-full w-0 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-200">⚡ السرعة (Agility)</h3>
+                                    <p class="text-[10px] text-slate-500 font-mono">الجري، المرونة، سرعة الاستجابة</p>
+                                </div>
+                                <span id="stat-agi-val" class="text-xl font-black text-amber-500 font-mono">10</span>
+                            </div>
+                            <div class="h-3 stat-bar-container rounded-full">
+                                <div id="stat-agi-bar" class="stat-fill bg-amber-500 h-full w-0 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="sovereign-panel rounded-xl p-6">
+                    <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2 mb-4">🔬 تقييم النظام السيادي</h3>
+                    
+                    <div class="bg-slate-950/80 p-4 border border-slate-800 rounded-lg text-center space-y-3">
+                        <div class="text-3xl" id="dominant-icon">👑</div>
+                        <h4 class="text-[var(--sys-cyan)] font-bold text-sm" id="dominant-title">جاري تحليل البيانات...</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed" id="dominant-desc">
+                            يقوم النظام حالياً بمسح مستويات التطور لتحديد السمة المهيمنة على العاهل.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="sovereign-panel rounded-xl p-6">
+                    <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2 mb-4">💡 كيف تتطور؟</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        بما أننا ألغينا الزنازين الافتراضية، فإن تطور هذه السمات يعتمد الآن كلياً على <span class="text-[var(--sys-cyan)]">مُحلل المهام الذكي</span> في اللوحة الرئيسية. 
+                        كلمات مثل (برمجة، ذكاء) ترفع INT، وكلمات مثل (عضلات، جري) ترفع STR و AGI تدريجياً مع إتمام المهام.
+                    </p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const BrainStatsEngine = {
+            data: {
+                level: 1,
+                xp: 0,
+                stats: { str: 10, vit: 10, agi: 10, int: 10, per: 10 }
+            },
+
+            init() {
+                this.loadData();
+                this.updateUI();
+                this.analyzeDominance();
+            },
+
+            loadData() {
+                const saved = localStorage.getItem('monarch_system_data');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        this.data.level = parsed.level || 1;
+                        this.data.xp = parsed.xp || 0;
+                        this.data.stats = parsed.stats || { str: 10, vit: 10, agi: 10, int: 10, per: 10 };
+                    } catch (e) {
+                        console.error("Error parsing data");
+                    }
+                }
+            },
+
+            updateUI() {
+                // Header Updates
+                const lvlEl = document.getElementById('player-level');
+                const barEl = document.getElementById('player-xp-bar');
+                
+                if (lvlEl) lvlEl.textContent = this.data.level;
+                if (barEl) {
+                    let xpNeeded = this.data.level * 100;
+                    let percentage = Math.min((this.data.xp / xpNeeded) * 100, 100);
+                    barEl.style.width = `${percentage}%`;
+                }
+
+                // Stats Updates
+                const s = this.data.stats;
+                const maxExpected = 100; // نسبة مرئية للشريط
+
+                const setStat = (key, val) => {
+                    document.getElementById(`stat-${key}-val`).textContent = val;
+                    // حساب النسبة المئوية بحيث لا تتجاوز 100% للشريط
+                    let pct = Math.min((val / maxExpected) * 100, 100);
+                    // إعطاء حد أدنى للشريط حتى يظهر دائماً
+                    pct = Math.max(pct, 5); 
+                    document.getElementById(`stat-${key}-bar`).style.width = `${pct}%`;
+                };
+
+                setTimeout(() => {
+                    setStat('int', s.int || 10);
+                    setStat('per', s.per || 10);
+                    setStat('str', s.str || 10);
+                    setStat('vit', s.vit || 10);
+                    setStat('agi', s.agi || 10);
+                }, 100);
+            },
+
+            analyzeDominance() {
+                const s = this.data.stats;
+                let highest = 'none';
+                let maxVal = 0;
+
+                const check = (key, val) => {
+                    if(val > maxVal) { maxVal = val; highest = key; }
+                };
+
+                check('int', s.int || 10);
+                check('per', s.per || 10);
+                check('str', s.str || 10);
+                check('vit', s.vit || 10);
+                check('agi', s.agi || 10);
+
+                const icon = document.getElementById('dominant-icon');
+                const title = document.getElementById('dominant-title');
+                const desc = document.getElementById('dominant-desc');
+
+                // إذا كانت جميع السمات متساوية (نقطة البداية)
+                if (maxVal === 10 && s.int === 10 && s.str === 10) {
+                    icon.textContent = "⚖️";
+                    title.textContent = "توازن سيادي مطلق";
+                    desc.textContent = "سماتك متوازنة تماماً. ابدأ في تنفيذ المهام اليومية لتوجيه مسار التطور.";
+                    return;
+                }
+
+                const profiles = {
+                    int: { i: "🧠", t: "العقل المعماري المتقدم", d: "يهيمن الذكاء والبرمجة على نشاطك. أنت تبني إمبراطوريتك من خلال الكود والتحليل." },
+                    per: { i: "👁️", t: "إدراك المفترس الصامت", d: "تركيزك حاد كالشفرة. قدرتك على الانغماس بعيداً عن المشتتات هي أقوى أسلحتك." },
+                    str: { i: "⚔️", t: "القوة البدنية الغاشمة", d: "جسدك هو المعبد. نشاطك البدني والأوزان هي ما يميز تطورك الحالي." },
+                    vit: { i: "🛡️", t: "صمود الجدار الحديدي", d: "قدرة هائلة على التحمل. الصيام وإرهاق العمل لا يكسران عزيمتك بل يصقلانها." },
+                    agi: { i: "⚡", t: "سرعة البرق الخاطف", d: "المرونة والحركة الدائمة. سرعتك في إنجاز المهام الجسدية تضعك في المقدمة." }
+                };
+
+                if (profiles[highest]) {
+                    icon.textContent = profiles[highest].i;
+                    title.textContent = profiles[highest].t;
+                    desc.textContent = profiles[highest].d;
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            BrainStatsEngine.init();
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'monarch_system_data') {
+                    BrainStatsEngine.init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

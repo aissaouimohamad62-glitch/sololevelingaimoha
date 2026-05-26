@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign System | Operational Charter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sys-cyan: #00f0ff;
+            --sys-cyan-glow: rgba(0, 240, 255, 0.4);
+            --sys-purple: #9d4edd;
+            --sys-purple-glow: rgba(157, 78, 221, 0.3);
+            --sys-bg-dark: #02040a;
+            --sys-panel: rgba(5, 10, 25, 0.85);
+        }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--sys-bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, var(--sys-cyan-glow) 0%, transparent 25%),
+                radial-gradient(circle at 85% 50%, var(--sys-purple-glow) 0%, transparent 25%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+        .font-mono {
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .sovereign-panel {
+            background: var(--sys-panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px var(--sys-cyan-glow);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        <header class="sovereign-panel rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-2 border-[var(--sys-cyan)]">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-lg bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] flex items-center justify-center text-xl shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                    📜
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-wide text-white text-glow">SOVEREIGN SYSTEM</h1>
+                    <p class="text-xs text-[var(--sys-cyan)] font-mono tracking-widest">OPERATIONAL CHARTER (الميثاق التشغيلي)</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6 bg-slate-950/60 px-6 py-3 rounded-lg border border-slate-800">
+                <div class="text-center">
+                    <span class="block text-[10px] text-slate-500 font-mono">LEVEL</span>
+                    <span id="player-level" class="text-xl font-bold text-white font-mono">1</span>
+                </div>
+                <div class="h-8 w-[1px] bg-slate-800"></div>
+                <div class="text-right min-w-[120px]">
+                    <span class="block text-[10px] text-slate-500 font-mono">EXP PROGRESS</span>
+                    <div class="w-full bg-slate-800 h-2 rounded-full mt-1 overflow-hidden">
+                        <div id="player-xp-bar" class="bg-[var(--sys-cyan)] h-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="flex flex-wrap gap-2 justify-center md:justify-start">
+            <a href="index.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                🏠 DASHBOARD
+            </a>
+            <a href="active-quests.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                ⚔️ ACTIVE QUESTS
+            </a>
+            <a href="brain-stats.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                🧠 BRAIN STATS
+            </a>
+            <a href="operational-charter.html" class="px-4 py-2 text-xs font-mono bg-cyan-950/40 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded font-bold shadow-[0_0_10px_rgba(0,240,255,0.1)]">
+                📜 OPERATIONAL CHARTER
+            </a>
+            <a href="monarch-ai.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                🤖 MONARCH AI
+            </a>
+            <a href="system-logs.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
+                📊 SYSTEM LOGS
+            </a>
+        </nav>
+
+        <main class="space-y-6">
+            
+            <div class="sovereign-panel rounded-xl p-6 lg:p-8 border-t-4 border-[var(--sys-cyan)]">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-3xl text-[var(--sys-cyan)]">🦅</span>
+                    <h2 class="text-2xl font-black text-white">الميثاق السيادي الموحد (النسخة المبسطة المطلقة)</h2>
+                </div>
+                <p class="text-sm text-slate-300 leading-relaxed max-w-4xl">
+                    هذا هو الميثاق التشغيلي النهائي الذي يحكم عمل النظام بعد بروتوكول التطهير العظيم. تم إزالة كل الكتل المشتتة (المتجر، زنزانات ألعاب العقل المستنزفة للموارد، الألقاب المعقدة، وألوان الهالات المتعددة). التركيز الآن ينصب حصرياً على الإنجاز الفعلي للمهام، مراكمة الـ XP، والارتقاء في مستويات القوة الذهنية والبدنية تحت هالتين فقط (السيادية المظلمة والقرمزية).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="sovereign-panel rounded-xl p-6 border border-slate-700 hover:border-[var(--sys-cyan)]/50 transition">
+                    <h3 class="text-lg font-bold text-[var(--sys-cyan)] mb-4 flex items-center gap-2">
+                        <span>📅</span> البروتوكول الأول: النظام اليومي المستقر (الأيام العادية)
+                    </h3>
+                    <ul class="space-y-4 text-sm text-slate-300">
+                        <li class="flex items-start gap-3">
+                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">05:00-06:00</span>
+                            <div>
+                                <strong class="text-white block">الكتلة الروحية الثابتة:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">الأيام الفردية (تلاوة تدبرية + مراجعة المحفوظ). الأيام الزوجية (تثبيت حفظ جديد وتلاوة منظمة).</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">06:00-08:30</span>
+                            <div>
+                                <strong class="text-white block">البرمجة العميقة:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">العمل المباشر والمكثف على تطوير مشروعك البرمجي (Python / JS).</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">08:30-10:30</span>
+                            <div>
+                                <strong class="text-white block">أكاديمية الذكاء الاصطناعي:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">دراسة وتطبيق هندسة النماذج اللغوية الكبيرة (LLMs) والتعلم الآلي المتقدم.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">10:30-12:00</span>
+                            <div>
+                                <strong class="text-white block">التمكن اللغوي:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">انغماس تقني كامل وممارسة اللغة الإنجليزية الفنية والمصطلحات المتقدمة.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">15:00-18:30</span>
+                            <div>
+                                <strong class="text-white block">التدريب البدني:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">جري مسافات طويلة، تمارين الضغط والبلانك، ومباريات التنافس الكامل.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sovereign-panel rounded-xl p-6 border border-slate-700 hover:border-rose-500/50 transition">
+                    <h3 class="text-lg font-bold text-rose-500 mb-4 flex items-center gap-2">
+                        <span>🕌</span> البروتوكول الثاني: كتلة الصيام والقيام (الإثنين والخميس)
+                    </h3>
+                    <ul class="space-y-4 text-sm text-slate-300">
+                        <li class="flex items-start gap-3">
+                            <span class="text-rose-400 font-bold mt-0.5 min-w-[80px]">02:45-05:00</span>
+                            <div>
+                                <strong class="text-white block">نافذة القيام والسحور:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">صلاة القيام، إعداد سحور غني بالبروتين، كتل المراجعة الصامتة والأذكار المركزية.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-rose-400 font-bold mt-0.5 min-w-[80px]">05:00-06:00</span>
+                            <div>
+                                <strong class="text-white block">صلاة الفجر:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">الالتحاق بالكتل البرمجية الثابتة والنشاط الذهني الصافي أثناء الصيام.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-rose-400 font-bold mt-0.5 min-w-[80px]">16:00-17:30</span>
+                            <div>
+                                <strong class="text-white block">نافذة الحفاظ الانفجاري:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">جلسة ركض وجري هوائي منتظم لحرق السعرات ورفع اللياقة دون إجهاد عضلي مفرط.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-rose-400 font-bold mt-0.5 min-w-[80px]">بعد الإفطار</span>
+                            <div>
+                                <strong class="text-white block">كتل الارتقاء والوعي:</strong> 
+                                <p class="text-xs text-slate-400 mt-1">قراءة كتب تطوير العقل، والابتعاد بالكامل عن المشتتات الرقمية السطحية (ديتوكس الدوبامين).</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="sovereign-panel rounded-xl p-6 border-l-4 border-emerald-500">
+                <h3 class="text-lg font-bold text-white mb-4">⚖️ قوانين الاشتباك السيادية</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
+                        <h4 class="text-emerald-400 font-bold text-sm mb-2">1. لا توجد عقوبات (No Penalties)</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">تم إلغاء نظام خصم نقاط الـ XP عند تأجيل أو تفويت المهام. التقدم يعتمد كلياً على الإنجاز الإيجابي فقط للحفاظ على استقرارية النظام النفسي.</p>
+                    </div>
+                    <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
+                        <h4 class="text-emerald-400 font-bold text-sm mb-2">2. بساطة الاستخدام والتوثيق</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">لا روابط خارجية إجبارية للمهام. التوثيق يتم بإضافة المهمة وإتمامها ببساطة للحصول على المكافآت النقية في اللوحة الرئيسية.</p>
+                    </div>
+                    <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
+                        <h4 class="text-emerald-400 font-bold text-sm mb-2">3. الهيمنة التلقائية (Auto-Stats)</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">يتولى النظام قياس إحصائياتك (Brain Stats) تلقائياً عبر مُحلل الكلمات الذكي بناءً على تصنيف المهام التي تنجزها كل يوم.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const OperationalCharterEngine = {
+            data: {
+                level: 1,
+                xp: 0
+            },
+
+            init() {
+                this.loadData();
+                this.updateUI();
+            },
+
+            loadData() {
+                const saved = localStorage.getItem('monarch_system_data');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        this.data.level = parsed.level || 1;
+                        this.data.xp = parsed.xp || 0;
+                    } catch (e) {
+                        console.error("Error parsing system data:", e);
+                    }
+                }
+            },
+
+            updateUI() {
+                const lvlEl = document.getElementById('player-level');
+                const barEl = document.getElementById('player-xp-bar');
+                
+                if (lvlEl) lvlEl.textContent = this.data.level;
+                if (barEl) {
+                    let xpNeeded = this.data.level * 100;
+                    let percentage = Math.min((this.data.xp / xpNeeded) * 100, 100);
+                    barEl.style.width = `${percentage}%`;
+                }
+            }
+        };
+
+        // تهيئة النظام
+        window.addEventListener('DOMContentLoaded', () => {
+            OperationalCharterEngine.init();
+
+            // الاستماع الحي لتغيرات البيانات من الصفحات الأخرى
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'monarch_system_data') {
+                    OperationalCharterEngine.init();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
