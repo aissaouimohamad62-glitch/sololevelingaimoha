@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Leveling System | لوحة عاهل الظلال</title>
+    <title>Sovereign System | لوحة عاهل الظلال</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    
     <style>
-           :root {
+        :root {
             --sys-cyan: #00f0ff;
             --sys-cyan-glow: rgba(0, 240, 255, 0.6);
             --sys-purple: #9d4edd;
@@ -20,7 +18,6 @@
             --sys-border: rgba(0, 240, 255, 0.3);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         body {
             font-family: 'Cairo', sans-serif;
             background-color: var(--sys-bg-dark);
@@ -32,9 +29,7 @@
             overflow-x: hidden;
             background-attachment: fixed;
         }
-
         .sys-font { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em; }
-
         .sl-panel {
             background: var(--sys-panel);
             backdrop-filter: blur(16px);
@@ -42,30 +37,21 @@
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.1);
             position: relative;
         }
-
         .sl-panel::before, .sl-panel::after {
             content: ''; position: absolute; width: 20px; height: 20px;
             pointer-events: none;
         }
         .sl-panel::before { top: -2px; left: -2px; border-top: 3px solid var(--sys-cyan); border-left: 3px solid var(--sys-cyan); }
         .sl-panel::after { bottom: -2px; right: -2px; border-bottom: 3px solid var(--sys-cyan); border-right: 3px solid var(--sys-cyan); }
-
         .sl-glow-text {
             color: var(--sys-cyan);
             text-shadow: 0 0 8px var(--sys-cyan-glow);
         }
-
         @keyframes systemPopIn {
             0% { opacity: 0; transform: scale(0.95) translateY(10px); filter: brightness(2); }
             100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
         }
         .animate-system-pop { animation: systemPopIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-
-        .neon-border-cyan { border-color: var(--sys-cyan); box-shadow: 0 0 10px var(--sys-cyan-glow), 0 0 20px var(--sys-cyan-glow); }
-        .neon-border-purple { border-color: var(--sys-purple); box-shadow: 0 0 10px var(--sys-purple-glow), 0 0 20px var(--sys-purple-glow); }
-        .neon-border-rose { border-color: #e11d48; box-shadow: 0 0 10px rgba(225, 29, 72, 0.4), 0 0 20px rgba(225, 29, 72, 0.3); }
-        .neon-border-yellow { border-color: #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.4), 0 0 20px rgba(234, 179, 8, 0.3); }
-
         .sl-btn {
             background: linear-gradient(180deg, rgba(0, 240, 255, 0.05) 0%, rgba(5, 10, 25, 0.8) 100%);
             border: 1px solid var(--sys-cyan);
@@ -76,23 +62,33 @@
             background: rgba(0,240,255,0.15);
             transform: translateY(-1px);
         }
-
-        .store-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .progress-bar-container {
+            position: relative;
+            width: 100%;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 9999px;
+            overflow: hidden;
         }
-        .store-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(234, 179, 8, 0.3);
-            box-shadow: 0 10px 40px rgba(234, 179, 8, 0.1);
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--sys-cyan), #00a8ff);
+            box-shadow: 0 0 10px var(--sys-cyan-glow);
+            border-radius: 9999px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .store-card.owned { border-color: rgba(157, 78, 221, 0.3); }
-        .store-card.equipped { border-color: var(--sys-cyan); box-shadow: 0 0 20px rgba(0, 240, 255, 0.15); }
-        .store-card.locked { opacity: 0.5; filter: grayscale(0.8); }
-
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--sys-cyan); }
+        .task-card {
+            transition: all 0.3s ease;
+            border-right: 3px solid transparent;
+        }
+        .task-card:hover { background: rgba(255,255,255,0.03); }
+        .task-card.completed { opacity: 0.5; border-right-color: var(--sys-cyan); }
+        .task-card.active { border-right-color: var(--sys-purple); }
     </style>
+<base target="_blank">
 </head>
 <body class="p-2 md:p-6 relative text-slate-200">
 
@@ -104,243 +100,199 @@
         <div id="loadProgress" class="h-full bg-[var(--sys-cyan)] w-0 transition-all duration-300"></div>
     </div>
 </div>
-<script>
-    window.addEventListener('load', () => {
-        const prog = document.getElementById('loadProgress');
-        prog.style.width = '100%';
-        setTimeout(() => {
-            document.getElementById('loadingScreen').style.opacity = '0';
-            setTimeout(() => document.getElementById('loadingScreen').remove(), 500);
-        }, 1200);
-    });
-</script>
 
 <div class="fixed top-6 right-6 z-50 flex gap-4 items-center">
-    <button onclick="SoundEffects.toggleMusic()" class="w-10 h-10 flex items-center justify-center bg-slate-900/80 backdrop-blur border border-slate-700 hover:border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded-full transition-all shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-        <span id="musicIcon" class="text-lg animate-pulse">🎵</span>
-    </button>
     <a href="https://aissaouimohamad62-glitch.github.io/proto/" target="_blank" class="px-4 py-2 bg-slate-900/80 backdrop-blur border border-slate-700 hover:border-[var(--sys-cyan)] text-white text-xs font-black uppercase tracking-widest rounded flex items-center gap-2 shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all">
         <span>PORTFOLIO</span> <span class="text-[var(--sys-cyan)]">📍</span>
     </a>
     <a href="https://aissaouimohamad62-glitch.github.io/booksoverhaul.dz/" target="_blank" class="px-4 py-2 bg-slate-900/80 backdrop-blur border border-slate-700 hover:border-[var(--sys-cyan)] text-white text-xs font-black uppercase tracking-widest rounded flex items-center gap-2 shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all">
         <span>LIBRARY</span> <span class="text-[var(--sys-cyan)]">📒</span>
     </a>
-    <button onclick="AuraThemes.cycleTheme()" class="w-10 h-10 flex items-center justify-center bg-slate-900/80 backdrop-blur border border-slate-700 hover:border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all">
-        <span id="themeIconInner" class="text-lg">🌌</span>
-    </button>
 </div>
 
 <div class="max-w-[1400px] mx-auto grid grid-cols-1 xl:grid-cols-12 gap-6 relative z-10 mt-16" dir="ltr">
-    
-    <!-- استبدل هذا القسم كاملاً في index.html -->
-<aside class="xl:col-span-4 space-y-6">
-    
-    <!-- CHARACTER CARD UI - مطابق للصورة المرجعية -->
-    <div class="sl-panel p-0 animate-system-pop overflow-hidden relative" style="border-color: rgba(157, 78, 221, 0.6); box-shadow: 0 0 30px rgba(157, 78, 221, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);">
-        <!-- الإطار الخارجي المضيء -->
-        <div class="absolute inset-0 pointer-events-none" style="border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.05);"></div>
-        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--sys-cyan)] to-transparent opacity-60"></div>
-        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--sys-purple)] to-transparent opacity-60"></div>
-        
-        <div class="relative z-10 p-6">
-            <!-- عنوان STATUS -->
-            <div class="flex justify-center mb-4">
-                <div class="px-8 py-1 border border-[var(--sys-cyan)] bg-[var(--sys-cyan)]/5 relative">
-                    <div class="absolute -top-1 left-2 right-2 h-[1px] bg-[var(--sys-cyan)] shadow-[0_0_8px_var(--sys-cyan)]"></div>
-                    <div class="absolute -bottom-1 left-2 right-2 h-[1px] bg-[var(--sys-cyan)] shadow-[0_0_8px_var(--sys-cyan)]"></div>
-                    <h2 class="sys-font text-lg font-black tracking-[0.3em] text-[var(--sys-cyan)] uppercase text-center">STATUS</h2>
-                </div>
-            </div>
 
-            <!-- المستوى واللقب -->
-            <div class="flex items-start justify-center gap-6 mb-6">
-                <div class="text-center">
-                    <div class="sys-font text-5xl font-black text-white leading-none drop-shadow-[0_0_15px_rgba(0,240,255,0.6)]" id="currentLevel">1</div>
-                    <div class="sys-font text-[10px] tracking-[0.2em] text-[var(--sys-cyan)] font-bold mt-1">LEVEL</div>
-                </div>
-                <div class="pt-2 text-left">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="sys-font text-[10px] text-[var(--sys-purple)] font-bold uppercase">JOB</span>
-                        <span class="sys-font text-xs font-black text-white tracking-wider">Shadow Monarch</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="sys-font text-[10px] text-[var(--sys-purple)] font-bold uppercase">TITLE</span>
-                        <span id="activeTitleDisplay" class="sys-font text-[10px] font-bold text-yellow-400 tracking-wider">[مبتدئ الكتل]</span>
-                    </div>
-                </div>
-            </div>
+    <aside class="xl:col-span-4 space-y-6">
 
-            <!-- أشرطة HP / MP / XP -->
-            <div class="space-y-3 mb-6 px-2">
-                <!-- HP Bar -->
-                <div class="flex items-center gap-3">
-                    <span class="sys-font text-[10px] font-black text-red-400 w-8 text-right">HP</span>
-                    <div class="flex-1 h-3 bg-slate-900/80 border border-slate-700 relative overflow-hidden rounded-sm">
-                        <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-red-900 to-red-600 w-[85%] shadow-[0_0_10px_rgba(220,38,38,0.4)]"></div>
-                        <span class="absolute inset-0 flex items-center justify-center sys-font text-[9px] font-bold text-white/80 tracking-wider">4320/5100</span>
-                    </div>
-                </div>
-                <!-- MP Bar -->
-                <div class="flex items-center gap-3">
-                    <span class="sys-font text-[10px] font-black text-[var(--sys-cyan)] w-8 text-right">MP</span>
-                    <div class="flex-1 h-3 bg-slate-900/80 border border-slate-700 relative overflow-hidden rounded-sm">
-                        <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-900 to-[var(--sys-cyan)] w-[72%] shadow-[0_0_10px_rgba(0,240,255,0.4)]"></div>
-                        <span class="absolute inset-0 flex items-center justify-center sys-font text-[9px] font-bold text-white/80 tracking-wider">840/1170</span>
-                    </div>
-                </div>
-                <!-- XP Bar -->
-                <div class="flex items-center gap-3">
-                    <span class="sys-font text-[10px] font-black text-emerald-400 w-8 text-right">XP</span>
-                    <div class="flex-1 h-3 bg-slate-900/80 border border-slate-700 relative overflow-hidden rounded-sm">
-                        <div id="xpBar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-900 to-emerald-500 w-0% shadow-[0_0_10px_rgba(16,185,129,0.4)] transition-all duration-700"></div>
-                        <span id="xpText" class="absolute inset-0 flex items-center justify-center sys-font text-[9px] font-bold text-white/80 tracking-wider">0 / 100</span>
-                    </div>
-                </div>
-                <!-- Fatigue / Focus -->
-                <div class="flex items-center gap-3">
-                    <span class="sys-font text-[10px] font-black text-yellow-500 w-8 text-right">FATIGUE</span>
-                    <div class="flex-1 h-3 bg-slate-900/80 border border-slate-700 relative overflow-hidden rounded-sm">
-                        <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-yellow-900 to-yellow-600 w-[15%] shadow-[0_0_10px_rgba(202,138,4,0.4)]"></div>
-                        <span class="absolute inset-0 flex items-center justify-center sys-font text-[9px] font-bold text-white/80 tracking-wider">0</span>
-                    </div>
-                </div>
-            </div>
+        <!-- CHARACTER CARD UI -->
+        <div class="sl-panel p-0 animate-system-pop overflow-hidden relative" style="border-color: rgba(157, 78, 221, 0.6); box-shadow: 0 0 30px rgba(157, 78, 221, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);">
+            <div class="absolute inset-0 pointer-events-none" style="border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.05);"></div>
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--sys-cyan)] to-transparent opacity-60"></div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--sys-purple)] to-transparent opacity-60"></div>
 
-            <!-- شبكة الإحصائيات - مطابقة للصورة -->
-            <div class="border border-[var(--sys-purple)]/30 bg-black/20 p-4 relative">
-                <div class="absolute -top-2 left-4 bg-[var(--sys-bg-dark)] px-2">
-                    <span class="sys-font text-[9px] text-[var(--sys-purple)] font-bold tracking-widest">ATTRIBUTES</span>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-x-6 gap-y-3">
-                    <!-- STR -->
-                    <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('str')">
-                        <div class="flex items-center gap-2">
-                            <span class="text-red-400 text-xs">⚔️</span>
-                            <span class="sys-font text-sm font-bold text-white">STR</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span id="stat-str" class="sys-font text-lg font-black text-white">10</span>
-                            <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+5</span>
-                        </div>
-                    </div>
-                    <!-- VIT -->
-                    <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('vit')">
-                        <div class="flex items-center gap-2">
-                            <span class="text-emerald-400 text-xs">🛡️</span>
-                            <span class="sys-font text-sm font-bold text-white">VIT</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span id="stat-vit" class="sys-font text-lg font-black text-white">10</span>
-                            <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+5</span>
-                        </div>
-                    </div>
-                    <!-- AGI -->
-                    <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('agi')">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sky-400 text-xs">⚡</span>
-                            <span class="sys-font text-sm font-bold text-white">AGI</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span id="stat-agi" class="sys-font text-lg font-black text-white">10</span>
-                            <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+7</span>
-                        </div>
-                    </div>
-                    <!-- INT -->
-                    <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('int')">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[var(--sys-cyan)] text-xs">🧠</span>
-                            <span class="sys-font text-sm font-bold text-white">INT</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span id="stat-int" class="sys-font text-lg font-black text-white">10</span>
-                            <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+5</span>
-                        </div>
-                    </div>
-                    <!-- SEN (PER في الصورة) -->
-                    <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('sen')">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[var(--sys-purple)] text-xs">👁️</span>
-                            <span class="sys-font text-sm font-bold text-white">PER</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span id="stat-sen" class="sys-font text-lg font-black text-white">10</span>
-                            <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+5</span>
-                        </div>
-                    </div>
-                    <!-- AP Counter -->
-                    <div class="flex items-center justify-between border-t border-slate-800 pt-2 mt-1 col-span-2">
-                        <span class="sys-font text-[10px] text-[var(--sys-purple)] font-bold tracking-widest">AVAILABLE AP</span>
-                        <span id="availablePoints" class="sys-font text-2xl font-black text-[var(--sys-cyan)] drop-shadow-[0_0_8px_rgba(0,240,255,0.5)]">0</span>
+            <div class="relative z-10 p-6">
+                <div class="flex justify-center mb-4">
+                    <div class="px-8 py-1 border border-[var(--sys-cyan)] bg-[var(--sys-cyan)]/5 relative">
+                        <div class="absolute -top-1 left-2 right-2 h-[1px] bg-[var(--sys-cyan)] shadow-[0_0_8px_var(--sys-cyan)]"></div>
+                        <div class="absolute -bottom-1 left-2 right-2 h-[1px] bg-[var(--sys-cyan)] shadow-[0_0_8px_var(--sys-cyan)]"></div>
+                        <h2 class="sys-font text-lg font-black tracking-[0.3em] text-[var(--sys-cyan)] uppercase text-center">STATUS</h2>
                     </div>
                 </div>
-            </div>
 
-            <!-- معلومات إضافية -->
-            <div class="mt-4 flex justify-between items-center px-2">
-                <div class="text-center">
-                    <div class="sys-font text-[10px] text-slate-500 uppercase tracking-widest mb-1">GOLD</div>
-                    <div class="flex items-center gap-1">
-                        <span class="text-yellow-500 text-sm">🪙</span>
-                        <span id="playerGold" class="sys-font text-lg font-bold text-yellow-400">0</span>
+                <div class="flex items-start justify-center gap-6 mb-6">
+                    <div class="text-center">
+                        <div class="sys-font text-5xl font-black text-white leading-none drop-shadow-[0_0_15px_rgba(0,240,255,0.6)]" id="currentLevel">1</div>
+                        <div class="sys-font text-[10px] tracking-[0.2em] text-[var(--sys-cyan)] font-bold mt-1">LEVEL</div>
+                    </div>
+                    <div class="pt-2 text-left">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="sys-font text-[10px] text-[var(--sys-purple)] font-bold uppercase">JOB</span>
+                            <span class="sys-font text-xs font-black text-white tracking-wider">Shadow Monarch</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="sys-font text-[10px] text-[var(--sys-purple)] font-bold uppercase">TITLE</span>
+                            <span id="activeTitleDisplay" class="sys-font text-[10px] font-bold text-yellow-400 tracking-wider">[مبتدئ الكتل]</span>
+                        </div>
                     </div>
                 </div>
-                <div class="text-center">
-                    <div class="sys-font text-[10px] text-slate-500 uppercase tracking-widest mb-1">AUTHORITY</div>
-                    <div class="sys-font text-lg font-bold text-[var(--sys-purple)]" id="stat-authority">0</div>
+
+                <!-- أشرطة HP / MP / XP / Fatigue -->
+                <div class="space-y-3 mb-6 px-2">
+                    <div class="flex items-center gap-3">
+                        <span class="sys-font text-[10px] font-black text-red-400 w-8 text-right">HP</span>
+                        <div class="flex-1 h-3 bg-slate-900/80 border border-slate-700 relative overflow-hidden rounded-sm">
+                            <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-red-900 to-red-600 w-[85%] shadow-[0_0_10px_rgba(220,38,38,0.4)]"></div>
+                            <span class="absolute inset-0 flex items-center justify-center sys-font text-[9px] font-bold text-white/80 tracking-wider">4320/5100</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="sys-font text-[10px] font-black text-[var(--sys-cyan)] w-8 text-right">MP</span>
+                        <div class="flex-1 h-3 bg-slate-900/80 border border-slate-700 relative overflow-hidden rounded-sm">
+                            <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-900 to-[var(--sys-cyan)] w-[72%] shadow-[0_0_10px_rgba(0,240,255,0.4)]"></div>
+                            <span class="absolute inset-0 flex items-center justify-center sys-font text-[9px] font-bold text-white/80 tracking-wider">840/1170</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="sys-font text-[10px] font-black text-emerald-400 w-8 text-right">XP</span>
+                        <div class="flex-1 h-3 bg-slate-900/80 border border-slate-700 relative overflow-hidden rounded-sm">
+                            <div id="xpBar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-900 to-emerald-500 w-0% shadow-[0_0_10px_rgba(16,185,129,0.4)] transition-all duration-700"></div>
+                            <span id="xpText" class="absolute inset-0 flex items-center justify-center sys-font text-[9px] font-bold text-white/80 tracking-wider">0 / 100</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="sys-font text-[10px] font-black text-yellow-500 w-8 text-right">FATIGUE</span>
+                        <div class="flex-1 h-3 bg-slate-900/80 border border-slate-700 relative overflow-hidden rounded-sm">
+                            <div id="fatigueBar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-yellow-900 to-yellow-600 w-[15%] shadow-[0_0_10px_rgba(202,138,4,0.4)]"></div>
+                            <span id="fatigueText" class="absolute inset-0 flex items-center justify-center sys-font text-[9px] font-bold text-white/80 tracking-wider">0</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-center">
-                    <div class="sys-font text-[10px] text-slate-500 uppercase tracking-widest mb-1">LETHALITY</div>
-                    <div class="sys-font text-lg font-bold text-rose-400" id="stat-lethality">0%</div>
+
+                <!-- شبكة الإحصائيات -->
+                <div class="border border-[var(--sys-purple)]/30 bg-black/20 p-4 relative">
+                    <div class="absolute -top-2 left-4 bg-[var(--sys-bg-dark)] px-2">
+                        <span class="sys-font text-[9px] text-[var(--sys-purple)] font-bold tracking-widest">ATTRIBUTES</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+                        <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('str')">
+                            <div class="flex items-center gap-2">
+                                <span class="text-red-400 text-xs">⚔️</span>
+                                <span class="sys-font text-sm font-bold text-white">STR</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="stat-str" class="sys-font text-lg font-black text-white">10</span>
+                                <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('vit')">
+                            <div class="flex items-center gap-2">
+                                <span class="text-emerald-400 text-xs">🛡️</span>
+                                <span class="sys-font text-sm font-bold text-white">VIT</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="stat-vit" class="sys-font text-lg font-black text-white">10</span>
+                                <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('agi')">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sky-400 text-xs">⚡</span>
+                                <span class="sys-font text-sm font-bold text-white">AGI</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="stat-agi" class="sys-font text-lg font-black text-white">10</span>
+                                <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+7</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('int')">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[var(--sys-cyan)] text-xs">🧠</span>
+                                <span class="sys-font text-sm font-bold text-white">INT</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="stat-int" class="sys-font text-lg font-black text-white">10</span>
+                                <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between group cursor-pointer" onclick="PlayerState.spendAP('sen')">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[var(--sys-purple)] text-xs">👁️</span>
+                                <span class="sys-font text-sm font-bold text-white">PER</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="stat-sen" class="sys-font text-lg font-black text-white">10</span>
+                                <span class="ap-btn hidden sys-font text-[10px] font-bold text-emerald-400 group-hover:inline-block">+5</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-t border-slate-800 pt-2 mt-1 col-span-2">
+                            <span class="sys-font text-[10px] text-[var(--sys-purple)] font-bold tracking-widest">AVAILABLE AP</span>
+                            <span id="availablePoints" class="sys-font text-2xl font-black text-[var(--sys-cyan)] drop-shadow-[0_0_8px_rgba(0,240,255,0.5)]">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-between items-center px-2">
+                    <div class="text-center">
+                        <div class="sys-font text-[10px] text-slate-500 uppercase tracking-widest mb-1">GOLD</div>
+                        <div class="flex items-center gap-1">
+                            <span class="text-yellow-500 text-sm">🪙</span>
+                            <span id="playerGold" class="sys-font text-lg font-bold text-yellow-400">0</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="sys-font text-[10px] text-slate-500 uppercase tracking-widest mb-1">AUTHORITY</div>
+                        <div class="sys-font text-lg font-bold text-[var(--sys-purple)]" id="stat-authority">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="sys-font text-[10px] text-slate-500 uppercase tracking-widest mb-1">LETHALITY</div>
+                        <div class="sys-font text-lg font-bold text-rose-400" id="stat-lethality">0%</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- System Directory (يبقى كما هو) -->
-    <div class="sl-panel p-4 animate-system-pop" style="animation-delay: 0.1s;">
-        <div class="sys-font text-[10px] text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-800 pb-2">
-            System Directory
+        <!-- System Directory -->
+        <div class="sl-panel p-4 animate-system-pop" style="animation-delay: 0.1s;">
+            <div class="sys-font text-[10px] text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-800 pb-2">
+                System Directory
+            </div>
+            <nav class="grid grid-cols-1 gap-2">
+                <button onclick="window.location.href='active-quests.html'" class="w-full text-right px-4 py-3 rounded bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-[var(--sys-cyan)] transition flex items-center gap-3">
+                    <span>⚔️</span> <span class="text-sm font-bold">المهام النشطة</span>
+                    <span class="sys-font text-lg font-black text-[var(--sys-purple)] ml-auto" id="cnt-active-val">0</span>
+                </button>
+                <button onclick="window.location.href='brain-stats.html'" class="w-full text-right px-4 py-3 rounded bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-[var(--sys-purple)] transition flex items-center gap-3">
+                    <span>🧠</span><span class="text-sm font-bold">إحصائيات العقل</span>
+                </button>
+                <button onclick="window.location.href='operational-charter.html'" class="w-full text-right px-4 py-3 rounded bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-yellow-500 transition flex items-center gap-3">
+                    <span>📜</span> <span class="text-sm font-bold">الميثاق التشغيلي</span>
+                </button>
+                <button onclick="window.location.href='monarch-ai.html'" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group">
+                    <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-cyan)]">🤖 AI ADVISOR</span>
+                    <span class="sys-font text-[10px] bg-cyan-950 text-[var(--sys-cyan)] px-2 py-0.5 border border-cyan-500">ONLINE</span>
+                </button>
+                <button onclick="window.location.href='system-logs.html'" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group">
+                    <span class="sys-font text-sm font-black text-white group-hover:text-slate-300">📂 SYSTEM LOGS</span>
+                    <span class="sys-font text-[10px] text-slate-500">ARCHIVE</span>
+                </button>
+            </nav>
         </div>
-        <nav class="grid grid-cols-1 gap-2">
-            <!-- أضف هذا الزر في <nav class="grid grid-cols-1 gap-2"> قبل زر المتجر -->
-<button onclick="window.location.href='schedule.html'" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group border-[var(--sys-cyan)]">
-    <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-cyan)]">👑 STATUS & EMPORIUM</span>
-    <span class="sys-font text-[10px] bg-cyan-950 text-[var(--sys-cyan)] px-2 py-0.5 border border-[var(--sys-cyan)]">CHARACTER</span>
-</button><!-- غيّر onclick من Router.navigate('store') إلى: -->
-<button onclick="window.location.href='schedule.html'" id="nav-store" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group border-yellow-600/30 hover:border-yellow-500 transition-colors">
-    <span class="sys-font text-sm font-black text-white group-hover:text-yellow-400 tracking-wider">🛒 SOVEREIGN STORE</span>
-    <span class="sys-font text-[10px] bg-yellow-950 text-yellow-500 px-2 py-0.5 border border-yellow-600 rounded-sm">SHOP</span>
-</button>
-            <button onclick="Router.navigate('active')" id="nav-active" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group">
-                <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-cyan)]">⚔️ ACTIVE QUESTS</span>
-                <span class="sys-font text-lg font-black text-[var(--sys-purple)]" id="cnt-active-val">0</span>
-            </button>
-            <button onclick="Router.navigate('charter')" id="nav-charter" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group border-[var(--sys-purple)]">
-                <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-purple)]">📜 OPERATIONAL CHARTER</span>
-                <span class="sys-font text-lg font-black text-[var(--sys-purple)]">∞</span>
-            </button>
-            <button onclick="window.location.href='dungeons.html'" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group bg-red-900/10 border-red-900 hover:border-red-500">
-                <span class="sys-font text-sm font-black text-white group-hover:text-red-400">🧠 MENTAL DUNGEONS</span>
-                <span class="sys-font text-[10px] bg-red-950 text-red-500 px-2 py-0.5 border border-red-500 animate-pulse">S-RANK</span>
-            </button>
-            <button onclick="window.location.href='monarch-ai.html'" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group">
-                <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-cyan)]">🤖 AI ADVISOR</span>
-                <span class="sys-font text-[10px] bg-cyan-950 text-[var(--sys-cyan)] px-2 py-0.5 border border-cyan-500">ONLINE</span>
-            </button>
-            <button onclick="window.location.href='system-logs.html'" class="sl-btn w-full text-left p-3 rounded-sm flex justify-between items-center group">
-                <span class="sys-font text-sm font-black text-white group-hover:text-slate-300">📂 SYSTEM LOGS</span>
-                <span class="sys-font text-[10px] text-slate-500">ARCHIVE</span>
-            </button>
-        </div>
-        </nav>
-    </div>
-    
-</aside>
-
+    </aside>
 
     <main class="xl:col-span-8 flex flex-col gap-6">
-        
+
+        <!-- System Clock & Weather -->
         <div class="sl-panel p-4 flex flex-wrap justify-between items-center gap-4 bg-slate-950/80 animate-system-pop" style="animation-delay: 0.2s;">
             <div class="flex items-center gap-4 text-white font-mono text-xs">
                 <span class="w-2 h-2 rounded-full bg-[var(--sys-cyan)] animate-ping"></span>
@@ -355,6 +307,7 @@
             </div>
         </div>
 
+        <!-- Pomodoro Timer -->
         <div class="sl-panel p-6 border-r-4 border-r-[var(--sys-cyan)] flex flex-col md:flex-row justify-between items-center gap-4 animate-system-pop" style="animation-delay: 0.3s;">
             <div>
                 <div class="flex items-center gap-2 mb-1">
@@ -370,6 +323,7 @@
             </div>
         </div>
 
+        <!-- System Message -->
         <div class="sl-panel p-5 border-l-4 border-l-[var(--sys-purple)] relative overflow-hidden animate-system-pop" style="animation-delay: 0.4s;">
             <div class="absolute right-0 top-0 w-32 h-32 bg-[var(--sys-purple)] opacity-10 blur-[50px] rounded-full pointer-events-none"></div>
             <div class="sys-font text-[10px] text-[var(--sys-purple)] mb-2 uppercase flex items-center gap-2 font-bold tracking-widest">
@@ -380,96 +334,68 @@
             </p>
         </div>
 
+        <!-- Tasks Section -->
         <div id="tasksView" class="flex flex-col flex-grow space-y-4 animate-system-pop" style="animation-delay: 0.5s;">
-    
-    <!-- شريط التحذير للمستويات المنخفضة -->
-    <div id="inputLockBanner" class="hidden animate-system-pop">
-        <div class="sl-panel p-4 border-2 border-rose-600/50 bg-rose-950/20 relative overflow-hidden">
-            <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent shadow-[0_0_10px_rgba(225,29,72,0.6)]"></div>
-            <div class="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent shadow-[0_0_10px_rgba(225,29,72,0.6)]"></div>
-            
-            <div class="flex items-center gap-4 relative z-10">
-                <div class="w-12 h-12 rounded-full bg-rose-950 border-2 border-rose-500 flex items-center justify-center shadow-[0_0_15px_rgba(225,29,72,0.4)] flex-shrink-0">
-                    <span class="text-2xl">🔒</span>
+
+            <!-- Input Lock Banner -->
+            <div id="inputLockBanner" class="hidden animate-system-pop">
+                <div class="sl-panel p-4 border-2 border-rose-600/50 bg-rose-950/20 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent shadow-[0_0_10px_rgba(225,29,72,0.6)]"></div>
+                    <div class="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent shadow-[0_0_10px_rgba(225,29,72,0.6)]"></div>
+
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-12 h-12 rounded-full bg-rose-950 border-2 border-rose-500 flex items-center justify-center shadow-[0_0_15px_rgba(225,29,72,0.4)] flex-shrink-0">
+                            <span class="text-2xl">🔒</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="sys-font text-sm font-black text-rose-400 tracking-widest uppercase mb-1">[ SYSTEM LOCKDOWN ]</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                إضافة المهام اليدوية <span class="text-rose-400 font-bold">مقفلة</span> حتى المستوى 
+                                <span class="sys-font text-rose-400 font-black text-lg mx-1">450</span>. 
+                                المستوى الحالي: <span id="lockCurrentLevel" class="sys-font text-white font-black">1</span>.
+                                أكمل المهام التلقائية والأنشطة اليومية للارتقاء.
+                            </p>
+                        </div>
+                        <div class="hidden md:block text-right flex-shrink-0">
+                            <div class="sys-font text-[10px] text-rose-500/60 uppercase tracking-widest">Required</div>
+                            <div class="sys-font text-2xl font-black text-rose-500/40">LVL 450</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <h3 class="sys-font text-sm font-black text-rose-400 tracking-widest uppercase mb-1">[ SYSTEM LOCKDOWN ]</h3>
-                    <p class="text-xs text-slate-300 leading-relaxed">
-                        إضافة المهام اليدوية <span class="text-rose-400 font-bold">مقفلة</span> حتى المستوى 
-                        <span class="sys-font text-rose-400 font-black text-lg mx-1">450</span>. 
-                        المستوى الحالي: <span id="lockCurrentLevel" class="sys-font text-white font-black">1</span>.
-                        أكمل المهام التلقائية والزنازين الذهنية للارتقاء.
-                    </p>
+            </div>
+
+            <!-- Task Input -->
+            <section id="taskInputSection" class="sl-panel p-3 flex flex-wrap gap-2 items-center focus-within:border-[var(--sys-cyan)] transition-colors relative">
+                <div class="sys-font text-[10px] text-[var(--sys-cyan)] absolute -top-2 left-4 bg-[var(--sys-bg-dark)] px-2">NEW INSTANT QUEST</div>
+                <input type="text" id="taskInput" placeholder="Deploy new custom directive..." class="flex-grow bg-transparent border-none outline-none px-4 py-3 text-sm font-medium placeholder:text-slate-600 text-white">
+                <div class="flex gap-2 p-2 w-full md:w-auto">
+                    <select id="prioritySelect" class="bg-[var(--sys-bg-dark)] sys-font font-bold px-3 py-2 border border-[var(--sys-cyan)] border-opacity-30 text-[var(--sys-cyan)] text-xs outline-none">
+                        <option value="high">S-RANK</option>
+                        <option value="medium" selected>A-RANK</option>
+                        <option value="low">C-RANK</option>
+                    </select>
+                    <select id="statSelect" class="bg-[var(--sys-bg-dark)] sys-font font-bold px-3 py-2 border border-[var(--sys-purple)] border-opacity-30 text-[var(--sys-purple)] text-xs outline-none">
+                        <option value="int">🧠 INT</option>
+                        <option value="str">💪 STR</option>
+                        <option value="vit">🛡️ VIT</option>
+                        <option value="agi">⚡ AGI</option>
+                        <option value="sen">👁️ SEN</option>
+                    </select>
+                    <button onclick="QuestSystem.addTask()" class="sl-btn px-6 py-2 font-black text-xs text-white uppercase tracking-widest">ADD</button>
                 </div>
-                <div class="hidden md:block text-right flex-shrink-0">
-                    <div class="sys-font text-[10px] text-rose-500/60 uppercase tracking-widest">Required</div>
-                    <div class="sys-font text-2xl font-black text-rose-500/40">LVL 450</div>
+            </section>
+
+            <!-- Tasks List -->
+            <div class="sl-panel p-4 flex-grow">
+                <h4 class="font-black text-sm text-[var(--sys-cyan)] tracking-wide mb-4 uppercase sys-font border-b border-slate-800 pb-2">⚔️ Active Directives Log</h4>
+                <div id="taskContainer" class="space-y-2 min-h-[250px] overflow-y-auto pr-2">
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- قسم الإدخال (يتم إخفاؤه/إظهاره حسب المستوى) -->
-    <section id="taskInputSection" class="sl-panel p-3 flex flex-wrap gap-2 items-center focus-within:border-[var(--sys-cyan)] transition-colors relative">
-        <div class="sys-font text-[10px] text-[var(--sys-cyan)] absolute -top-2 left-4 bg-[var(--sys-bg-dark)] px-2">NEW INSTANT QUEST</div>
-        <input type="text" id="taskInput" placeholder="Deploy new custom directive..." class="flex-grow bg-transparent border-none outline-none px-4 py-3 text-sm font-medium placeholder:text-slate-600 text-white">
-        <div class="flex gap-2 p-2 w-full md:w-auto">
-            <select id="prioritySelect" class="bg-[var(--sys-bg-dark)] sys-font font-bold px-3 py-2 border border-[var(--sys-cyan)] border-opacity-30 text-[var(--sys-cyan)] text-xs outline-none">
-                <option value="high">S-RANK</option>
-                <option value="medium" selected>A-RANK</option>
-                <option value="low">C-RANK</option>
-            </select>
-            <select id="statSelect" class="bg-[var(--sys-bg-dark)] sys-font font-bold px-3 py-2 border border-[var(--sys-purple)] border-opacity-30 text-[var(--sys-purple)] text-xs outline-none">
-                <option value="int">🧠 INT</option>
-                <option value="str">💪 STR</option>
-                <option value="vit">🛡️ VIT</option>
-                <option value="agi">⚡ AGI</option>
-                <option value="sen">👁️ SEN</option>
-            </select>
-            <button onclick="QuestSystem.addTask()" class="sl-btn px-6 py-2 font-black text-xs text-white uppercase tracking-widest">ADD</button>
-        </div>
-    </section>
-
-    <div class="sl-panel p-4 flex-grow">
-        <h4 class="font-black text-sm text-[var(--sys-cyan)] tracking-wide mb-4 uppercase sys-font border-b border-slate-800 pb-2">⚔️ Active Directives Log</h4>
-        <div id="taskContainer" class="space-y-2 min-h-[250px] overflow-y-auto pr-2">
-            </div>
-    </div>
-</div>
-
-        <div id="charterView" class="hidden flex-col flex-grow sl-panel p-6 overflow-y-auto max-h-[700px] border-2 border-[var(--sys-purple)]">
-            <div class="text-center mb-8 border-b border-[var(--sys-purple)] pb-4">
-                <div class="sys-font text-[var(--sys-cyan)] tracking-[0.5em] text-sm mb-2">SYSTEM INTEGRATED CHARTER</div>
-                <h2 class="text-3xl font-black text-white drop-shadow-[0_0_10px_var(--sys-purple)]">Integrated Operational Charter</h2>
-                <p class="text-slate-400 mt-2 text-sm font-bold">الميثاق العملياتي لعاهل الظلال</p>
-            </div>
-            <div id="operationalCharterContainer"></div>
-        </div>
-        <div id="storeView" class="hidden flex-col flex-grow sl-panel p-6 overflow-y-auto max-h-[700px] border-2 border-yellow-600/30 relative animate-system-pop">
-    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent opacity-60 shadow-[0_0_10px_rgba(234,179,8,0.4)]"></div>
-    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-600 to-transparent opacity-40"></div>
-    
-    <div class="text-center mb-6 border-b border-yellow-600/30 pb-4 relative">
-        <div class="sys-font text-yellow-500 tracking-[0.5em] text-xs mb-2 font-bold uppercase">Royal Exchange</div>
-        <h2 class="text-3xl font-black text-white drop-shadow-[0_0_10px_rgba(234,179,8,0.4)] tracking-wide">Sovereign Titles Emporium</h2>
-        <div class="flex justify-center items-center gap-3 mt-4 bg-black/30 border border-yellow-900/30 rounded-lg px-6 py-2 inline-flex">
-            <span class="text-yellow-500 text-xl">🪙</span>
-            <span id="storeGoldDisplay" class="sys-font text-2xl font-black text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]">0</span>
-            <span class="sys-font text-[10px] text-yellow-600/60 uppercase tracking-widest font-bold">Gold Available</span>
-        </div>
-    </div>
-    
-    <div id="titlesStoreGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    
-    <div id="storeEmptyState" class="hidden text-center py-16 border border-dashed border-slate-800 rounded-xl bg-slate-900/20 mt-4">
-        <div class="text-5xl mb-3 opacity-30">🏛️</div>
-        <p class="text-sm font-bold text-slate-500 sys-font tracking-wider">[NO TITLES AVAILABLE IN CURRENT CYCLE]</p>
-        <p class="text-[10px] text-slate-600 mt-2 sys-font">Stock rotates based on level, day, and time. Check back later.</p>
-    </div>
-</div>
     </main>
 </div>
 
+<!-- Timer Settings Modal -->
 <div id="timerModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/80 backdrop-blur-sm transition-opacity">
     <div class="sl-panel p-8 w-full max-w-sm mx-4">
         <h3 class="sys-font text-xl font-black text-[var(--sys-cyan)] mb-6 text-center uppercase tracking-widest border-b border-white/10 pb-4">Set Quest Timer</h3>
@@ -491,6 +417,7 @@
     </div>
 </div>
 
+<!-- Level Up Modal -->
 <div id="milestoneModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/90 backdrop-blur-md transition-opacity">
     <div class="sl-panel p-1 border-2 border-[var(--sys-cyan)] w-full max-w-2xl mx-4 text-center animate-system-pop overflow-hidden shadow-[0_0_50px_rgba(0,240,255,0.4)]">
         <div class="border border-[var(--sys-purple)] p-10">
@@ -512,574 +439,119 @@
     </div>
 </div>
 
-<div id="animeSystemPopup" class="fixed inset-0 z-[10000] hidden flex items-center justify-center bg-black/85 backdrop-blur-sm transition-opacity duration-300">
-    <div class="relative bg-[#02040a]/95 border-2 border-[var(--sys-cyan)] shadow-[0_0_40px_rgba(0,240,255,0.2),inset_0_0_20px_rgba(0,240,255,0.1)] p-8 max-w-lg w-full mx-4 text-center animate-system-pop overflow-hidden">
-        <div class="sys-font text-[var(--sys-cyan)] tracking-[0.6em] text-[10px] mb-3 font-black animate-pulse">[ SYSTEM DIRECTIVE ]</div>
-        <h2 id="animePopupTitle" class="text-2xl md:text-3xl font-black text-white mb-4 drop-shadow-[0_0_8px_var(--sys-cyan)]">عنوان المهمة</h2>
-        <div class="bg-black/60 border-y border-[var(--sys-cyan)]/30 py-5 mb-6 relative">
-            <p id="animePopupDesc" class="text-sm md:text-base text-slate-200 leading-relaxed font-bold">وصف المهمة التفصيلي سيظهر هنا بأسلوب الأنمي.</p>
-        </div>
-        <div class="flex justify-between items-center text-xs sys-font text-amber-400 mb-6 font-black tracking-widest bg-amber-900/20 px-4 py-2 border border-amber-500/30">
-            <span id="animePopupTime">TIME: --:--</span>
-            <span id="animePopupReward">REWARD: +?? EXP</span>
-        </div>
-        <button onclick="AnimePopup.acceptQuest()" class="w-full py-4 bg-gradient-to-r from-[var(--sys-cyan)]/10 via-[var(--sys-cyan)]/20 to-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] font-black tracking-[0.2em] uppercase hover:bg-[var(--sys-cyan)] hover:text-black transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-            ACCEPT QUEST (قبول)
-        </button>
-    </div>
-</div>
-
-<!-- استبدل هذا القسم كاملاً في index.html -->
-<div id="activeDirectiveBar" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9000] w-11/12 max-w-2xl">
-    <!-- الإطار الخارجي المضيء -->
-    <div class="relative bg-[#02040a]/95 border border-[var(--sys-cyan)] shadow-[0_0_30px_rgba(0,240,255,0.15),inset_0_0_20px_rgba(0,240,255,0.05)] backdrop-blur-md overflow-hidden" style="clip-path: polygon(0 0, 100% 0, 98% 100%, 2% 100%);">
-        <!-- خطوط النيون العلوية والسفلية -->
-        <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--sys-cyan)] to-transparent shadow-[0_0_10px_var(--sys-cyan)]"></div>
-        <div class="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--sys-purple)] to-transparent shadow-[0_0_10px_var(--sys-purple)]"></div>
-        
-        <!-- شريط التقدم الزمني -->
-        <div class="absolute top-0 left-0 h-full bg-gradient-to-r from-[var(--sys-cyan)]/5 to-transparent transition-all duration-1000" id="directiveProgressBar" style="width: 0%;"></div>
-        
-        <div class="relative z-10 flex items-center gap-4 px-6 py-4">
-            <!-- الأيقونة النابضة -->
-            <div class="relative flex-shrink-0">
-                <div class="absolute inset-0 bg-[var(--sys-cyan)] rounded-full blur-md opacity-40 animate-pulse"></div>
-                <div class="relative w-12 h-12 rounded-full bg-slate-900 border-2 border-[var(--sys-cyan)] flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-                    <span class="text-[var(--sys-cyan)] text-xl animate-pulse">⚡</span>
-                </div>
-            </div>
-            
-            <!-- المحتوى النصي والعداد -->
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="sys-font text-[9px] text-[var(--sys-cyan)] tracking-[0.3em] font-bold uppercase animate-pulse">CURRENT ACTIVE DIRECTIVE</span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span class="sys-font text-[9px] text-emerald-400 font-bold uppercase">LIVE</span>
-                </div>
-                
-                <div class="flex items-center gap-3">
-                    <span id="activeDirectiveText" class="text-white text-sm md:text-base font-bold truncate tracking-wide">...</span>
-                </div>
-                
-                <!-- العداد التصاعدي -->
-                <div class="flex items-center gap-3 mt-1">
-                    <div class="flex items-center gap-1 bg-black/40 px-2 py-0.5 border border-slate-800 rounded">
-                        <span class="sys-font text-[10px] text-slate-500 uppercase">Elapsed</span>
-                        <span id="directiveTimer" class="sys-font text-sm font-black text-[var(--sys-cyan)] tracking-wider tabular-nums">00:00:00</span>
-                    </div>
-                    <div class="flex items-center gap-1 bg-black/40 px-2 py-0.5 border border-slate-800 rounded">
-                        <span class="sys-font text-[10px] text-slate-500 uppercase">Target</span>
-                        <span id="directiveTargetTime" class="sys-font text-sm font-black text-[var(--sys-purple)] tracking-wider tabular-nums">--:--</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- زر الإنهاء -->
-            <button onclick="AnimePopup.completeQuest()" class="flex-shrink-0 group relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-500 opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                <div class="relative px-4 py-3 bg-emerald-950/50 border border-emerald-500 hover:bg-emerald-500 hover:text-white text-emerald-400 flex items-center gap-2 transition-all duration-300 shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]" style="clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);">
-                    <span class="font-black text-xs sys-font tracking-wider group-hover:scale-110 transition-transform">COMPLETE</span>
-                    <span class="font-black text-lg group-hover:scale-125 transition-transform">✓</span>
-                </div>
-            </button>
-            
-            <!-- زر الإلغاء (إضافة جديدة) -->
-            <button onclick="AnimePopup.cancelQuest()" class="flex-shrink-0 w-8 h-8 bg-slate-900/80 border border-slate-700 hover:border-rose-500 hover:text-rose-500 text-slate-500 flex items-center justify-center transition-all rounded-sm" title="إلغاء المهمة">
-                <span class="font-bold text-xs">✕</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<div id="ironcladAlarmOverlay" class="hidden fixed inset-0 z-[10001] flex items-center justify-center bg-red-950/90 backdrop-blur-md">
-    <div class="text-center">
-        <div class="text-6xl mb-4 animate-bounce">⏰</div>
-        <h2 class="text-4xl font-black text-white mb-4">TIME IS UP</h2>
-        <button onclick="SovereignTimer.completeTaskSuccess()" class="px-8 py-3 bg-emerald-500 text-black font-black rounded hover:bg-emerald-400 transition-all">COMPLETE TASK ✓</button>
-    </div>
-</div>
-
+<!-- Toast Container -->
 <div id="toastContainer" class="fixed top-5 right-5 z-[10000] flex flex-col gap-3 pointer-events-none"></div>
 
 <script>
 // ==========================================
-// 1. UTILITIES, EFFECTS & THEME ENGINE
+// UTILITIES & UI
 // ==========================================
 const UI = {
     toggleTimerSettings() {
-        if (typeof SoundEffects !== 'undefined') SoundEffects.playSystemClick();
         document.getElementById('timerModal').classList.toggle('hidden');
     }
 };
 
-const AuraThemes = {
-    themeOrder: ['dark', 'lightning', 'crimson', 'nature'],
-    currentIndex: 0,
-    themes: {
-        dark: {
-            '--sys-cyan': '#00f0ff', '--sys-cyan-glow': 'rgba(0, 240, 255, 0.6)',
-            '--sys-purple': '#9d4edd', '--sys-purple-glow': 'rgba(157, 78, 221, 0.4)',
-            '--sys-bg-dark': '#02040a', '--sys-panel': 'rgba(5, 10, 25, 0.85)',
-            isLight: false, icon: '🌌'
-        },
-        lightning: {
-            '--sys-cyan': '#0284c7', '--sys-cyan-glow': 'rgba(2, 132, 199, 0.4)',
-            '--sys-purple': '#f97316', '--sys-purple-glow': 'rgba(249, 115, 22, 0.3)',
-            '--sys-bg-dark': '#f8fafc', '--sys-panel': 'rgba(255, 255, 255, 0.95)',
-            isLight: true, icon: '⚡'
-        },
-        crimson: {
-            '--sys-cyan': '#ff003c', '--sys-cyan-glow': 'rgba(255, 0, 60, 0.6)',
-            '--sys-purple': '#7f1d1d', '--sys-purple-glow': 'rgba(127, 29, 29, 0.4)',
-            '--sys-bg-dark': '#080102', '--sys-panel': 'rgba(15, 0, 0, 0.85)',
-            isLight: false, icon: '🩸'
-        },
-        nature: {
-            '--sys-cyan': '#10b981', '--sys-cyan-glow': 'rgba(16, 185, 129, 0.4)',
-            '--sys-purple': '#ec4899', '--sys-purple-glow': 'rgba(236, 72, 153, 0.3)',
-            '--sys-bg-dark': '#f4fbf7', '--sys-panel': 'rgba(255, 255, 255, 0.95)',
-            isLight: true, icon: '🌿'
-        }
-    },
-    init() {
-        const savedAura = localStorage.getItem('sovereign-aura') || 'dark';
-        this.currentIndex = this.themeOrder.indexOf(savedAura) !== -1 ? this.themeOrder.indexOf(savedAura) : 0;
-        this.applyTheme(this.themeOrder[this.currentIndex], false);
-    },
-    cycleTheme() {
-        this.currentIndex = (this.currentIndex + 1) % this.themeOrder.length;
-        const nextTheme = this.themeOrder[this.currentIndex];
-        this.applyTheme(nextTheme, true);
-    },
-    applyTheme(themeName, playSound = true) {
-        const root = document.documentElement;
-        const selectedAura = this.themes[themeName];
-        for (const [property, value] of Object.entries(selectedAura)) {
-            if (property !== 'isLight' && property !== 'icon') root.style.setProperty(property, value);
-        }
-        if (selectedAura.isLight) document.body.classList.add('light-mode');
-        else document.body.classList.remove('light-mode');
-        const iconEl = document.getElementById('themeIconInner');
-        if (iconEl) iconEl.textContent = selectedAura.icon;
-        localStorage.setItem('sovereign-aura', themeName);
-        if (playSound && window.SoundEffects && typeof window.SoundEffects.playSystemClick === 'function') window.SoundEffects.playSystemClick();
-        if (playSound && window.Toast && typeof window.Toast.show === 'function') window.Toast.show(`تفعيل الهالة: ${themeName.toUpperCase()}`, 'success');
-    }
-};
-
-const SoundEffects = {
-    bgMusic: new Audio('Kingdom_of_Iron.mp3'),
-    clickAudio: null,
-    init() {
-        this.bgMusic.loop = true;
-        this.bgMusic.volume = 0.4;
-        try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.audioCtx = new AudioContext();
-        } catch(e) { console.log("AudioContext not supported"); }
-    },
-    playSystemClick() {
-        if (!this.audioCtx) return;
-        if(this.audioCtx.state === 'suspended') this.audioCtx.resume();
-        const oscillator = this.audioCtx.createOscillator();
-        const gainNode = this.audioCtx.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(800, this.audioCtx.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(300, this.audioCtx.currentTime + 0.05);
-        gainNode.gain.setValueAtTime(0.1, this.audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.05);
-        oscillator.connect(gainNode);
-        gainNode.connect(this.audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(this.audioCtx.currentTime + 0.05);
-    },
-    playSuccess() { this.playSystemClick(); },
-    playLevelUp() { this.playSystemClick(); },
-    toggleMusic() {
-        this.playSystemClick();
-        const icon = document.getElementById('musicIcon');
-        if (this.bgMusic.paused) {
-            this.bgMusic.play().catch(e => Toast.show("قم بالتفاعل مع الصفحة أولاً لتشغيل الموسيقى", "error"));
-            icon.classList.add('animate-pulse', 'text-[var(--sys-purple)]');
-        } else {
-            this.bgMusic.pause();
-            icon.classList.remove('animate-pulse', 'text-[var(--sys-purple)]');
-        }
-    }
-};
-
 const Toast = {
-    container: document.getElementById('toastContainer') || (function() {
+    show(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
         const div = document.createElement('div');
-        div.id = 'toastContainer';
-        div.className = 'fixed top-5 right-5 z-[10000] flex flex-col gap-3 pointer-events-none';
-        document.body.appendChild(div);
-        return div;
-    })(),
-    show(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `p-4 border-r-4 ${type === 'success' ? 'bg-slate-900 border-[var(--sys-cyan)]' : 'bg-slate-900 border-rose-500'} text-white shadow-2xl flex items-center gap-3 transition-all duration-300 animate-system-pop`;
-        toast.innerHTML = `
-            <div class="flex flex-col">
-                <span class="font-bold text-xs uppercase tracking-widest text-[var(--sys-cyan)]">${type === 'success' ? 'System Message' : 'Alert'}</span>
-                <span class="text-sm font-medium text-slate-200">${message}</span>
-            </div>
-        `;
-        this.container.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
+        const colors = {
+            success: 'border-emerald-500 text-emerald-400 bg-emerald-950/80',
+            error: 'border-rose-500 text-rose-400 bg-rose-950/80',
+            info: 'border-[var(--sys-cyan)] text-[var(--sys-cyan)] bg-slate-900/80'
+        };
+        div.className = `pointer-events-auto px-4 py-3 border-l-4 rounded shadow-lg text-sm font-bold sys-font tracking-wider animate-system-pop ${colors[type] || colors.info}`;
+        div.textContent = message;
+        container.appendChild(div);
+        setTimeout(() => div.remove(), 4000);
     }
 };
 
 // ==========================================
-// 2. ANIME POPUP ENGINE
-// ==========================================
-// ==========================================
-// ACTIVE DIRECTIVE TIMER ENGINE (عداد تصاعدي)
-// ==========================================
-const DirectiveTimer = {
-    startTime: null,
-    timerInterval: null,
-    isRunning: false,
-    
-    start(savedStartTime) {
-        if (this.isRunning) return;
-        
-        // ✅ استخدام الوقت المحفوظ أو الوقت الحالي
-        this.startTime = savedStartTime || Date.now();
-        this.isRunning = true;
-        
-        // حفظ الوقت في LocalStorage للاستمرارية
-        localStorage.setItem('directive_start_time', this.startTime.toString());
-        
-        // تحديث فوري
-        this.update();
-        
-        // بدء التحديث كل ثانية
-        this.timerInterval = setInterval(() => this.update(), 1000);
-    },
-    
-    stop() {
-        clearInterval(this.timerInterval);
-        this.isRunning = false;
-        this.startTime = null;
-        localStorage.removeItem('directive_start_time');
-    },
-    
-    update() {
-        if (!this.startTime) return;
-        
-        const elapsed = Date.now() - this.startTime;
-        const timerEl = document.getElementById('directiveTimer');
-        const progressEl = document.getElementById('directiveProgressBar');
-        
-        if (timerEl) {
-            timerEl.textContent = this.formatTime(elapsed);
-        }
-        
-        // تحديث شريط التقدم (Pomodoro افتراضي 25 دقيقة)
-        if (progressEl) {
-            const progress = Math.min((elapsed / (25 * 60 * 1000)) * 100, 100);
-            progressEl.style.width = `${progress}%`;
-        }
-    },
-    
-    formatTime(ms) {
-        const totalSeconds = Math.floor(ms / 1000);
-        const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-        const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-        const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-        return `${hours}:${minutes}:${seconds}`;
-    },
-    
-    reset() {
-        this.stop();
-        const timerEl = document.getElementById('directiveTimer');
-        const progressEl = document.getElementById('directiveProgressBar');
-        if (timerEl) timerEl.textContent = '00:00:00';
-        if (progressEl) progressEl.style.width = '0%';
-    }
-};
-
-// ==========================================
-// تحديث AnimePopup لدعم العداد
-// ==========================================
-const AnimePopup = {
-    currentQuest: null,
-    questStartTime: null,
-    playerLevel: 1,
-    playerXP: 0,
-    playerGold: 0,
-    
-   show(title, description, timeLimit, rewardXP) {
-    if(window.SoundEffects) SoundEffects.playSystemClick();
-    this.syncPlayerState();
-    
-    this.currentQuest = { 
-        title: title, 
-        rewardXP: rewardXP || 10, 
-        timeLimit: timeLimit || "25:00",
-        type: this.inferQuestType(title),
-        details: description,
-        acceptedAt: null,
-        active: false
-    };
-    
-    // ✅ تحديث الواجهة المنبثقة
-    document.getElementById('animePopupTitle').textContent = title;
-    document.getElementById('animePopupDesc').innerHTML = description;
-    document.getElementById('animePopupTime').textContent = `TIME: ${this.currentQuest.timeLimit}`;
-    document.getElementById('animePopupReward').textContent = `REWARD: +${this.currentQuest.rewardXP} EXP`;
-    
-    // ✅ تحديث الشريط السفلي المستهدف
-    document.getElementById('directiveTargetTime').textContent = this.currentQuest.timeLimit;
-    
-    const modal = document.getElementById('animeSystemPopup');
-    modal.classList.remove('hidden');
-},
-    
-    inferQuestType(title) {
-        const t = title.toLowerCase();
-        if (t.includes('برمج') || t.includes('code') || t.includes('هندس') || t.includes('ai') || t.includes('تطوير') || t.includes('برمجية')) return 'coding_ai';
-        if (t.includes('رياض') || t.includes('رياضي') || t.includes('بدني') || t.includes('ppl') || t.includes('جري') || t.includes('تدريب') || t.includes('قتال')) return 'sports';
-        if (t.includes('لغة') || t.includes('إنجليز') || t.includes('english') || t.includes('كتاب') || t.includes('قرآن') || t.includes('روح') || t.includes('شرع')) return 'languages_books';
-        if (t.includes('زنزان') || t.includes('dungeon') || t.includes('ذهن') || t.includes('شطرنج') || t.includes('سودوكو') || t.includes('ذاكرة')) return 'dungeons';
-        return 'coding_ai';
-    },
-    
-    syncPlayerState() {
-        try {
-            const coreData = JSON.parse(localStorage.getItem('monarch_system_data')) || {};
-            this.playerLevel = coreData.level || 1;
-            this.playerXP = coreData.xp || 0;
-            this.playerGold = coreData.gold || 0;
-        } catch(e) {
-            console.error('[AnimePopup] فشل المزامنة', e);
-        }
-    },
-    
-   acceptQuest() {
-    if(window.SoundEffects) SoundEffects.playSystemClick();
-    document.getElementById('animeSystemPopup').classList.add('hidden');
-    
-    if(this.currentQuest) {
-        // ✅ تأكيد: إضافة timestamp قبل الحفظ
-        this.currentQuest.acceptedAt = Date.now();
-        this.currentQuest.active = true;
-        
-        // ✅ حفظ في LocalStorage فوراً
-        localStorage.setItem('sovereign_active_quest', JSON.stringify(this.currentQuest));
-        
-        // ✅ تمرير للمحرك المركزي إن وجد
-        if(window.SovereignEngine && typeof SovereignEngine.acceptQuest === 'function') {
-            SovereignEngine.acceptQuest(this.currentQuest);
-        }
-        
-        // ✅ تحديث واجهة المستخدم فوراً
-        document.getElementById('activeDirectiveText').textContent = this.currentQuest.title;
-        document.getElementById('activeDirectiveBar').classList.remove('hidden');
-        
-        // ✅ بدء العداد مع الوقت المحفوظ
-        DirectiveTimer.start(this.currentQuest.acceptedAt);
-        
-        if(window.Toast) Toast.show('تم تفعيل المهمة: ' + this.currentQuest.title, 'success');
-    }
-},
-    
-    fallbackAcceptQuest() {
-        localStorage.setItem('sovereign_active_quest', JSON.stringify(this.currentQuest));
-        if(window.SovereignEngine && SovereignEngine.logToSystem) {
-            SovereignEngine.logToSystem('quest', `تم قبول المهمة السيادية: ${this.currentQuest.title}`);
-        }
-    },
-    
-    completeQuest() {
-        if(window.SoundEffects) SoundEffects.playSystemClick();
-        document.getElementById('activeDirectiveBar').classList.add('hidden');
-        DirectiveTimer.stop();
-        
-        if(this.currentQuest) {
-            // ✅ الإصلاح: استخدام المحرك المركزي
-            if(window.SovereignEngine && typeof SovereignEngine.completeQuest === 'function') {
-                SovereignEngine.completeQuest();
-            } else {
-                this.fallbackCompleteQuest();
-            }
-        }
-        
-        this.currentQuest = null;
-        this.questStartTime = null;
-    },
-    
-    fallbackCompleteQuest() {
-        if(!this.currentQuest || !window.PlayerState) return;
-        const elapsed = this.questStartTime ? Date.now() - this.questStartTime : 0;
-        const elapsedMinutes = Math.floor(elapsed / 60000);
-        const rewardXP = this.currentQuest.rewardXP || 10;
-        let bonusXP = 0;
-        if (elapsedMinutes >= 25) bonusXP = 10;
-        if (elapsedMinutes >= 60) bonusXP = 25;
-        const totalXP = rewardXP + bonusXP;
-        
-        PlayerState.addXP(totalXP);
-        PlayerState.addGold(totalXP * 2);
-        
-        if(window.Toast) Toast.show(`تم إنجاز المهمة! +${totalXP} EXP`, 'success');
-        if(typeof confetti === 'function') confetti({particleCount: 100, spread: 70, origin: {y: 0.9}, colors: ['#00f0ff', '#10b981']});
-        
-        if(window.SovereignEngine && SovereignEngine.logToSystem) {
-            SovereignEngine.logToSystem('quest', `إنجاز مهمة نشطة: [${this.currentQuest.title}] | الوقت: ${elapsedMinutes}د | +${totalXP} XP`);
-        }
-    },
-    
-    cancelQuest() {
-        if(!this.currentQuest) return;
-        DirectiveTimer.stop();
-        document.getElementById('activeDirectiveBar').classList.add('hidden');
-        
-        if(window.SovereignEngine && SovereignEngine.logToSystem) {
-            SovereignEngine.logToSystem('penalty', `إلغاء مهمة نشطة: [${this.currentQuest.title}] | -10 XP`);
-        }
-        if(window.PlayerState) {
-            PlayerState.addXP(-10);
-            if(window.Toast) Toast.show('تم إلغاء المهمة! عقوبة: -10 XP', 'error');
-        }
-        
-        localStorage.removeItem('sovereign_active_quest');
-        if(window.SovereignEngine) SovereignEngine.state.activeQuest = null;
-        
-        this.currentQuest = null;
-        this.questStartTime = null;
-    }
-};
-// ==========================================
-// 3. SOVEREIGN SCHEDULES MATRIX
-// ==========================================
-const SovereignSchedules = {
-    getTier(level) {
-        if (level >= 1 && level <= 70) return "tier_1_70";
-        if (level > 70 && level <= 130) return "tier_70_130";
-        if (level > 130 && level <= 180) return "tier_130_180";
-        if (level > 180 && level <= 250) return "tier_180_250";
-        if (level > 250 && level <= 320) return "tier_250_320";
-        if (level > 320 && level <= 400) return "tier_320_400";
-        if (level > 400 && level <= 450) return "tier_400_450";
-        if (level > 450) return "tier_infinity";
-        return "tier_1_70";
-    },
-    xpRules: { cognitive: 30, physical: 20, elevation: 10, trivial: 5 },
-    matrix: {
-        "tier_1_70": {
-            "Sunday": [
-                { time: "05:00", title: "الفترة الروحية | Spiritual Block", desc: "تلاوة القرآن، صلاة الفجر والأذكار + تمارين الإطالات العضلية والتمدد.", xp: 20, type: "physical" },
-                { time: "06:00", title: "الهندسة البرمجية المتقدمة | Advanced Software Engineering", desc: "أساسيات البرمجة العامة وبناء منطق الويب المتقدم (Python/JS).", xp: 30, type: "cognitive" },
-                { time: "08:30", title: "المسار الأكاديمي الأساسي | Core Academic Track", desc: "الرياضيات المتقدمة وحل مسائل المنطق المعقدة بكفاءة عالية.", xp: 30, type: "cognitive" },
-                { time: "10:30", title: "إتقان اللغة الإنجليزية | English Mastery", desc: "الانغماس التقني، بناء المخردات والمصطلحات البرمجية، والمحاكاة الصوتية (Shadowing).", xp: 10, type: "elevation" },
-                { time: "15:00", title: "الإعداد البدني | Physical Conditioning", desc: "تمارين نظام PPL المتقدم واستقرار الكاليسثينكس البدني الصارم.", xp: 20, type: "physical" },
-                { time: "17:30", title: "التركيز الأكاديمي المسائي | Academic Focus", desc: "دراسة مادة الرياضيات (درس جديد) مع التركيز المطلق وتفكيك العقد الصعبة.", xp: 30, type: "cognitive" },
-                { time: "19:30", title: "التدريب الرياضي الخاص | Basketball Training", desc: "تمارين ومهارات كرة السلة المخصصة بشكل فردي (بدون مباريات كاملة).", xp: 20, type: "physical" }
-            ],
-            "Monday": [
-                { time: "05:00", title: "الفترة الروحية | Spiritual Block", desc: "حفظ جديد وتلاوة، صلاة الفجر والأذكار الصباحية.", xp: 10, type: "elevation" },
-                { time: "17:30", title: "التركيز الأكاديمي المسائي | Academic Focus", desc: "دراسة مادة العلوم الطبيعية (درس جديد) وفهم العمق العلمي للوحدة.", xp: 30, type: "cognitive" },
-                { time: "19:30", title: "التدريب الرياضي الخاص | Football Training", desc: "تمارين كرة القدم الفردية وتطوير دقة التحكم واللياقة البدنية.", xp: 20, type: "physical" }
-            ],
-            "Tuesday": [
-                { time: "17:30", title: "التركيز الأكاديمي المسائي | Academic Focus", desc: "دراسة مادة الفيزياء (درس جديد) وحل القوانين الفيزيائية بكفاءة هندسية.", xp: 30, type: "cognitive" },
-                { time: "19:30", title: "التدريب الرياضي الخاص | Basketball Training", desc: "تطوير مهارات التسديد وحركات الخداع الفردية في كرة السلة.", xp: 20, type: "physical" }
-            ],
-            "Wednesday": [
-                { time: "17:30", title: "التركيز الأكاديمي المسائي | Academic Focus", desc: "مراجعة مادة الرياضيات وتثبيت المفاهيم المكتسبة طوال الأسبوع وحل التمارين.", xp: 30, type: "cognitive" },
-                { time: "19:30", title: "التدريب الرياضي الخاص | Football Training", desc: "تمارين مهارية فردية مكثفة لتطوير الأداء الرياضي في كرة القدم.", xp: 20, type: "physical" }
-            ],
-            "Thursday": [
-                { time: "19:30", title: "كتلة الفنون القتالية والدفاع | Jiu-Jitsu & Muay Thai", desc: "تمارين وتكتيكات رياضية قتالية لتعزيز الانضباط الجسدي والذهني المطلق.", xp: 20, type: "physical" }
-            ],
-            "Friday": [
-                { time: "05:00", title: "جمعة الإبداع الروحية | Surah Al-Kahf & Review", desc: "قراءة سورة الكهف، أذكار الصباح، ومراجعة شاملة لدروس الأسبوع (العلوم الطبيعية).", xp: 30, type: "cognitive" },
-                { time: "08:00", title: "التعديل البصري الاحترافي | Video Editing Lab", desc: "جلسة المونتاج وتعديل الفيديو الاحترافي للمحتوى الرقمي قنوات اليوتيوب.", xp: 30, type: "cognitive" }
-            ],
-            "Saturday": [
-                { time: "05:00", title: "سبت الإتقان الأكاديمي | Physics Repetition", desc: "تكرار ومراجعة مادة الفيزياء لترسيخ وتثبيت القوانين وحل المسائل المتقدمة.", xp: 30, type: "cognitive" }
-            ]
-        },
-        "tier_70_130": {}, "tier_130_180": {}, "tier_180_250": {}, "tier_250_320": {},
-        "tier_320_400": {}, "tier_400_450": {}, "tier_infinity": {}
-    }
-};
-
-// ==========================================
-// 4. PLAYER STATE (RPG MECHANICS)
+// PLAYER STATE
 // ==========================================
 const PlayerState = {
-    data: { level: 1, xp: 0, gold: 0, ap: 0, stats: { str: 10, vit: 10, agi: 10, int: 10, sen: 10 }, authority: 0, lethality: 0 },
-    init() { 
-    this.load(); 
-    this.startScheduleSync(); 
-    this.updateInputLock(); // ✅ فحص القفل عند بدء التشغيل
-},
-    load() {
+    data: {
+        level: 1,
+        xp: 20,
+        gold: 0,
+        ap: 0,
+        stats: { str: 10, vit: 10, agi: 10, int: 10, sen: 10 },
+        authority: 0,
+        lethality: 0
+    },
+
+    init() {
         const saved = localStorage.getItem('monarch_system_data');
-        if (saved) this.data = JSON.parse(saved);
-        this.updateUI();
-    },
-    save() {
-    localStorage.setItem('monarch_system_data', JSON.stringify(this.data));
-    this.updateUI();
-    this.updateInputLock(); // ✅ تحديث حالة قفل الإدخال عند كل تغيير
-},
-    updateUI() {
-        ['str', 'vit', 'agi', 'int', 'sen'].forEach(stat => {
-            if(document.getElementById(`stat-${stat}`)) document.getElementById(`stat-${stat}`).textContent = this.data.stats[stat];
-        });
-        if(document.getElementById('playerGold')) document.getElementById('playerGold').textContent = this.data.gold;
-        if(document.getElementById('availablePoints')) document.getElementById('availablePoints').textContent = this.data.ap;
-        if(document.getElementById('currentLevel')) document.getElementById('currentLevel').textContent = this.data.level;
-        const nextLevelXP = this.data.level * 100;
-        if(document.getElementById('xpText')) document.getElementById('xpText').textContent = `${this.data.xp} / ${nextLevelXP}`;
-        const xpPercent = Math.min((this.data.xp / nextLevelXP) * 100, 100);
-        if(document.getElementById('xpBar')) document.getElementById('xpBar').style.width = `${xpPercent}%`;
-        document.querySelectorAll('.ap-btn').forEach(btn => {
-            btn.classList.toggle('hidden', this.data.ap <= 0);
-            
-        });
-    },
-    updateInputLock() {
-    const currentLevel = this.data.level || 1;
-    const inputSection = document.getElementById('taskInputSection');
-    const lockBanner = document.getElementById('inputLockBanner');
-    const lockLevelDisplay = document.getElementById('lockCurrentLevel');
-    
-    if(lockLevelDisplay) lockLevelDisplay.textContent = currentLevel;
-    
-    if (currentLevel < 450) {
-        // ✅ إخفاء قسم الإدخال وإظهار الشريط التحذيري
-        if(inputSection) inputSection.classList.add('hidden');
-        if(lockBanner) {
-            lockBanner.classList.remove('hidden');
-            lockBanner.classList.add('animate-system-pop');
+        if (saved) {
+            try { this.data = { ...this.data, ...JSON.parse(saved) }; } catch(e) {}
         }
-    } else {
-        // ✅ إظهار قسم الإدخال وإخفاء الشريط التحذيري
-        if(inputSection) inputSection.classList.remove('hidden');
-        if(lockBanner) lockBanner.classList.add('hidden');
-        
-        // تأثير فك القفل النيون
-        if(window.Toast) Toast.show('🔓 تم فك قفل الإدخال اليدوي! المستوى 450+', 'success');
-        if(typeof confetti === 'function') confetti({
-            particleCount: 60, spread: 80, origin: { y: 0.7 }, 
-            colors: ['#00f0ff', '#10b981', '#ffffff']
-        });
-    }
-},
+        this.updateDynamicStats();
+        this.updateUI();
+        this.startScheduleSync();
+        this.updateInputLock();
+    },
+
+    updateDynamicStats() {
+        const now = new Date();
+        const minutesPassed = (now.getHours() * 60) + now.getMinutes();
+        const fatiguePercentage = Math.floor((minutesPassed / 1440) * 100);
+
+        const fatigueEl = document.getElementById('fatigueText');
+        const fatigueBar = document.getElementById('fatigueBar');
+        if(fatigueEl) fatigueEl.textContent = fatiguePercentage;
+        if(fatigueBar) fatigueBar.style.width = `${fatiguePercentage}%`;
+    },
+
+    analyzeQuestAndReward(questTitle) {
+        let title = questTitle.toLowerCase();
+        let statGained = '';
+        if (title.match(/عضلات|قوة|مواي تاي|جوجيتسو|ضغط|أوزان/)) {
+            this.data.stats.str += 1; statGained = 'STR';
+        } else if (title.match(/برمجة|ذكاء|دراسة|تطوير|كود|ai|اصطناعي/)) {
+            this.data.stats.int += 1; statGained = 'INT';
+        } else if (title.match(/جري|سرعة|ركض/)) {
+            this.data.stats.agi += 1; statGained = 'AGI';
+        } else if (title.match(/تأمل|تركيز|ملاحظة/)) {
+            this.data.stats.sen += 1; statGained = 'PER';
+        } else if (title.match(/تحمل|صيام|عمل/)) {
+            this.data.stats.vit += 1; statGained = 'VIT';
+        } else {
+            this.data.ap += 1; statGained = 'AP (Free Point)';
+        }
+        this.save();
+        return statGained;
+    },
+
+    updateInputLock() {
+        const currentLevel = this.data.level || 1;
+        const inputSection = document.getElementById('taskInputSection');
+        const lockBanner = document.getElementById('inputLockBanner');
+        const lockLevelDisplay = document.getElementById('lockCurrentLevel');
+
+        if(lockLevelDisplay) lockLevelDisplay.textContent = currentLevel;
+        if (currentLevel < 450) {
+            if(inputSection) inputSection.classList.add('hidden');
+            if(lockBanner) {
+                lockBanner.classList.remove('hidden');
+                lockBanner.classList.add('animate-system-pop');
+            }
+        } else {
+            if(inputSection) inputSection.classList.remove('hidden');
+            if(lockBanner) lockBanner.classList.add('hidden');
+        }
+    },
+
     spendAP(statName) {
         if (this.data.ap > 0 && this.data.stats[statName] !== undefined) {
             this.data.ap -= 1;
             this.data.stats[statName] += 1;
-            SoundEffects.playSystemClick();
-            Toast.show(`Stat ${statName.toUpperCase()} structurally upgraded!`, 'success');
+            Toast.show(`Stat ${statName.toUpperCase()} upgraded!`, 'success');
             this.save();
         }
     },
+
     addXP(amount) {
         this.data.xp += amount;
         if (this.data.xp < 0) {
@@ -1096,18 +568,29 @@ const PlayerState = {
             this.levelUp();
         }
         this.save();
+        this.updateInputLock();
     },
-    addGold(amount) { this.data.gold += amount; this.save(); },
+
+    addGold(amount) { 
+        this.data.gold += amount; 
+        this.save();
+    },
+
     addStat(statName, amount) {
-        if (this.data.stats[statName] !== undefined) { this.data.stats[statName] += amount; this.save(); }
+        if (this.data.stats[statName] !== undefined) { 
+            this.data.stats[statName] += amount;
+            this.save(); 
+        }
     },
+
     levelUp() {
         this.data.level += 1;
         this.data.ap += 3;
         Object.keys(this.data.stats).forEach(k => this.data.stats[k] += 1);
         this.save();
-        SoundEffects.playLevelUp();
+
         if (typeof confetti !== 'undefined') confetti({ particleCount: 300, spread: 120, origin: { y: 0.6 }, colors: ['#00f0ff', '#9d4edd', '#ffffff'] });
+
         const modal = document.getElementById('milestoneModal');
         if(modal) {
             document.getElementById('milestoneOldLevel').textContent = this.data.level - 1;
@@ -1116,6 +599,7 @@ const PlayerState = {
             modal.classList.remove('hidden');
         }
     },
+
     startScheduleSync() {
         const updateSystemBroadcast = () => {
             const now = new Date();
@@ -1125,17 +609,50 @@ const PlayerState = {
             else if (currentTimeDec >= 6 && currentTimeDec < 8.5) msg = "💻 ACTIVE BLOCK: [DEEP ARCHITECTURE DEV] -> Programming AiMoha Project.";
             else if (currentTimeDec >= 8.5 && currentTimeDec < 10.5) msg = "🤖 ACTIVE BLOCK: [AI ACADEMY] -> Machine Learning training.";
             else if (currentTimeDec >= 15 && currentTimeDec < 16.5) msg = "🏋️ ACTIVE BLOCK: [EVOLUTIONARY PPL ENGINE] -> Physical conditioning.";
-            else if (currentTimeDec >= 20.5 && currentTimeDec < 21.5) msg = "🧠 ACTIVE BLOCK: [COGNITIVE DOMINATION] -> Brain Dungeons active.";
+            else if (currentTimeDec >= 20.5 && currentTimeDec < 21.5) msg = "🧠 ACTIVE BLOCK: [COGNITIVE DOMINATION] -> Brain training active.";
             else msg = "⚔️ ACTIVE BLOCK: [FLEXIBLE ENGAGEMENT] -> Check operational charter.";
-            if(document.getElementById('motivationalQuote')) document.getElementById('motivationalQuote').textContent = msg;
+            const quoteEl = document.getElementById('motivationalQuote');
+            if(quoteEl) quoteEl.textContent = msg;
         };
         updateSystemBroadcast();
         setInterval(updateSystemBroadcast, 60000);
+    },
+
+    save() {
+        localStorage.setItem('monarch_system_data', JSON.stringify(this.data));
+        this.updateDynamicStats();
+        this.updateUI();
+    },
+
+    updateUI() {
+        ['str', 'vit', 'agi', 'int', 'sen'].forEach(stat => {
+            const el = document.getElementById(`stat-${stat}`);
+            if(el) el.textContent = this.data.stats[stat];
+        });
+        const goldEl = document.getElementById('playerGold');
+        const apEl = document.getElementById('availablePoints');
+        const lvlEl = document.getElementById('currentLevel');
+        const xpText = document.getElementById('xpText');
+        const xpBar = document.getElementById('xpBar');
+
+        if(goldEl) goldEl.textContent = this.data.gold;
+        if(apEl) apEl.textContent = this.data.ap;
+        if(lvlEl) lvlEl.textContent = this.data.level;
+
+        const nextLevelXP = this.data.level * 100;
+        if(xpText) xpText.textContent = `${this.data.xp} / ${nextLevelXP}`;
+
+        const xpPercent = Math.min((this.data.xp / nextLevelXP) * 100, 100);
+        if(xpBar) xpBar.style.width = `${xpPercent}%`;
+
+        document.querySelectorAll('.ap-btn').forEach(btn => {
+            btn.classList.toggle('hidden', this.data.ap <= 0);
+        });
     }
 };
 
 // ==========================================
-// 5. QUEST SYSTEM
+// QUEST SYSTEM
 // ==========================================
 const QuestSystem = {
     tasks: [],
@@ -1145,26 +662,31 @@ const QuestSystem = {
         this.render();
     },
     addTask() {
-    // ✅ قفل الإدخال اليدوي للمستويات دون 450
-    const currentLevel = PlayerState.data.level || 1;
-    if (currentLevel < 450) {
-        if(window.SoundEffects) SoundEffects.playSystemClick();
-        if(window.Toast) Toast.show(`🔒 قفل النظام: يتطلب المستوى 450 (حالياً: ${currentLevel})`, 'error');
-        return;
-    }
-    
-    if(window.SoundEffects) SoundEffects.playSystemClick();
-    const inp = document.getElementById('taskInput');
-    const prio = document.getElementById('prioritySelect').value;
-    const statSelect = document.getElementById('statSelect').value;
-    if(!inp || !inp.value.trim()) return;
-    const task = { id: Date.now(), text: inp.value.trim(), priority: prio, completed: false, stat: statSelect, createdAt: new Date().toISOString() };
-    this.tasks.unshift(task);
-    inp.value = '';
-    this.save();
-    this.render();
-    Toast.show('Quest deployed to system window', 'success');
-},
+        const currentLevel = PlayerState.data.level || 1;
+        if (currentLevel < 450) {
+            Toast.show(`🔒 قفل النظام: يتطلب المستوى 450 (حالياً: ${currentLevel})`, 'error');
+            return;
+        }
+
+        const inp = document.getElementById('taskInput');
+        const prio = document.getElementById('prioritySelect').value;
+        const statSelect = document.getElementById('statSelect').value;
+        if(!inp || !inp.value.trim()) return;
+
+        const task = { 
+            id: Date.now(), 
+            text: inp.value.trim(), 
+            priority: prio, 
+            completed: false, 
+            stat: statSelect, 
+            createdAt: new Date().toISOString() 
+        };
+        this.tasks.unshift(task);
+        inp.value = '';
+        this.save();
+        this.render();
+        Toast.show('Quest deployed to system window', 'success');
+    },
     toggleTask(id) {
         const taskIndex = this.tasks.findIndex(t => t.id === id);
         if (taskIndex === -1) return;
@@ -1175,32 +697,25 @@ const QuestSystem = {
 
         if (!task.completed) {
             task.completed = true;
-            if(window.PlayerState) {
-                PlayerState.data.authority = (PlayerState.data.authority || 0) + authorityReward;
-                PlayerState.addXP(xpReward);
-                PlayerState.addGold(goldReward);
-                PlayerState.addStat(task.stat || 'int', 1);
-            }
+            PlayerState.data.authority = (PlayerState.data.authority || 0) + authorityReward;
+            PlayerState.addXP(xpReward);
+            PlayerState.addGold(goldReward);
+            PlayerState.addStat(task.stat || 'int', 1);
             Toast.show(`Quest Cleared! +${xpReward} EXP`, 'success');
-            if(window.SoundEffects) SoundEffects.playSuccess();
             if(typeof confetti === 'function') confetti({particleCount: 80, spread: 60, origin: {y: 0.7}, colors: ['#00f0ff','#9d4edd']});
         } else {
             task.completed = false;
-            if(window.PlayerState) {
-                PlayerState.data.authority = Math.max(0, (PlayerState.data.authority || 0) - authorityReward);
-                PlayerState.addXP(-xpReward);
-                PlayerState.addGold(-goldReward);
-                if (PlayerState.data.gold < 0) PlayerState.data.gold = 0;
-                PlayerState.addStat(task.stat || 'int', -1);
-            }
+            PlayerState.data.authority = Math.max(0, (PlayerState.data.authority || 0) - authorityReward);
+            PlayerState.addXP(-xpReward);
+            PlayerState.addGold(-goldReward);
+            if (PlayerState.data.gold < 0) PlayerState.data.gold = 0;
+            PlayerState.addStat(task.stat || 'int', -1);
             Toast.show(`Quest Reversed! Rewards Deducted.`, 'error');
-            if(window.SoundEffects) SoundEffects.playSystemClick();
         }
         this.save();
         this.render();
     },
     deleteTask(id) {
-        if(window.SoundEffects) SoundEffects.playSystemClick();
         this.tasks = this.tasks.filter(t => t.id !== id);
         this.save();
         this.render();
@@ -1209,18 +724,28 @@ const QuestSystem = {
         const container = document.getElementById('taskContainer');
         if(!container) return;
         container.innerHTML = '';
-        let activeCount = 0; let completedCount = 0;
+        let activeCount = 0; 
+        let completedCount = 0;
+
         if (this.tasks.length === 0) {
             container.innerHTML = `<div class="text-center py-10 opacity-30 sys-font"><p>[NO ACTIVE QUESTS DETECTED]</p></div>`;
             this.updateStatsUI(0, 0, 0);
             return;
         }
-        const statColors = { 'int': 'text-[var(--sys-cyan)]', 'str': 'text-rose-500', 'vit': 'text-emerald-500', 'agi': 'text-sky-400', 'sen': 'text-[var(--sys-purple)]' };
+
+        const statColors = { 
+            'int': 'text-[var(--sys-cyan)]', 
+            'str': 'text-rose-500', 
+            'vit': 'text-emerald-500', 
+            'agi': 'text-sky-400', 
+            'sen': 'text-[var(--sys-purple)]' 
+        };
+
         this.tasks.forEach(task => {
             task.completed ? completedCount++ : activeCount++;
             const escapedText = task.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const div = document.createElement('div');
-            div.className = `task-card flex items-center justify-between p-4 bg-slate-900/80 backdrop-blur-sm border-y border-y-slate-800 transition-all ${task.completed ? 'completed opacity-50' : ''}`;
+            div.className = `task-card flex items-center justify-between p-4 bg-slate-900/80 backdrop-blur-sm border-y border-y-slate-800 transition-all ${task.completed ? 'completed' : 'active'}`;
             div.innerHTML = `
                 <div class="flex items-center gap-4">
                     <button onclick="QuestSystem.toggleTask(${task.id})" class="w-6 h-6 rounded border-2 border-[var(--sys-cyan)] flex items-center justify-center hover:bg-[var(--sys-cyan)] hover:bg-opacity-20 transition-colors ${task.completed ? 'bg-[var(--sys-cyan)]' : ''}">
@@ -1238,27 +763,35 @@ const QuestSystem = {
             `;
             container.appendChild(div);
         });
+
         const lethalityRate = Math.round((completedCount / this.tasks.length) * 100);
-        if(window.PlayerState) {
-            PlayerState.data.lethality = lethalityRate;
-            PlayerState.save();
-        }
+        PlayerState.data.lethality = lethalityRate;
+        PlayerState.save();
         this.updateStatsUI(activeCount, this.tasks.length, lethalityRate);
     },
     updateStatsUI(active, all, lethality) {
-        if(document.getElementById('cnt-active-val')) document.getElementById('cnt-active-val').textContent = active;
-        if(document.getElementById('stat-percent')) document.getElementById('stat-percent').textContent = `${lethality}%`;
+        const activeEl = document.getElementById('cnt-active-val');
+        if(activeEl) activeEl.textContent = active;
     },
-    save() { localStorage.setItem('SL_QUESTS', JSON.stringify(this.tasks)); }
+    save() { 
+        localStorage.setItem('SL_QUESTS', JSON.stringify(this.tasks)); 
+    }
 };
 
 // ==========================================
-// 6. POMODORO TIMER
+// POMODORO TIMER
 // ==========================================
 const Pomodoro = {
     defaultTime: parseInt(localStorage.getItem('SL_SYS_TIMER')) || (5 * 3600),
-    timeLeft: 0, timer: null, isRunning: false,
-    init() { this.timeLeft = this.defaultTime; this.updateUI(); },
+    timeLeft: 0, 
+    timer: null, 
+    isRunning: false,
+
+    init() { 
+        this.timeLeft = this.defaultTime;
+        this.updateUI(); 
+    },
+
     saveSettings() {
         const h = parseInt(document.getElementById('inputHours').value) || 0;
         const m = parseInt(document.getElementById('inputMinutes').value) || 0;
@@ -1267,581 +800,192 @@ const Pomodoro = {
             this.defaultTime = tot;
             localStorage.setItem('SL_SYS_TIMER', this.defaultTime.toString());
             document.getElementById('timerModal').classList.add('hidden');
-            clearInterval(this.timer); this.timeLeft = this.defaultTime; this.isRunning = false; this.toggle();
+            clearInterval(this.timer); 
+            this.timeLeft = this.defaultTime; 
+            this.isRunning = false; 
+            this.toggle();
         }
     },
+
     toggle() {
-        if(typeof SoundEffects !== 'undefined') SoundEffects.playSystemClick();
-        const btn = document.getElementById('timerBtn'); const st = document.getElementById('timerStatus');
+        const btn = document.getElementById('timerBtn'); 
+        const st = document.getElementById('timerStatus');
         if (this.isRunning) {
             clearInterval(this.timer);
-            btn.textContent = '▶️'; btn.classList.remove('bg-rose-600/30');
-            st.textContent = 'PAUSED'; st.className = 'sys-font text-[9px] px-2 py-0.5 bg-amber-900 border border-amber-600 text-amber-300 uppercase';
+            btn.textContent = '▶️'; 
+            btn.classList.remove('bg-rose-600/30');
+            st.textContent = 'PAUSED'; 
+            st.className = 'sys-font text-[9px] px-2 py-0.5 bg-amber-900 border border-amber-600 text-amber-300 uppercase';
         } else {
             if (this.timeLeft <= 0) this.timeLeft = this.defaultTime;
-            this.timer = setInterval(() => { if (this.timeLeft > 0) { this.timeLeft--; this.updateUI(); } else { this.finish(); } }, 1000);
-            btn.textContent = '⏸️'; btn.classList.add('bg-rose-600/30');
-            st.textContent = 'IN COMBAT'; st.className = 'sys-font text-[9px] px-2 py-0.5 bg-rose-900 border border-rose-600 text-rose-300 uppercase animate-pulse';
+            this.timer = setInterval(() => { 
+                if (this.timeLeft > 0) { 
+                    this.timeLeft--; 
+                    this.updateUI(); 
+                } else { 
+                    this.finish(); 
+                } 
+            }, 1000);
+            btn.textContent = '⏸️'; 
+            btn.classList.add('bg-rose-600/30');
+            st.textContent = 'IN COMBAT'; 
+            st.className = 'sys-font text-[9px] px-2 py-0.5 bg-rose-900 border border-rose-600 text-rose-300 uppercase animate-pulse';
         }
         this.isRunning = !this.isRunning;
     },
+
     reset() {
-        if(typeof SoundEffects !== 'undefined') SoundEffects.playSystemClick();
-        clearInterval(this.timer); this.timeLeft = this.defaultTime; this.isRunning = false;
-        const btn = document.getElementById('timerBtn'); btn.textContent = '▶️'; btn.classList.remove('bg-rose-600/30');
+        clearInterval(this.timer);
+        this.timeLeft = this.defaultTime; 
+        this.isRunning = false;
+        const btn = document.getElementById('timerBtn'); 
+        btn.textContent = '▶️'; 
+        btn.classList.remove('bg-rose-600/30');
         const st = document.getElementById('timerStatus');
-        st.textContent = 'IDLE'; st.className = 'sys-font text-[9px] px-2 py-0.5 bg-slate-800 border border-slate-600 text-slate-300 uppercase';
+        st.textContent = 'IDLE'; 
+        st.className = 'sys-font text-[9px] px-2 py-0.5 bg-slate-800 border border-slate-600 text-slate-300 uppercase';
         this.updateUI();
     },
+
     finish() {
-        clearInterval(this.timer); if(typeof SoundEffects !== 'undefined') SoundEffects.playSuccess();
+        clearInterval(this.timer); 
         if (typeof confetti !== 'undefined') confetti({ particleCount: 100, colors: ['#00f0ff'] });
         this.reset();
     },
+
     updateUI() {
         const h = Math.floor(this.timeLeft / 3600).toString().padStart(2, '0');
         const m = Math.floor((this.timeLeft % 3600) / 60).toString().padStart(2, '0');
         const s = (this.timeLeft % 60).toString().padStart(2, '0');
-        if(document.getElementById('timerDisplay')) document.getElementById('timerDisplay').textContent = `${h}:${m}:${s}`;
+        const display = document.getElementById('timerDisplay');
+        if(display) display.textContent = `${h}:${m}:${s}`;
     }
 };
 
-const Milestone = { hide() { document.getElementById('milestoneModal').classList.add('hidden'); if(typeof SoundEffects !== 'undefined') SoundEffects.playSystemClick(); } };
-
-// ==========================================
-// 7. SOVEREIGN TIMER (IRONCLAD ALARM)
-// ==========================================
-const SovereignTimer = {
-    timerInterval: null, timeRemaining: 0, totalDuration: 0, isActive: false, penaltyTriggered: false,
-    alarmAudioContext: null, alarmOscillator: null, alarmInterval: null,
-    init() { this.setupAntiDistraction(); },
-    start(minutes) {
-        if (this.isActive) this.stop();
-        this.totalDuration = minutes * 60; this.timeRemaining = this.totalDuration;
-        this.isActive = true; this.penaltyTriggered = false;
-        if (window.SoundEffects && typeof window.SoundEffects.playSystemClick === 'function') window.SoundEffects.playSystemClick();
-        this.updateUI(); document.getElementById('floatingTimerWidget')?.classList.remove('hidden');
-        this.timerInterval = setInterval(() => {
-            if (this.timeRemaining > 0) { this.timeRemaining--; this.updateUI(); }
-            else { this.triggerAlarm(); }
-        }, 1000);
-    },
-    stop() { clearInterval(this.timerInterval); this.isActive = false; document.getElementById('floatingTimerWidget')?.classList.add('hidden'); },
-    updateUI() {
-        const mins = Math.floor(this.timeRemaining / 60).toString().padStart(2, '0');
-        const secs = (this.timeRemaining % 60).toString().padStart(2, '0');
-        const widgetText = document.getElementById('floatingTimerText');
-        const widgetProgress = document.getElementById('floatingTimerProgress');
-        if(widgetText) widgetText.textContent = `${mins}:${secs}`;
-        if(widgetProgress) widgetProgress.style.width = `${(this.timeRemaining / this.totalDuration) * 100}%`;
-    },
-    setupAntiDistraction() {
-        const penaltyAction = () => {
-            if (this.isActive && !this.penaltyTriggered) {
-                this.penaltyTriggered = true;
-                if (window.PlayerState && typeof window.PlayerState.addXP === 'function') window.PlayerState.addXP(-5);
-                if (window.Toast && typeof window.Toast.show === 'function') window.Toast.show('🚨 [تحذير التشتت]: غادرت محيط التركيز! تم خصم 5 XP.', 'error');
-            }
-        };
-        document.addEventListener('visibilitychange', () => { if (document.hidden) penaltyAction(); });
-        window.addEventListener('blur', penaltyAction);
-    },
-    triggerAlarm() {
-        this.stop();
-        const overlay = document.getElementById('ironcladAlarmOverlay');
-        if(overlay) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); }
-        this.playIroncladTone();
-    },
-    playIroncladTone() {
-        try {
-            this.alarmAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-            this.alarmOscillator = this.alarmAudioContext.createOscillator();
-            const gainNode = this.alarmAudioContext.createGain();
-            this.alarmOscillator.type = 'sawtooth';
-            this.alarmOscillator.frequency.setValueAtTime(440, this.alarmAudioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.2, this.alarmAudioContext.currentTime);
-            this.alarmOscillator.connect(gainNode); gainNode.connect(this.alarmAudioContext.destination);
-            this.alarmOscillator.start();
-            this.alarmInterval = setInterval(() => {
-                if(this.alarmOscillator) {
-                    let currentFreq = this.alarmOscillator.frequency.value;
-                    this.alarmOscillator.frequency.setValueAtTime(currentFreq === 440 ? 587 : 440, this.alarmAudioContext.currentTime);
-                }
-            }, 500);
-        } catch(e) { console.log("Audio Context Alert: Waiting for User Interaction."); }
-    },
-    completeTaskSuccess() {
-        if (this.alarmOscillator) { this.alarmOscillator.stop(); this.alarmOscillator = null; }
-        clearInterval(this.alarmInterval);
-        if (this.alarmAudioContext) this.alarmAudioContext.close();
-        const overlay = document.getElementById('ironcladAlarmOverlay');
-        if(overlay) { overlay.classList.remove('flex'); overlay.classList.add('hidden'); }
-        if (window.PlayerState && typeof window.PlayerState.addXP === 'function') window.PlayerState.addXP(30);
-        if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00f0ff', '#9d4edd'] });
-    }
+const Milestone = { 
+    hide() { 
+        document.getElementById('milestoneModal').classList.add('hidden'); 
+    } 
 };
 
 // ==========================================
-// 8. SOVEREIGN ENGINE (CORE SYSTEM)
+// SOVEREIGN ENGINE (SCHEDULE)
 // ==========================================
 const SovereignEngine = {
     state: {
         get playerLevel() { return PlayerState.data.level || 1; },
         get playerXP() { return PlayerState.data.xp || 0; },
         get playerGold() { return PlayerState.data.gold || 0; },
-        activeTitle: localStorage.getItem('sovereign_title') || "[مبتدئ الكتل]",
-        activeQuest: JSON.parse(localStorage.getItem('sovereign_active_quest')) || null,
-        lastDistractionTime: 0
     },
-    config: { weights: { coding_ai: 30, sports: 20, languages_books: 10, dungeons: 10 }, penaltyXP: 5, xpPerLevelBase: 100 },
+    config: { 
+        weights: { coding_ai: 30, sports: 20, languages_books: 10, dungeons: 10 }, 
+        penaltyXP: 5, 
+        xpPerLevelBase: 100 
+    },
+
     init() {
-        this.checkActiveQuestOnLoad();
-        this.activateAntiDistraction();
         this.runTimeScheduleEngine();
-        this.renderInterface();
         setInterval(() => this.runTimeScheduleEngine(), 60000);
     },
+
     runTimeScheduleEngine() {
-        const now = new Date(); const day = now.getDay(); const hour = now.getHours(); const minute = now.getMinutes();
-        const currentTimeDecimal = hour + (minute / 60); let currentQuest = null;
+        const now = new Date();
+        const day = now.getDay(); 
+        const hour = now.getHours(); 
+        const minute = now.getMinutes();
+        const currentTimeDecimal = hour + (minute / 60);
+        let currentQuest = null;
         const currentTier = this.determineTier(this.state.playerLevel);
+
         if (currentTimeDecimal >= 5.0 && currentTimeDecimal < 6.0) {
             const isEvenDay = (day % 2 === 0);
-            currentQuest = { title: "الكتلة الروحية السيادية", details: isEvenDay ? "صلاة الفجر والأذكار + حفظ جديد وتلاوة قرآنية تدبرية" : "صلاة الفجر والأذكار + مراجعة وتثبيت المحفوظ السابق", type: "languages_books" };
+            currentQuest = { 
+                title: "الكتلة الروحية السيادية", 
+                details: isEvenDay ? "صلاة الفجر والأذكار + حفظ جديد وتلاوة قرآنية تدبرية" : "صلاة الفجر والأذكار + مراجعة وتثبيت المحفوظ السابق", 
+                type: "languages_books" 
+            };
         } else {
             currentQuest = this.getTaskBySchedule(currentTier, day, currentTimeDecimal);
         }
-        if (currentQuest && (!this.state.activeQuest || this.state.activeQuest.title !== currentQuest.title)) {
-            this.triggerQuestPopup(currentQuest);
-        }
     },
+
     determineTier(level) {
-        if (level <= 70) return 'ALPHA'; if (level <= 130) return 'BETA'; if (level <= 450) return 'GAMMA';
-        if (level <= 599) return 'SOVEREIGN_PRE'; return 'INFINITY';
+        if (level <= 70) return 'ALPHA';
+        if (level <= 130) return 'BETA'; 
+        if (level <= 450) return 'GAMMA';
+        if (level <= 599) return 'SOVEREIGN_PRE'; 
+        return 'INFINITY';
     },
+
     getTaskBySchedule(tier, day, time) {
         if (day >= 0 && day <= 3) {
-            if (time >= 6.0 && time < 8.5) return { title: "الهندسة البرمجية العميقة", details: "تطوير مشروع AiMoha والتحكم البرمجي بأسلوب الويب (Python/JS)", type: "coding_ai" };
-            if (time >= 8.5 && time < 10.5) return { title: tier === 'ALPHA' || tier === 'BETA' ? "المسار الأكاديمي الأساسي" : "أكاديمية الذكاء الاصطناعي", details: tier === 'ALPHA' || tier === 'BETA' ? "حل مسائل المنطق والرياضيات المتقدمة" : "دراسة خوارزميات التعلم الآلي والنماذج اللغوية الكبيرة", type: "coding_ai" };
-            if (time >= 10.3 && time < 12.0) return { title: "إتقان اللغة الإنجليزية التقنية", details: "انغماس لغوي مكثف وجلسات المحاكاة الصوتية", type: "languages_books" };
-            if (time >= 13.0 && time < 15.0) return { title: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "إنتاج وتأليف الكتاب الرقمي" : "المعمل التقني التطبيقي", details: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "جلسات الكتابة والتدقيق النهائي" : "بناء مشاريع فرونت إند متقدمة", type: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "languages_books" : "coding_ai" };
-            if (time >= 15.0 && time < 16.5) return { title: tier === 'SOVEREIGN_PRE' || tier === 'INFINITY' ? "كتلة الجري الانفجاري" : "الإعداد البدني الصارم", details: tier === 'SOVEREIGN_PRE' || tier === 'INFINITY' ? "رفع الصلابة العظمية وفق قانون وولف" : "نظام تمارين PPL المتقدم", type: "sports" };
+            if (time >= 6.0 && time < 8.5) return { 
+                title: "الهندسة البرمجية العميقة", 
+                details: "تطوير مشروع AiMoha والتحكم البرمجي بأسلوب الويب (Python/JS)", 
+                type: "coding_ai" 
+            };
+            if (time >= 8.5 && time < 10.5) return { 
+                title: tier === 'ALPHA' || tier === 'BETA' ? "المسار الأكاديمي الأساسي" : "أكاديمية الذكاء الاصطناعي", 
+                details: tier === 'ALPHA' || tier === 'BETA' ? "حل مسائل المنطق والرياضيات المتقدمة" : "دراسة خوارزميات التعلم الآلي والنماذج اللغوية الكبيرة", 
+                type: "coding_ai" 
+            };
+            if (time >= 10.3 && time < 12.0) return { 
+                title: "إتقان اللغة الإنجليزية التقنية", 
+                details: "انغماس لغوي مكثف وجلسات المحاكاة الصوتية", 
+                type: "languages_books" 
+            };
+            if (time >= 13.0 && time < 15.0) return { 
+                title: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "إنتاج وتأليف الكتاب الرقمي" : "المعمل التقني التطبيقي", 
+                details: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "جلسات الكتابة والتدقيق النهائي" : "بناء مشاريع فرونت إند متقدمة", 
+                type: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "languages_books" : "coding_ai" 
+            };
+            if (time >= 15.0 && time < 16.5) return { 
+                title: tier === 'SOVEREIGN_PRE' || tier === 'INFINITY' ? "كتلة الجري الانفجاري" : "الإعداد البدني الصارم", 
+                details: tier === 'SOVEREIGN_PRE' || tier === 'INFINITY' ? "رفع الصلابة العظمية وفق قانون وولف" : "نظام تمارين PPL المتقدم", 
+                type: "sports" 
+            };
             if (time >= 19.5 && time < 20.5) {
-                const sportsMatrix = { 0: "تمارين الجري والتحمل", 1: "فنون القتال الحية: قتال الموي تاي", 2: "تمارين الكور والجري الانفجاري", 3: "تمارين كرة القدم الفردية" };
-                return { title: "جلسة التدريب البدني التخصصي", details: sportsMatrix[day], type: "sports" };
+                const sportsMatrix = { 
+                    0: "تمارين الجري والتحمل", 
+                    1: "فنون القتال الحية: قتال الموي تاي", 
+                    2: "تمارين الكور والجري الانفجاري", 
+                    3: "تمارين كرة القدم الفردية" 
+                };
+                return { 
+                    title: "جلسة التدريب البدني التخصصي", 
+                    details: sportsMatrix[day], 
+                    type: "sports" 
+                };
             }
         }
         if (day === 6) {
-            if (time >= 10.0 && time < 14.0) return { title: "كتلة الأمن التقني والسيبراني", details: "دراسة وتطبيق أساسيات القرصنة الأخلاقية", type: "coding_ai" };
-            if (time >= 15.0 && time < 16.5) return { title: "كتلة الجري الصارم", details: "ساعة ونصف من الجري مقسمة بدقة", type: "sports" };
-            if (time >= 17.0 && time < 18.5) return { title: "الأداء الرياضي التنافسي", details: "مباراة كاملة لاختبار الصلابة والمقاومة", type: "sports" };
+            if (time >= 10.0 && time < 14.0) return { 
+                title: "كتلة الأمن التقني والسيبراني", 
+                details: "دراسة وتطبيق أساسيات القرصنة الأخلاقية", 
+                type: "coding_ai" 
+            };
+            if (time >= 15.0 && time < 16.5) return { 
+                title: "كتلة الجري الصارم", 
+                details: "ساعة ونصف من الجري مقسمة بدقة", 
+                type: "sports" 
+            };
+            if (time >= 17.0 && time < 18.5) return { 
+                title: "الأداء الرياضي التنافسي", 
+                details: "مباراة كاملة لاختبار الصلابة والمقاومة", 
+                type: "sports" 
+            };
         }
-        if (day === 4 && time >= 13.0 && time < 15.0) return { title: "الدراسة الشرعية العميقة", details: "دراسة متعمقة في التوحيد ورياض الصالحين", type: "languages_books" };
+        if (day === 4 && time >= 13.0 && time < 15.0) return { 
+            title: "الدراسة الشرعية العميقة", 
+            details: "دراسة متعمقة في التوحيد ورياض الصالحين", 
+            type: "languages_books" 
+        };
         return null;
     },
-    triggerQuestPopup(quest) {
-        AnimePopup.show(quest.title, quest.details, "NOW", this.config.weights[quest.type] || 10);
-    },
- acceptQuest(quest) {
-    if(!quest) return;
-    
-    // ✅ ضمان وجود acceptedAt
-    if(!quest.acceptedAt) quest.acceptedAt = Date.now();
-    quest.active = true;
-    
-    this.state.activeQuest = quest;
-    localStorage.setItem('sovereign_active_quest', JSON.stringify(quest));
-    
-    // ✅ تحديث الواجهة
-    document.getElementById('activeDirectiveText').textContent = quest.title;
-    document.getElementById('activeDirectiveBar').classList.remove('hidden');
-    
-    const targetEl = document.getElementById('directiveTargetTime');
-    if(targetEl && quest.timeLimit) targetEl.textContent = quest.timeLimit;
-    
-    // ✅ بدء العداد
-    if(window.DirectiveTimer) DirectiveTimer.start(quest.acceptedAt);
-    
-    this.logToSystem('quest', `تم قبول المهمة: ${quest.title}`);
-},
-    activateDirectiveBar() {
-        let bar = document.getElementById('activeDirectiveBar');
-        if (bar) bar.classList.remove('hidden');
-    },
-    completeQuest() {
-    if (!this.state.activeQuest) return;
-    
-    const quest = this.state.activeQuest;
-    const questType = quest.type || 'coding_ai';
-    const baseReward = this.config.weights[questType] || 10;
-    
-    // ✅ حساب الوقت المنقضي بدقة
-    const acceptedAt = quest.acceptedAt || Date.now();
-    const elapsedMs = Date.now() - acceptedAt;
-    const elapsedMinutes = Math.floor(elapsedMs / 60000);
-    
-    // ✅ مكافآت إضافية بناءً على الوقت المستغرق
-    let timeBonus = 0;
-    if (elapsedMinutes >= 25) timeBonus = 10;
-    if (elapsedMinutes >= 60) timeBonus = 25;
-    
-    const totalXP = baseReward + timeBonus;
-    const goldReward = totalXP * 2;
-    
-    // ✅ تطبيق المكافآت عبر PlayerState الموحد
-    if(window.PlayerState) {
-        PlayerState.addXP(totalXP);
-        PlayerState.addGold(goldReward);
-    }
-    
-    this.logToSystem('quest', `إنجاز مهمة: [${quest.title}] | النوع: ${questType} | الوقت: ${elapsedMinutes}د | مكافأة: +${totalXP} XP (أساسي: ${baseReward} + وقت: ${timeBonus}) | ذهب: +${goldReward}`);
-    
-    // ✅ تنظيف الحالة
-    const bar = document.getElementById('activeDirectiveBar');
-    if (bar) bar.classList.add('hidden');
-    this.state.activeQuest = null;
-    localStorage.removeItem('sovereign_active_quest');
-    
-    if (typeof confetti === 'function') {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.9 }, colors: ['#00f0ff', '#9d4edd'] });
-    }
-    if(window.Toast) Toast.show(`✅ تم إنجاز المهمة! +${totalXP} XP | +${goldReward} 🪙`, 'success');
-},
-    activateAntiDistraction() {
-        const handlePenalty = () => {
-            const now = Date.now();
-            if (this.state.activeQuest && (now - this.state.lastDistractionTime > 30000)) {
-                this.state.lastDistractionTime = now;
-                PlayerState.addXP(-this.config.penaltyXP);
-                this.logToSystem('penalty', `عقوبة انضباطية: تشتت أثناء مهمة [${this.state.activeQuest.title}] -5 XP`);
-            }
-        };
-        window.addEventListener('blur', handlePenalty);
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') handlePenalty(); });
-    },
-    logToSystem(type, message) {
-        let logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
-        logs.unshift({ id: Date.now(), time: new Date().toLocaleTimeString('ar-EG'), type, text: message });
-        localStorage.setItem('sovereign_system_logs', JSON.stringify(logs.slice(0, 200)));
-    },
-    renderInterface() {
-        const lvlEl = document.getElementById('currentLevel');
-        const ttlEl = document.getElementById('activeTitleDisplay');
-        if (lvlEl) lvlEl.innerText = this.state.playerLevel;
-        if (ttlEl) ttlEl.innerText = `TITLE: ${this.state.activeTitle}`;
-    },
-checkActiveQuestOnLoad() {
-    const saved = localStorage.getItem('sovereign_active_quest');
-    const savedStartTime = localStorage.getItem('directive_start_time');
-    
-    if (saved) { 
-        try {
-            const quest = JSON.parse(saved);
-            this.state.activeQuest = quest;
-            
-            // ✅ استعادة واجهة المستخدم
-            document.getElementById('activeDirectiveText').textContent = quest.title || '...';
-            document.getElementById('activeDirectiveBar').classList.remove('hidden');
-            
-            // ✅ تحديث الوقت المستهدف
-            const targetEl = document.getElementById('directiveTargetTime');
-            if(targetEl && quest.timeLimit) {
-                targetEl.textContent = quest.timeLimit;
-            }
-            
-            // ✅ استئناف العداد
-            if(quest.acceptedAt && window.DirectiveTimer) {
-                DirectiveTimer.start(quest.acceptedAt);
-            } else if (savedStartTime && window.DirectiveTimer) {
-                // fallback للإصدارات القديمة
-                DirectiveTimer.start(parseInt(savedStartTime));
-            }
-        } catch(e) {
-            console.error('[SovereignEngine] فشل استعادة المهمة', e);
-            localStorage.removeItem('sovereign_active_quest');
-        }
-    }
-}
 };
 
 // ==========================================
-// 9. SOVEREIGN CHARTERS (DYNAMIC CHARTER)
-// ==========================================
-const SovereignCharters = {
-    getCharterData(level) {
-        if (level >= 1 && level <= 30) {
-            return { title: "ميثاق التأسيس وبناء الكتل (المستوى 1 - 30)", badge: "[مبتدئ الكتل]", color: "var(--sys-purple)", schedule: [
-                { time: "05:00 - 06:00", task: "الفترة الروحية", details: "تلاوة القرآن + صلاة الفجر والأذكار + الإطالات البدنية." },
-                { time: "06:00 - 08:30", task: "الهندسة البرمجية الأساسية", details: "بناء قواعد البرمجة العامة ومنطق الويب (Python / JS)." },
-                { time: "08:30 - 10:30", task: "المسار الأكاديمي الأساسي", details: "حل مسائل الرياضيات المتقدمة والمنطق." },
-                { time: "10:30 - 12:00", task: "إتقان اللغة الإنجليزية", details: "انغماس لغوي مكثف وجلسات المحاكاة الصوتية (Shadowing)." },
-                { time: "12:00 - 13:00", task: "الاستراحة الكبرى", details: "صلاة الظهر + وجبة غداء غنية بالبروتين." },
-                { time: "13:00 - 15:00", task: "المعمل التقني التطبيقي", details: "هندسة نظم البرمجيات والتكامل العملي." }
-            ]};
-        } else if (level >= 31 && level <= 70) {
-            return { title: "ميثاق التطور العصبي وتوسيع المهارات (31 - 70)", badge: "[مطور النواة]", color: "var(--sys-cyan)", schedule: [
-                { time: "05:00 - 06:00", task: "الفترة الروحية المتقدمة", details: "الأيام الفردية: مراجعة. الأيام الزوجية: حفظ جديد." },
-                { time: "06:00 - 08:30", task: "التطوير البرمجي العميق", details: "التركيز على المشاريع النشطة وبناء الأنظمة المستقلة." },
-                { time: "08:30 - 10:30", task: "أكاديمية الذكاء الاصطناعي", details: "دراسة خوارزميات تعلم الآلة والنماذج اللغوية الكبيرة." },
-                { time: "14:30 - 16:00", task: "الذكاء السائل والمخرجات", details: "جلسة Dual N-Back مكثفة + تدقيق الكتاب الرقمي." },
-                { time: "16:00 - 18:00", task: "معمل الحرف والخفة اليدوية", details: "تعلم مهارة الحلاقة وصنع الحيل اليدوية." }
-            ]};
-        } else if (level >= 71 && level <= 449) {
-            return { title: "ميثاق الإتقان والأداء التنافسي (71 - 449)", badge: "[سيد الحرف والإنتاج]", color: "var(--sys-cyan)", schedule: [
-                { time: "05:00 - 10:00", task: "الكتلة الأكاديمية والروحية المتكاملة", details: "5 ساعات: مراجعة الفيزياء + حفظ وتلاوة القرآن." },
-                { time: "10:00 - 14:00", task: "الأمن السيبراني واللغات", details: "تعلم القرصنة الأخلاقية + تعزيز المفردات الإنجليزية." },
-                { time: "14:00 - 15:00", task: "التتدبر الصوتي والتحسين", details: "الاستماع والتلاوة لرفع جودة النبرة الصوتية." },
-                { time: "15:00 - 17:00", task: "المسار الفني والثقافي", details: "التحليل الاستراتيجي وتدريبات الآلات الموسيقية." },
-                { time: "17:00 - 19:30", task: "المباريات الكاملة والأداء الرياضي", details: "منافسات كاملة في كرة القدم وكرة السلة." }
-            ]};
-        } else {
-            return { title: "ميثاق السيادة المطلقة: نسخة اللانهاية (450+)", badge: "[العاهل المستقل]", color: "#ff0055", alert: "🚨 STATUS: SOVEREIGN AUTONOMY ACTIVATED.", schedule: [
-                { time: "05:00 - 06:00", task: "بروتوكول التبادل الروحي الفولاذي", details: "تثبيت المحفوظ وحفظ الجديد بدقة متناهية." },
-                { time: "06:00 - 08:30", task: "Deep Programming", details: "تطوير نواة نظام المحاكاة والمشاريع البرمجية المتقدمة." },
-                { time: "08:30 - 10:30", task: "AI Academy & Chess Logic", details: "دمج منطق الشطرنج الاستراتيجي في وكلاء الذكاء الاصطناعي." },
-                { time: "16:30 - 17:30", task: "كتلة الجري الانفجاري اليومي", details: "ساعة جري مكثف لرفع قدرة التحمل العضلية والرئوية." },
-                { time: "خميس الإنجاز", task: "الدراسات الشرعية المكثفة", details: "التفرغ لدراسة علوم التوحيد وأحكام التجويد." },
-                { time: "20:30 - 21:30", task: "كتلة الارتقاء الذهني النهائي", details: "ديتوكس الدوبامين وقراءة نظم تطوير الذات العميقة." }
-            ]};
-        }
-    }
-};
-
-function updateCharterView() {
-    const currentLevel = PlayerState.data.level || 1;
-    const charter = SovereignCharters.getCharterData(currentLevel);
-    const container = document.getElementById('operationalCharterContainer');
-    if (!container) return;
-    let alertHTML = '';
-    if (charter.alert) alertHTML = `<div class="mb-6 p-4 bg-red-950/40 border border-red-500/50 rounded animate-pulse text-center"><p class="text-xs font-mono tracking-widest text-red-400 font-bold">${charter.alert}</p></div>`;
-    let rowsHTML = charter.schedule.map(item => `
-        <tr class="border-b border-slate-800/60 hover:bg-slate-900/40 transition">
-            <td class="p-4 font-mono text-xs font-bold text-slate-400 whitespace-nowrap">${item.time}</td>
-            <td class="p-4 text-sm font-black text-white whitespace-nowrap"><span class="inline-block w-2 h-2 rounded-full mr-2" style="background-color: ${charter.color}"></span>${item.task}</td>
-            <td class="p-4 text-xs text-slate-300 leading-relaxed">${item.details}</td>
-        </tr>
-    `).join('');
-    container.innerHTML = `
-        <div class="p-6 bg-[var(--sys-panel)] border rounded-lg backdrop-blur-md transition-all duration-500" style="border-color: ${charter.color}44; box-shadow: 0 0 15px ${charter.color}15">
-            ${alertHTML}
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6 border-b border-slate-800 pb-4">
-                <div><h2 class="text-xl font-black text-white tracking-wide">${charter.title}</h2><p class="text-xs text-slate-400 mt-1">يتكيف محتوى هذه الفترات تلقائياً مع رتبتك الحالية.</p></div>
-                <span class="px-3 py-1 text-xs font-mono font-black uppercase rounded tracking-widest" style="background-color: ${charter.color}22; color: ${charter.color}; border: 1px solid ${charter.color}44">${charter.badge}</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
-                    <thead><tr class="border-b border-slate-700 text-xs font-bold uppercase tracking-wider text-slate-400"><th class="p-3 text-right w-32">الوقت / اليوم</th><th class="p-3 text-right w-48">الكتلة التشغيلية</th><th class="p-3 text-right">البروتوكول والتفاصيل</th></tr></thead>
-                    <tbody>${rowsHTML}</tbody>
-                </table>
-            </div>
-        </div>`;
-}
-
-// ==========================================
-// 10. SOVEREIGN STORE (TITLES STORE)
-// ==========================================
-const SovereignStore = {
-    titlesDatabase: [
-        { id: "tier_1_alpha", name: "[مبتدئ الكتل]", cost: 0, minLevel: 1, desc: "اللقب التأسيسي المجاني عند بدء ميثاق ترويض العقل.", availableDays: [0,1,2,3,4,5,6], availableHours: [0, 24] },
-        { id: "cyber_ghost", name: "[شبح الشبكات]", cost: 150, minLevel: 71, desc: "يُفتح عند دخول عتبة الأمن التقني والقرصنة الأخلاقية.", availableDays: [1,3,5], availableHours: [18, 24] },
-        { id: "shadow_coder", name: "[مبرمج الظلال]", cost: 300, minLevel: 100, desc: "مخصص لمن يطوعون كتل الـ JavaScript والويب.", availableDays: [0,2,4,6], availableHours: [6, 18] },
-        { id: "ai_monarch", name: "[عاهل الذكاء الاصطناعي]", cost: 600, minLevel: 131, desc: "يتطلب اختراق فئة غاما ودراسة LLMs.", availableDays: [1,2,3,4,5], availableHours: [0, 24] },
-        { id: "iron_warrior", name: "[المحارب الفولاذي]", cost: 800, minLevel: 451, desc: "خاص بجلسات التحمل القاسي والقتال.", availableDays: [0,3,6], availableHours: [5, 10] },
-        { id: "independent_sovereign", name: "[العاهل المستقل]", cost: 2000, minLevel: 600, desc: "السيادة المطلقة والاستقلالية التامة.", availableDays: [5,6], availableHours: [0, 24] },
-        { id: "weekend_architect", name: "[مهندس العطلات]", cost: 250, minLevel: 50, desc: "لقب نادر يظهر فقط أيام الجمعة والسبت.", availableDays: [5,6], availableHours: [0, 24] },
-        { id: "night_hacker", name: "[مخترق الليل]", cost: 400, minLevel: 90, desc: "يظهر فقط في ساعات الظلام العميقة.", availableDays: [0,1,2,3,4,5,6], availableHours: [0, 5] }
-    ],
-    purchasedTitles: JSON.parse(localStorage.getItem('sovereign_owned_titles')) || ["tier_1_alpha"],
-    
-    init() {
-        this.renderStore(); 
-        this.updateStoreGold();
-    },
-    
-    getAvailableStock() {
-        const now = new Date();
-        const currentDay = now.getDay();
-        const currentHour = now.getHours();
-        const currentLevel = PlayerState.data.level || 1;
-        
-        return this.titlesDatabase.filter(item => {
-            if (currentLevel < item.minLevel) return false;
-            if (item.availableDays && !item.availableDays.includes(currentDay)) return false;
-            if (item.availableHours) {
-                const [start, end] = item.availableHours;
-                if (currentHour < start || currentHour >= end) return false;
-            }
-            return true;
-        });
-    },
-    
-    updateStoreGold() {
-        const goldDisplay = document.getElementById('storeGoldDisplay');
-        if (goldDisplay) goldDisplay.innerText = PlayerState.data.gold || 0;
-    },
-    
-    renderStore() {
-        const grid = document.getElementById('titlesStoreGrid');
-        const emptyState = document.getElementById('storeEmptyState');
-        if (!grid) return;
-        
-        const currentLevel = PlayerState.data.level || 1;
-        const currentTitle = SovereignEngine.state.activeTitle;
-        const currentGold = PlayerState.data.gold || 0;
-        const availableStock = this.getAvailableStock();
-        
-        if (availableStock.length === 0) {
-            grid.innerHTML = '';
-            if(emptyState) emptyState.classList.remove('hidden');
-            return;
-        }
-        if(emptyState) emptyState.classList.add('hidden');
-        
-        grid.innerHTML = availableStock.map(item => {
-            const isOwned = this.purchasedTitles.includes(item.id);
-            const isEquipped = currentTitle === item.name;
-            const canAfford = currentGold >= item.cost;
-            
-            let actionButton = '';
-            if (isEquipped) {
-                actionButton = `<button class="w-full py-2.5 bg-[var(--sys-cyan)] text-black font-black text-xs uppercase shadow-[0_0_15px_rgba(0,240,255,0.3)] animate-pulse tracking-widest">⚡ مجهز حالياً</button>`;
-            } else if (isOwned) {
-                actionButton = `<button onclick="SovereignStore.equipTitle('${item.id}')" class="w-full py-2.5 bg-[#0d1527] border border-[var(--sys-purple)] text-[var(--sys-purple)] font-bold text-xs hover:bg-[var(--sys-purple)] hover:text-white transition rounded-sm tracking-wider uppercase">تجهيز اللقب</button>`;
-            } else if (!canAfford) {
-                actionButton = `<button class="w-full py-2.5 bg-slate-800 border border-slate-700 text-slate-500 font-bold text-xs cursor-not-allowed opacity-50 rounded-sm" disabled>🪙 ${item.cost} (رصيد ناقص)</button>`;
-            } else {
-                actionButton = `<button onclick="SovereignStore.buyTitle('${item.id}', ${item.cost})" class="w-full py-2.5 bg-gradient-to-r from-yellow-700 to-yellow-600 hover:from-yellow-600 hover:to-yellow-500 text-black font-black text-xs transition rounded-sm shadow-[0_0_15px_rgba(234,179,8,0.25)] uppercase tracking-widest hover:shadow-[0_0_20px_rgba(234,179,8,0.4)]">شراء بـ 🪙 ${item.cost}</button>`;
-            }
-            
-            let rotationBadge = '';
-            if (item.availableDays && item.availableDays.length < 7) {
-                const dayNames = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-                const daysStr = item.availableDays.map(d => dayNames[d]).join(' • ');
-                rotationBadge += `<div class="text-[9px] text-slate-500 sys-font mt-2 pt-2 border-t border-slate-800/60 flex items-center gap-1"><span>📅</span> ${daysStr}</div>`;
-            }
-            if (item.availableHours && !(item.availableHours[0] === 0 && item.availableHours[1] === 24)) {
-                rotationBadge += `<div class="text-[9px] text-slate-500 sys-font flex items-center gap-1"><span>⏰</span> ${item.availableHours[0].toString().padStart(2,'0')}:00 – ${item.availableHours[1].toString().padStart(2,'0')}:00</div>`;
-            }
-            
-            return `<div class="border ${isEquipped ? 'border-[var(--sys-cyan)] shadow-[0_0_20px_rgba(0,240,255,0.12)]' : 'border-slate-800'} bg-slate-950/60 p-5 flex flex-col justify-between rounded-sm backdrop-blur-sm relative overflow-hidden group transition-all duration-300 hover:border-slate-600 hover:bg-slate-900/80">
-                ${isEquipped ? '<div class="absolute top-0 right-0 bg-[var(--sys-cyan)] text-black text-[9px] font-black px-3 py-1 sys-font tracking-wider z-10">ACTIVE</div>' : ''}
-                ${!isEquipped && isOwned ? '<div class="absolute top-0 right-0 bg-slate-700 text-slate-300 text-[9px] font-black px-3 py-1 sys-font tracking-wider z-10">OWNED</div>' : ''}
-                
-                <div class="mb-4 relative z-10">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-xl shadow-inner">
-                            ${isEquipped ? '👑' : isOwned ? '💎' : '🔮'}
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-black text-white tracking-wide leading-tight">${item.name}</h3>
-                            <div class="flex gap-2 mt-1">
-                                <span class="text-[10px] px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 sys-font rounded">LVL ${item.minLevel}</span>
-                                ${!isOwned ? `<span class="text-[10px] px-2 py-0.5 bg-yellow-950/40 border border-yellow-900/40 text-yellow-500 sys-font rounded">🪙 ${item.cost}</span>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-slate-400 text-[11px] leading-relaxed min-h-[36px]">${item.desc}</p>
-                    ${rotationBadge}
-                </div>
-                
-                <div class="mt-auto pt-3 border-t border-slate-800/60 relative z-10">
-                    ${actionButton}
-                </div>
-                
-                ${isEquipped ? '<div class="absolute inset-0 bg-[var(--sys-cyan)] opacity-[0.03] pointer-events-none"></div>' : ''}
-            </div>`;
-        }).join('');
-    },
-    
-    buyTitle(id, cost) {
-        if (PlayerState.data.gold < cost) { 
-            if(window.Toast) Toast.show('⚠️ رصيد الذهب غير كافٍ!', 'error');
-            return; 
-        }
-        PlayerState.data.gold -= cost; 
-        this.purchasedTitles.push(id);
-        localStorage.setItem('sovereign_owned_titles', JSON.stringify(this.purchasedTitles));
-        PlayerState.save();
-        if(window.SovereignEngine && SovereignEngine.logToSystem) {
-            SovereignEngine.logToSystem('system', `شراء لقب [${id}]: -${cost} ذهب`);
-        }
-        this.updateStoreGold(); 
-        this.renderStore();
-        if(window.Toast) Toast.show(`تم شراء اللقب مقابل ${cost} 🪙`, 'success');
-        if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 70, origin: { y: 0.8 }, colors: ['#fbbf24', '#f59e0b', '#ffffff'] });
-    },
-    
-    equipTitle(id) {
-        const titleData = this.titlesDatabase.find(item => item.id === id);
-        if (!titleData) return;
-        SovereignEngine.state.activeTitle = titleData.name;
-        localStorage.setItem('sovereign_title', titleData.name);
-        if(window.SovereignEngine && SovereignEngine.logToSystem) {
-            SovereignEngine.logToSystem('system', `تجهيز اللقب: ${titleData.name}`);
-        }
-        SovereignEngine.renderInterface(); 
-        this.renderStore();
-        if(window.Toast) Toast.show(`تم تجهيز اللقب: ${titleData.name}`, 'success');
-    }
-};
-const Router = {
-    navigate(viewId) {
-        if(typeof SoundEffects !== 'undefined') SoundEffects.playSystemClick();
-        if (viewId === 'aiChat') { window.location.href = 'monarch-ai.html'; return; }
-        else if (viewId === 'brainGames') { window.location.href = 'dungeons.html'; return; }
-
-        // إخفاء جميع الواجهات الرئيسية
-        const views = ['tasksView', 'charterView', 'storeView'];
-        views.forEach(v => {
-            const el = document.getElementById(v);
-            if(el) {
-                el.classList.add('hidden');
-                el.classList.remove('flex');
-            }
-        });
-
-        if (viewId === 'charter') {
-            document.getElementById('charterView').classList.remove('hidden');
-            document.getElementById('charterView').classList.add('flex');
-            updateCharterView();
-        } else if (viewId === 'store') {
-            document.getElementById('storeView').classList.remove('hidden');
-            document.getElementById('storeView').classList.add('flex');
-            SovereignStore.renderStore();
-            SovereignStore.updateStoreGold();
-        } else {
-            document.getElementById('tasksView').classList.remove('hidden');
-            document.getElementById('tasksView').classList.add('flex');
-            if (viewId === 'active') {
-                document.querySelectorAll('.task-card').forEach(card => { card.style.display = card.classList.contains('completed') ? 'none' : 'flex'; });
-            } else {
-                document.querySelectorAll('.task-card').forEach(card => { card.style.display = 'flex'; });
-            }
-        }
-        
-        // إعادة ضبط أزرار التنقل
-        document.querySelectorAll('aside nav button').forEach(btn => {
-            btn.classList.remove('bg-[var(--sys-cyan)]', 'bg-opacity-10', 'text-[var(--sys-cyan)]', 'border-[var(--sys-cyan)]', 'text-[var(--sys-purple)]', 'bg-[var(--sys-purple)]', 'text-yellow-400', 'border-yellow-500');
-            if(!btn.classList.contains('text-white')) btn.classList.add('text-slate-400');
-        });
-        
-        // تفعيل الزر النشط
-        const activeBtn = document.getElementById(`nav-${viewId}`);
-        if(activeBtn) {
-            activeBtn.classList.remove('text-slate-400');
-            if(viewId === 'charter') {
-                activeBtn.classList.add('text-[var(--sys-purple)]', 'bg-[var(--sys-purple)]', 'bg-opacity-10');
-            } else if (viewId === 'store') {
-                activeBtn.classList.add('text-yellow-400', 'border-yellow-500');
-            } else {
-                activeBtn.classList.add('bg-[var(--sys-cyan)]', 'bg-opacity-10', 'text-[var(--sys-cyan)]', 'border-[var(--sys-cyan)]');
-            }
-        }
-    }
-};
-
-// ==========================================
-// 12. WEATHER & METRICS
+// WEATHER & METRICS
 // ==========================================
 const SovereignMetrics = {
     init() {
@@ -1861,10 +1005,12 @@ const SovereignMetrics = {
         const locEl = document.getElementById('sysLocation');
         const tempEl = document.getElementById('sysTemp');
         const humEl = document.getElementById('sysHumidity');
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
-                    const lat = position.coords.latitude; const lon = position.coords.longitude;
+                    const lat = position.coords.latitude; 
+                    const lon = position.coords.longitude;
                     try {
                         const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&relative_humidity_2m=true`);
                         if (!response.ok) throw new Error();
@@ -1879,122 +1025,54 @@ const SovereignMetrics = {
         } else { this.activateFallbackMode(); }
     },
     activateFallbackMode() {
-        if(document.getElementById('sysLocation')) document.getElementById('sysLocation').textContent = `📍 SOVEREIGN ZONE`;
-        if(document.getElementById('sysTemp')) document.getElementById('sysTemp').textContent = `24°C`;
-        if(document.getElementById('sysHumidity')) document.getElementById('sysHumidity').textContent = `45% Hum`;
+        const locEl = document.getElementById('sysLocation');
+        const tempEl = document.getElementById('sysTemp');
+        const humEl = document.getElementById('sysHumidity');
+        if(locEl) locEl.textContent = `📍 SOVEREIGN ZONE`;
+        if(tempEl) tempEl.textContent = `24°C`;
+        if(humEl) humEl.textContent = `45% Hum`;
     }
 };
 
 // ==========================================
-// 13. ANTI-DISTRACTION PROTOCOL
+// ANTI-DISTRACTION PROTOCOL
 // ==========================================
 window.addEventListener('blur', () => {
     if (Pomodoro.isRunning) {
         PlayerState.addXP(-5);
         Toast.show("🚨 [تحذير التشتت]: تم خصم 5 XP لغيابك أثناء المهمة!", "error");
     }
-    const activeBar = document.getElementById('activeDirectiveBar');
-    const isTaskRunning = activeBar && !activeBar.classList.contains('hidden');
-    if (isTaskRunning) {
-        PlayerState.addXP(-5);
-        Toast.show("[تحذير النظام] تم رصد خروج وتشتت ذهني! الخصم: -5 XP", "error");
-    }
 });
 
 // ==========================================
-// 14. SYSTEM INITIALIZATION
+// SYSTEM INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    AuraThemes.init();
-    SoundEffects.init();
+    // Loading screen
+    const prog = document.getElementById('loadProgress');
+    if(prog) prog.style.width = '100%';
+    setTimeout(() => {
+        const loading = document.getElementById('loadingScreen');
+        if(loading) {
+            loading.style.opacity = '0';
+            setTimeout(() => loading.remove(), 500);
+        }
+    }, 1200);
+
     PlayerState.init();
     QuestSystem.init();
     Pomodoro.init();
     SovereignMetrics.init();
     SovereignEngine.init();
-    SovereignStore.init();
-
-    const h = new Date().getHours();
-    if(document.getElementById('greetingText')) {
-        document.getElementById('greetingText').textContent = h < 12 ? 'Morning of Sovereignty, Monarch..' : 'Evening of Dominance, Monarch..';
-    }
 
     const taskInput = document.getElementById('taskInput');
-    if(taskInput) taskInput.addEventListener('keypress', e => { if (e.key === 'Enter') QuestSystem.addTask(); });
-
-    const navAll = document.getElementById('nav-all');
-    if(navAll) navAll.classList.add('bg-[var(--sys-cyan)]', 'bg-opacity-10', 'text-[var(--sys-cyan)]', 'border-[var(--sys-cyan)]');
+    if(taskInput) {
+        taskInput.addEventListener('keypress', e => { 
+            if(e.key === 'Enter') QuestSystem.addTask(); 
+        });
+    }
 });
-
-// Global Accessibility
-window.UI = UI;
-window.AuraThemes = AuraThemes;
-window.SoundEffects = SoundEffects;
-window.PlayerState = PlayerState;
-window.QuestSystem = QuestSystem;
-window.Pomodoro = Pomodoro;
-window.Router = Router;
-window.Milestone = Milestone;
-window.AnimePopup = AnimePopup;
-window.SovereignEngine = SovereignEngine;
-window.SovereignStore = SovereignStore;
-window.SovereignCharters = SovereignCharters;
-window.SovereignMetrics = SovereignMetrics;
-window.SovereignTimer = SovereignTimer;
 </script>
-<div id="holographicModal" class="fixed inset-0 z-[20000] hidden items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
-    <div id="holoContent" class="relative w-full max-w-lg mx-4 transform scale-90 opacity-0 transition-all duration-300">
-        <div class="absolute -inset-1 bg-gradient-to-r from-[var(--sys-cyan)] via-[var(--sys-purple)] to-[var(--sys-cyan)] rounded-xl blur opacity-30 animate-pulse"></div>
-        <div class="relative bg-[#02040a]/95 border-2 border-[var(--sys-cyan)] rounded-xl overflow-hidden shadow-[0_0_60px_rgba(0,240,255,0.3)]">
-            <div class="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,240,255,0.03)_50%)] bg-[length:100%_4px] pointer-events-none"></div>
-            <div class="h-1 bg-gradient-to-r from-transparent via-[var(--sys-cyan)] to-transparent shadow-[0_0_10px_var(--sys-cyan)]"></div>
-            <div class="p-6 text-center relative">
-                <div class="sys-font text-[var(--sys-cyan)] tracking-[0.5em] text-[10px] mb-2 font-black animate-pulse">[ SYSTEM DIRECTIVE ]</div>
-                <h2 id="holoTitle" class="text-2xl font-black text-white mb-2 drop-shadow-[0_0_8px_var(--sys-cyan)]">عنوان النظام</h2>
-                <div class="w-16 h-0.5 bg-gradient-to-r from-transparent via-[var(--sys-cyan)] to-transparent mx-auto"></div>
-            </div>
-            <div class="px-6 pb-4">
-                <div class="bg-black/60 border border-[var(--sys-cyan)]/20 rounded-lg p-4 mb-4 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-full bg-[var(--sys-cyan)] opacity-[0.02]"></div>
-                    <p id="holoDesc" class="text-sm text-slate-200 leading-relaxed font-bold relative z-10">وصف النظام...</p>
-                </div>
-                <div class="flex justify-between items-center text-xs sys-font text-amber-400 mb-4 font-black tracking-widest bg-amber-900/10 px-4 py-2 border border-amber-500/20 rounded">
-                    <span id="holoTime">TIME: --:--</span>
-                    <span id="holoReward">REWARD: +?? EXP</span>
-                </div>
-            </div>
-            <div class="p-4 pt-0 flex gap-3">
-                <button onclick="HolographicModal.accept()" class="flex-1 py-3 bg-gradient-to-r from-[var(--sys-cyan)]/20 via-[var(--sys-cyan)]/30 to-[var(--sys-cyan)]/20 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] font-black tracking-[0.2em] uppercase hover:bg-[var(--sys-cyan)] hover:text-black transition-all shadow-[0_0_15px_rgba(0,240,255,0.2)]">ACCEPT (قبول)</button>
-                <button onclick="HolographicModal.close()" class="px-4 py-3 bg-slate-900 border border-slate-700 text-slate-400 font-bold uppercase tracking-widest text-xs hover:border-rose-500 hover:text-rose-500 transition-all">REJECT</button>
-            </div>
-            <div class="h-1 bg-gradient-to-r from-transparent via-[var(--sys-purple)] to-transparent shadow-[0_0_10px_var(--sys-purple)]"></div>
-        </div>
-    </div>
-</div>
-<script>const HolographicModal = {
-    currentCallback: null,
-    show(title, description, time, reward, onAccept) {
-        const modal = document.getElementById('holographicModal');
-        const content = document.getElementById('holoContent');
-        document.getElementById('holoTitle').textContent = title;
-        document.getElementById('holoDesc').innerHTML = description;
-        document.getElementById('holoTime').textContent = `TIME: ${time}`;
-        document.getElementById('holoReward').textContent = `REWARD: +${reward} EXP`;
-        this.currentCallback = onAccept;
-        modal.classList.remove('hidden'); modal.classList.add('flex');
-        setTimeout(() => { content.classList.remove('scale-90','opacity-0'); content.classList.add('scale-100','opacity-100'); }, 50);
-        if(window.SoundEffects) SoundEffects.playSystemClick();
-    },
-    close() {
-        const modal = document.getElementById('holographicModal');
-        const content = document.getElementById('holoContent');
-        content.classList.remove('scale-100','opacity-100'); content.classList.add('scale-90','opacity-0');
-        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
-        this.currentCallback = null;
-    },
-    accept() { if(this.currentCallback) this.currentCallback(); this.close(); }
-};
-window.HolographicModal = HolographicModal;</script>
 </body>
 </html>
 
