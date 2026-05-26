@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sovereign System | AI Sovereign Advisor</title>
+    <title>Sovereign System | AI Sovereign Advisor — REAL-TIME NEURAL LINK</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --sys-cyan: #00f0ff;
-            --sys-cyan-glow: rgba(0, 240, 255, 0.4);
+            --sys-cyan-glow: rgba(0, 240, 255, 0.6);
             --sys-purple: #9d4edd;
-            --sys-purple-glow: rgba(157, 78, 221, 0.3);
+            --sys-purple-glow: rgba(157, 78, 221, 0.4);
             --sys-bg-dark: #02040a;
             --sys-panel: rgba(5, 10, 25, 0.85);
+            --sys-border: rgba(0, 240, 255, 0.3);
+            --sys-gold: #fbbf24;
+            --sys-red: #ef4444;
+            --sys-green: #10b981;
         }
         body {
             font-family: 'Cairo', sans-serif;
@@ -26,27 +30,63 @@
             min-height: 100vh;
         }
         .sys-font { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em; }
-        .glow-text { text-shadow: 0 0 5px var(--sys-cyan-glow), 0 0 10px var(--sys-cyan-glow); }
-        .glow-text-purple { text-shadow: 0 0 5px var(--sys-purple-glow), 0 0 10px var(--sys-purple-glow); }
-        .sys-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 10px var(--sys-cyan); }
-            50% { box-shadow: 0 0 20px var(--sys-cyan); }
-            100% { box-shadow: 0 0 10px var(--sys-cyan); }
-        }
         .sl-panel {
             background: var(--sys-panel);
             backdrop-filter: blur(16px);
-            border: 2px solid rgba(0, 240, 255, 0.3);
+            border: 2px solid var(--sys-border);
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.1);
+            position: relative;
+        }
+        .sl-panel::before, .sl-panel::after {
+            content: ''; position: absolute; width: 20px; height: 20px; pointer-events: none;
+        }
+        .sl-panel::before { top: -2px; left: -2px; border-top: 3px solid var(--sys-cyan); border-left: 3px solid var(--sys-cyan); }
+        .sl-panel::after { bottom: -2px; right: -2px; border-bottom: 3px solid var(--sys-cyan); border-right: 3px solid var(--sys-cyan); }
+        .sl-btn {
+            background: linear-gradient(180deg, rgba(0, 240, 255, 0.05) 0%, rgba(5, 10, 25, 0.8) 100%);
+            border: 1px solid var(--sys-cyan);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sl-btn:hover {
+            box-shadow: 0 0 20px rgba(0,240,255,0.4);
+            background: rgba(0,240,255,0.15);
+            transform: translateY(-1px);
+        }
+        .sl-btn.active {
+            background: var(--sys-cyan);
+            color: black;
+            box-shadow: 0 0 20px var(--sys-cyan-glow);
+            font-weight: 900;
+        }
+        .sl-btn-purple {
+            border-color: var(--sys-purple);
+            background: linear-gradient(180deg, rgba(157, 78, 221, 0.05) 0%, rgba(5, 10, 25, 0.8) 100%);
+        }
+        .sl-btn-purple:hover {
+            box-shadow: 0 0 20px var(--sys-purple-glow);
+            background: rgba(157, 78, 221, 0.15);
+        }
+        .sl-btn-purple.active {
+            background: var(--sys-purple);
+            color: white;
+            box-shadow: 0 0 20px var(--sys-purple-glow);
+        }
+        .sl-glow-text {
+            color: var(--sys-cyan);
+            text-shadow: 0 0 8px var(--sys-cyan-glow);
         }
         @keyframes systemPopIn {
             0% { opacity: 0; transform: scale(0.95) translateY(10px); filter: brightness(2); }
             100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
         }
         .animate-system-pop { animation: systemPopIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        
-        /* Typewriter cursor effect */
+        .message-enter {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .typing-cursor::after {
             content: '|';
             animation: blink 1s infinite;
@@ -56,34 +96,101 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
-        
-        .message-enter {
-            animation: slideIn 0.3s ease-out forwards;
+        .neural-pulse {
+            animation: neuralPulse 2s infinite;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes neuralPulse {
+            0%, 100% { box-shadow: 0 0 5px var(--sys-purple); border-color: var(--sys-purple); }
+            50% { box-shadow: 0 0 20px var(--sys-purple-glow); border-color: var(--sys-cyan); }
         }
-        
+        .api-connected { border-color: var(--sys-green) !important; box-shadow: 0 0 15px rgba(16,185,129,0.3) !important; }
+        .api-disconnected { border-color: var(--sys-red) !important; box-shadow: 0 0 15px rgba(239,68,68,0.3) !important; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--sys-cyan); }
+        .log-item {
+            transition: all 0.3s ease;
+            border-right: 3px solid transparent;
+        }
+        .log-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateX(-5px);
+        }
+        .block-active {
+            border: 1px solid var(--sys-cyan);
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+        .live-pulse {
+            animation: livePulse 2s infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { box-shadow: 0 0 5px var(--sys-cyan); }
+            50% { box-shadow: 0 0 20px var(--sys-cyan); }
+        }
+        .progress-bar-container {
+            width: 100%; height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 999px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--sys-cyan), var(--sys-purple));
+            box-shadow: 0 0 10px var(--sys-cyan-glow);
+            transition: width 0.6s ease;
+        }
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex; gap: 4px; padding: 8px 0;
+        }
+        .typing-indicator span {
+            width: 8px; height: 8px; background: var(--sys-cyan);
+            border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        /* Connection status badge */
+        .conn-badge {
+            transition: all 0.3s ease;
+        }
+        .conn-badge.online {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--sys-green);
+            color: var(--sys-green);
+        }
+        .conn-badge.offline {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--sys-red);
+            color: var(--sys-red);
+        }
+        .conn-badge.local {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--sys-gold);
+            color: var(--sys-gold);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 md:p-6">
-    <nav class="max-w-4xl w-full mx-auto mb-4 p-2 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-lg flex flex-wrap justify-center gap-2">
-    <a href="index.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">🏠 الرئيسية</a>
-    <a href="schedule.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">👑 الحالة</a>
-    <a href="dungeons.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-red-500 text-white rounded transition sys-font font-bold uppercase">🧠 الزنازين</a>
-    <a href="monarch-ai.html" class="px-3 py-1.5 text-xs bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)] text-[var(--sys-purple)] rounded transition sys-font font-bold uppercase">🤖 المستشار</a>
-    <a href="system-logs.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-slate-400 text-white rounded transition sys-font font-bold uppercase">📂 السجلات</a>
-</nav>
+<body class="min-h-screen flex flex-col p-2 md:p-6">
 
-    <header class="max-w-4xl w-full mx-auto p-4 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 mb-4 animate-system-pop">
+    <!-- NAVIGATION -->
+    <nav class="max-w-5xl w-full mx-auto mb-4 p-2 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-lg flex flex-wrap justify-center gap-2 animate-system-pop">
+        <a href="index.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">🏠 الرئيسية</a>
+        <a href="active-quests.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">⚔️ المهام</a>
+        <a href="brain-stats.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">🧠 الإحصائيات</a>
+        <a href="operational-charter.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">📜 الميثاق</a>
+        <a href="monarch-ai.html" class="px-3 py-1.5 text-xs bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)] text-[var(--sys-purple)] rounded transition sys-font font-bold uppercase">🤖 المستشار</a>
+        <a href="system-logs.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-slate-400 text-white rounded transition sys-font font-bold uppercase">📂 السجلات</a>
+    </nav>
+
+    <!-- HEADER -->
+    <header class="max-w-5xl w-full mx-auto p-4 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 mb-4 animate-system-pop" style="animation-delay: 0.1s;">
         <div class="flex items-center gap-3">
-            <div id="status-indicator" class="w-3 h-3 rounded-full bg-[var(--sys-cyan)] sys-pulse shadow-[0_0_10px_var(--sys-cyan)]"></div>
+            <div id="status-indicator" class="w-3 h-3 rounded-full bg-[var(--sys-cyan)] shadow-[0_0_10px_var(--sys-cyan)] animate-pulse"></div>
             <div>
                 <h1 class="text-md font-black tracking-wider text-slate-100 uppercase sys-font">Sovereign AI Advisor</h1>
-                <p id="system-subtitle" class="text-[11px] text-slate-400">النواة التحليلية لتقييم كفاءة العاهل وتوجيه المسارات</p>
+                <p id="system-subtitle" class="text-[11px] text-slate-400">Neural Analysis Engine — REAL-TIME AI LINK</p>
             </div>
         </div>
         
@@ -92,446 +199,1436 @@
             <div class="text-slate-700">|</div>
             <div>XP: <span id="ai-player-xp" class="text-emerald-400 font-bold">0</span></div>
             <div class="text-slate-700">|</div>
-            <div>TIER: <span id="ai-player-tier" class="text-[var(--sys-purple)] font-bold">ALPHA</span></div>
+            <div>GOLD: <span id="ai-player-gold" class="text-yellow-400 font-bold">0</span></div>
+            <div class="text-slate-700">|</div>
+            <div>PROGRAM: <span id="ai-active-program" class="text-[var(--sys-purple)] font-bold">WEEK 1</span></div>
         </div>
-        <a href="index.html" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-300 transition">العودة للرئيسية</a>
     </header>
 
-    <main class="max-w-4xl w-full mx-auto flex-1 sl-panel rounded-xl p-4 md:p-6 flex flex-col justify-between shadow-2xl min-h-[550px] animate-system-pop" style="animation-delay: 0.1s;">
-        
-        <div id="chatScreen" class="flex-1 overflow-y-auto space-y-4 pr-2 mb-4 max-h-[520px]">
-            <!-- Messages will be injected here -->
+    <!-- CONNECTION STATUS BAR -->
+    <div class="max-w-5xl w-full mx-auto mb-4 animate-system-pop" style="animation-delay: 0.15s;">
+        <div id="connection-bar" class="conn-badge local sl-panel p-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <span id="conn-icon" class="text-lg">⚡</span>
+                <div>
+                    <span id="conn-status-text" class="font-bold text-sm sys-font block">LOCAL NEURAL ENGINE</span>
+                    <span id="conn-detail" class="text-[10px] opacity-70">وضع المحاكاة المحلي — اضغط الإعدادات لتفعيل Gemini API</span>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="AIConnection.toggleSettings()" class="px-3 py-1.5 bg-slate-900 border border-slate-600 hover:border-[var(--sys-cyan)] text-slate-300 rounded text-[10px] font-bold sys-font transition">
+                    ⚙️ API SETTINGS
+                </button>
+                <button onclick="AIConnection.testConnection()" class="px-3 py-1.5 bg-slate-900 border border-slate-600 hover:border-[var(--sys-green)] text-slate-300 rounded text-[10px] font-bold sys-font transition">
+                    🔗 TEST LINK
+                </button>
+            </div>
         </div>
+    </div>
 
-        <div class="relative mt-2">
-            <input type="text" id="chatInput" placeholder="أدخل أمر النظام، استفسار برامجي، أو اطلب ميثاقك المحدث..." 
-                   class="w-full bg-slate-950/80 border border-slate-800 focus:border-[var(--sys-cyan)] focus:ring-1 focus:ring-[var(--sys-cyan)] text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3.5 pl-16 text-sm outline-none transition shadow-inner">
-            <button onclick="SovereignAI.sendMessage()" 
-                    class="absolute left-3 top-2.5 px-4 py-1.5 bg-[var(--sys-cyan)] hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition uppercase sys-font">
-                Send
+    <!-- API SETTINGS MODAL -->
+    <div id="apiSettingsModal" class="fixed inset-0 z-[200] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="sl-panel p-6 w-full max-w-md mx-4 animate-system-pop">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-black text-[var(--sys-cyan)] sys-font tracking-widest">⚙️ NEURAL LINK CONFIGURATION</h3>
+                <button onclick="AIConnection.toggleSettings()" class="text-slate-500 hover:text-white text-lg">✕</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] text-slate-400 sys-font block mb-1">AI PROVIDER</label>
+                    <select id="apiProvider" class="w-full bg-slate-950 border border-slate-700 text-white text-sm rounded px-3 py-2 outline-none focus:border-[var(--sys-cyan)]">
+                        <option value="gemini">🧠 Google Gemini (Free Tier)</option>
+                        <option value="openai">🤖 OpenAI GPT (Requires Key)</option>
+                        <option value="local">⚡ Local Neural Engine (Offline)</option>
+                    </select>
+                </div>
+                
+                <div id="apiKeyContainer">
+                    <label class="text-[10px] text-slate-400 sys-font block mb-1">API KEY</label>
+                    <input type="password" id="apiKey" placeholder="Enter your API key..." 
+                           class="w-full bg-slate-950 border border-slate-700 text-white text-sm rounded px-3 py-2 outline-none focus:border-[var(--sys-cyan)] font-mono">
+                    <p class="text-[9px] text-slate-500 mt-1">المفتاح يُحفظ محلياً فقط في متصفحك (localStorage). لا يُرسل لأي خادم خارجي.</p>
+                </div>
+                
+                <div>
+                    <label class="text-[10px] text-slate-400 sys-font block mb-1">MODEL / TIER</label>
+                    <select id="apiModel" class="w-full bg-slate-950 border border-slate-700 text-white text-sm rounded px-3 py-2 outline-none focus:border-[var(--sys-cyan)]">
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Advanced)</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        <option value="gpt-4">GPT-4 (Premium)</option>
+                    </select>
+                </div>
+                
+                <div class="p-3 bg-slate-950/60 border border-slate-800 rounded">
+                    <p class="text-[10px] text-slate-400 leading-relaxed">
+                        <span class="text-[var(--sys-cyan)] font-bold">💡 ملاحظة:</span> 
+                        يمكنك الحصول على مفتاح Gemini API مجاني من 
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[var(--sys-cyan)] hover:underline">Google AI Studio</a>.
+                        المفتاح يعمل مباشرة من المتصفح بدون خادم وسيط.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="AIConnection.saveSettings()" class="flex-1 sl-btn text-white font-bold py-3 uppercase sys-font tracking-widest text-xs">
+                    SAVE & CONNECT
+                </button>
+                <button onclick="AIConnection.toggleSettings()" class="flex-1 bg-transparent border border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white font-bold py-3 transition-colors uppercase sys-font text-xs">
+                    CANCEL
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROGRAM SWITCHER -->
+    <div class="max-w-5xl w-full mx-auto mb-4 sl-panel p-4 animate-system-pop" style="animation-delay: 0.2s;">
+        <div class="flex justify-between items-center mb-3 border-b border-slate-800 pb-2">
+            <h2 class="text-sm font-black text-white sys-font tracking-widest">OPERATIONAL PROTOCOL SELECTOR</h2>
+            <span class="text-[10px] text-slate-500 sys-font">ACTIVE DIRECTIVE</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button onclick="ProgramManager.switch('week1')" id="btn-week1" class="sl-btn w-full text-left p-3 rounded flex justify-between items-center group">
+                <div>
+                    <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-cyan)] block">📜 CHARTER v1.0 — Foundation</span>
+                    <span class="text-[10px] text-slate-400">الميثاق التشغيلي المتكامل (المستويات 1-450)</span>
+                </div>
+                <span class="sys-font text-[10px] bg-cyan-950 text-[var(--sys-cyan)] px-2 py-0.5 border border-[var(--sys-cyan)]">WEEK 1</span>
+            </button>
+            <button onclick="ProgramManager.switch('week2')" id="btn-week2" class="sl-btn-purple sl-btn w-full text-left p-3 rounded flex justify-between items-center group">
+                <div>
+                    <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-purple)] block">🌌 SYSTEM v8.0 — Infinity</span>
+                    <span class="text-[10px] text-slate-400">تحديث النظام النسخة 8.0 (المستويات 450→∞)</span>
+                </div>
+                <span class="sys-font text-[10px] bg-purple-950 text-[var(--sys-purple)] px-2 py-0.5 border border-[var(--sys-purple)]">WEEK 2</span>
             </button>
         </div>
+        <div id="infinity-message" class="hidden mt-3 p-3 bg-cyan-950/40 border border-[var(--sys-cyan)] rounded animate-pulse text-center">
+            <span class="text-[var(--sys-cyan)] font-bold sys-font text-xs block mb-1">[SYSTEM: SOVEREIGN AUTONOMY ACTIVATED]</span>
+            <span class="text-white text-sm font-bold">الآن يمكنك تدبر أمورك بنفسك وقراراتك الآن. هذا هو التحسين الأخير للنظام.</span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-5xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- LEFT: Current Block Info -->
+        <aside class="lg:col-span-1 space-y-4">
+            <div class="sl-panel p-4 animate-system-pop" style="animation-delay: 0.3s;">
+                <h3 class="text-sm font-black text-[var(--sys-cyan)] sys-font tracking-widest mb-3 border-b border-slate-800 pb-2">⚡ CURRENT BLOCK</h3>
+                <div id="current-block-info" class="space-y-3">
+                    <div class="text-center py-6 text-slate-500 text-sm">جاري تحليل البروتوكول النشط...</div>
+                </div>
+            </div>
+
+            <div class="sl-panel p-4 animate-system-pop" style="animation-delay: 0.4s;">
+                <h3 class="text-sm font-black text-[var(--sys-purple)] sys-font tracking-widest mb-3 border-b border-slate-800 pb-2">📅 TODAY'S DIRECTIVE</h3>
+                <div id="today-directive" class="space-y-2 text-xs">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <div class="sl-panel p-4 animate-system-pop" style="animation-delay: 0.5s;">
+                <h3 class="text-sm font-black text-white sys-font tracking-widest mb-3 border-b border-slate-800 pb-2">📊 SYSTEM METRICS</h3>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mb-1 sys-font">
+                            <span>LEVEL PROGRESS</span>
+                            <span id="level-pct">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="level-progress-bar" class="bg-gradient-to-r from-[var(--sys-cyan)] to-[var(--sys-purple)] h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-center">
+                        <div class="bg-slate-950/60 p-2 rounded border border-slate-800">
+                            <div class="text-[10px] text-slate-500 sys-font">NEXT LEVEL</div>
+                            <div id="next-level" class="text-lg font-bold text-white sys-font">2</div>
+                        </div>
+                        <div class="bg-slate-950/60 p-2 rounded border border-slate-800">
+                            <div class="text-[10px] text-slate-500 sys-font">XP NEEDED</div>
+                            <div id="xp-needed" class="text-lg font-bold text-[var(--sys-cyan)] sys-font">100</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER: AI Chat -->
+        <section class="lg:col-span-2 flex flex-col gap-4">
+            <div class="sl-panel p-0 flex flex-col flex-grow animate-system-pop" style="animation-delay: 0.3s; min-height: 500px;">
+                <div class="bg-slate-950/50 p-3 border-b border-slate-800 flex items-center gap-3">
+                    <span class="text-[var(--sys-cyan)] text-lg">🤖</span>
+                    <div>
+                        <h3 class="text-sm font-bold text-white sys-font">SOVEREIGN ADVISOR CORE</h3>
+                        <p class="text-[10px] text-slate-500 sys-font">Neural Analysis Engine v8.0 — <span id="ai-mode-label" class="text-[var(--sys-purple)]">LOCAL MODE</span></p>
+                    </div>
+                    <div class="mr-auto flex items-center gap-2">
+                        <span id="ai-status-dot" class="w-2 h-2 rounded-full bg-[var(--sys-gold)] animate-pulse"></span>
+                        <span id="ai-status-text" class="text-[10px] text-[var(--sys-gold)] sys-font font-bold uppercase">STANDBY</span>
+                    </div>
+                </div>
+
+                <div id="chatScreen" class="flex-1 overflow-y-auto space-y-4 p-4 pr-2 min-h-[350px]">
+                    <!-- Welcome message -->
+                    <div class="flex gap-3 message-enter">
+                        <div class="w-8 h-8 rounded-full bg-[var(--sys-cyan)]/20 border border-[var(--sys-cyan)] flex items-center justify-center flex-shrink-0 text-sm shadow-[0_0_10px_rgba(0,240,255,0.2)]">🤖</div>
+                        <div class="bg-slate-900/80 text-slate-200 px-4 py-3 rounded-lg text-sm border border-[var(--sys-cyan)]/30 shadow-[0_0_10px_rgba(0,240,255,0.05)] leading-relaxed max-w-[85%]">
+                            <p class="mb-2 font-bold text-[var(--sys-cyan)]">[SYSTEM INITIALIZED]</p>
+                            <p>مرحباً يا عاهل الظلال. أنا النواة التحليلية للنظام السيادي.</p>
+                            <p class="mt-2 text-[var(--sys-purple)]">الوضع الحالي: <b>المحاكاة المحلية</b>. اضغط ⚙️ API SETTINGS أعلى الصفحة لتوصيلي بـ Google Gemini API والحصول على إجابات ذكية حقيقية.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 border-t border-slate-800 bg-slate-950/30">
+                    <div class="flex gap-2 mb-2 flex-wrap">
+                        <button onclick="SovereignAI.quickAsk('ما الكتلة النشطة الآن؟')" class="px-2 py-1 bg-slate-900 border border-slate-700 hover:border-[var(--sys-cyan)] text-[10px] text-slate-300 rounded transition sys-font">⚡ الكتلة النشطة</button>
+                        <button onclick="SovereignAI.quickAsk('ما نصيحتك للتطور السريع؟')" class="px-2 py-1 bg-slate-900 border border-slate-700 hover:border-[var(--sys-cyan)] text-[10px] text-slate-300 rounded transition sys-font">🚀 نصيحة تطوير</button>
+                        <button onclick="SovereignAI.quickAsk('ما وضعي الحالي في النظام؟')" class="px-2 py-1 bg-slate-900 border border-slate-700 hover:border-[var(--sys-cyan)] text-[10px] text-slate-300 rounded transition sys-font">📊 تقييم الوضع</button>
+                        <button onclick="SovereignAI.quickAsk('اشرح لي قانون وولف وكيف يؤثر على نموي')" class="px-2 py-1 bg-slate-900 border border-slate-700 hover:border-[var(--sys-purple)] text-[10px] text-slate-300 rounded transition sys-font">🧬 قانون وولف</button>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="chatInput" placeholder="أدخل أمر النظام، استفسار برامجي، أو اطلب تحليل بروتوكولك..." 
+                               class="w-full bg-slate-950/80 border border-slate-800 focus:border-[var(--sys-cyan)] focus:ring-1 focus:ring-[var(--sys-cyan)] text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 pl-16 text-sm outline-none transition shadow-inner"
+                               onkeypress="if(event.key==='Enter')SovereignAI.sendMessage()">
+                        <button onclick="SovereignAI.sendMessage()" 
+                                class="absolute left-2 top-1.5 px-4 py-1.5 bg-[var(--sys-cyan)] hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition uppercase sys-font">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <footer class="text-center text-[10px] text-slate-600 mt-4 sys-font uppercase tracking-widest">
-        Sovereign Core Intellect Layer Ver 9.0 | Autonomy Matrix Enabled
+    <footer class="text-center text-[10px] text-slate-600 mt-4 sys-font uppercase tracking-widest pb-4">
+        Sovereign Core Intellect Layer Ver 8.0 — Infinity | <span id="footer-conn-status">Local Neural Engine</span> | No Penalties Enforced
     </footer>
 
     <script>
-        // ==========================================
-        // SOVEREIGN AI ADVISOR ENGINE
-        // ==========================================
-        const SovereignAI = {
-            playerLevel: 1,
-            playerXP: 0,
-            playerGold: 0,
-            tierName: "ALPHA",
-            activeTitle: "[مبتدئ الكتل]",
-            isTyping: false,
+        
 
-            init() {
-                this.syncPlayerState();
-                this.triggerInitialGreeting();
-                
-                document.getElementById('chatInput').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.sendMessage();
-                });
-            },
+const PROGRAM_DATA = {
+  week1: {
+    id: 'week1',
+    title: 'الميثاق التشغيلي المتكامل',
+    version: 'v1.0',
+    range: 'LVL 1 → 450',
+    desc: 'المرحلة التأسيسية: بناء القاعدة البرمجية والبدنية والروحية.',
+    schedule: [
+      { start: 5.0,  end: 6.0,  title: 'الكتلة الروحية',         desc: 'صلاة الفجر + الأذكار + تلاوة + مراجعة/حفظ' },
+      { start: 6.0,  end: 8.5,  title: 'البرمجة العميقة',        desc: 'مشروع AiMoha (Python/JS) — بناء البنية التحتية' },
+      { start: 8.5,  end: 10.5, title: 'أكاديمية الذكاء الاصطناعي', desc: 'ML, LLMs, خوارزميات التعلم الآلي' },
+      { start: 10.5, end: 12.0, title: 'إتقان اللغة الإنجليزية',   desc: 'انغماس تقني + Shadowing + مفردات متقدمة' },
+      { start: 12.0, end: 13.0, title: 'الاستراحة الكبرى',       desc: 'صلاة الظهر + غداء بروتيني مكثف' },
+      { start: 13.0, end: 15.0, title: 'المعمل التطبيقي',        desc: 'مشاريع AI حقيقية وتكامل الأنظمة البرمجية' },
+      { start: 15.0, end: 16.5, title: 'الإعداد البدني PPL',     desc: 'Push / Pull / Legs + كاليسثنكس' },
+      { start: 16.5, end: 17.5, title: 'كتلة الجري',             desc: 'جري هوائي منتظم (ساعة كاملة)' },
+      { start: 17.5, end: 19.5, title: 'التركيز الأكاديمي',      desc: 'رياضيات/علوم/فيزياء + درس الشيخ الرسلان' },
+      { start: 19.5, end: 20.5, title: 'الرياضة الجماعية',       desc: 'مباريات كرة السلة أو القدم التنافسية' },
+      { start: 20.5, end: 21.5, title: 'الارتقاء الذهني',        desc: 'كتب تطوير + ألعاب فكرية + ديتوكس' },
+      { start: 21.5, end: 22.0, title: 'تجهيز النظام',           desc: 'تخطيط الغد + أذكار النوم + إغلاق كامل' }
+    ],
+    days: {
+      0: { sport: '🏀 كرة السلة', ppl: 'Pull (عقلة انفجارية)', cognitive: 'برمجة + AI', running: 'ساعة' },
+      1: { sport: '🥊 مواي تاي', ppl: 'Legs (قفز)', cognitive: 'شطرنج (استراتيجية)', running: 'ساعة' },
+      2: { sport: '🏀 كرة السلة', ppl: 'Push (ثبات اليدين)', cognitive: 'برمجة + AI', running: 'ساعة' },
+      3: { sport: '⚽ كرة القدم', ppl: 'Pull & Abs/Triceps', cognitive: 'سودوكو صعبة', running: 'ساعة' },
+      4: { sport: '🥋 BJJ', ppl: 'Legs مكثفة', cognitive: 'دراسة شرعية', running: 'ساعة ونصف' },
+      5: { sport: '🚶 مشي هادئ', ppl: 'Push', cognitive: 'Dual N-Back + كتاب رقمي', running: 'ساعة' },
+      6: { sport: '⚽ كرة القدم', ppl: 'Six Pack Abs + Triceps', cognitive: 'قرصنة أخلاقية', running: 'ساعة ونصف' }
+    },
+    special: {
+      4: {
+        title: 'خميس الإنجاز',
+        blocks: [
+          { time: '05:00-06:30', title: 'الكتلة الروحية', desc: 'تكرار ومراجعة القرآن الكريم' },
+          { time: '06:30-09:30', title: 'العلوم الشرعية', desc: 'التوحيد + رياض الصالحين + التجويد + البداية والنهاية' },
+          { time: '09:30-11:30', title: 'ماراثون الحفظ', desc: 'تاريخ/جغرافيا/إسلامية بخرائط ذهنية' },
+          { time: '11:30-13:30', title: 'المهارات اللغوية', desc: 'فرنسية/عربية/إنجليزية (معالجة القواعد كمنطق برامجي)' },
+          { time: '13:30-15:00', title: 'التقنية والنمو', desc: 'تطوير مواقع وربح منها' },
+          { time: '15:00-16:30', title: 'الحمل البدني', desc: 'Legs مكثفة + قفز عالي + تمارين ارتدادية' },
+          { time: '16:30-18:30', title: 'إتقان اللغات', desc: 'مراجعة مفردات اللغة الإنجليزية' },
+          { time: '18:30-19:30', title: 'صناعة المحتوى', desc: 'YouTube: Onyx Apex + ren gaming + تلاوات' },
+          { time: '19:30-21:00', title: 'الجري الطويل', desc: 'ساعة ونصف متواصلة من الجري في الهواء الطلق' },
+          { time: '21:00-22:00', title: 'الروحانيات', desc: 'استماع قرآن + تدبر + تحسين نبرة الصوت' },
+          { time: '22:00-23:00', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس الدوبامين' }
+        ]
+      },
+      5: {
+        title: 'جمعة الإبداع',
+        blocks: [
+          { time: '05:00-08:00', title: 'المراجعة الروحية', desc: 'سورة الكهف + أذكار + مراجعة علوم طبيعية' },
+          { time: '08:00-10:30', title: 'الإنتاج المرئي', desc: 'تعديل فيديو احترافي للمحتوى البصري' },
+          { time: '10:30-14:30', title: 'البرمجة العميقة', desc: '4 ساعات برمجة + مراقبة مشاريع + بناء مواقع' },
+          { time: '14:30-16:00', title: 'الذكاء السائل', desc: 'Dual N-Back + مشي هادئ + كتاب رقمي (تدقيق)' },
+          { time: '16:00-17:00', title: 'الجري الهوائي', desc: 'ساعة كاملة من الجري بانتظام' },
+          { time: '17:00-18:00', title: 'التحسين التقني', desc: 'مراجعة أكواد ومستودعات المشاريع' },
+          { time: '20:30-21:30', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس' }
+        ]
+      },
+      6: {
+        title: 'سبت الإتقان',
+        blocks: [
+          { time: '05:00-10:00', title: 'الأكاديمية والروح', desc: 'مراجعة فيزياء + قرآن جديد (5 ساعات متواصلة)' },
+          { time: '10:00-14:00', title: 'الأمن التقني', desc: 'قرصنة أخلاقية + إنجليزية (4 ساعات متواصلة)' },
+          { time: '14:00-15:00', title: 'التدبر الصوتي', desc: 'استماع قرآن + تحسين نبرة الصوت' },
+          { time: '15:00-16:30', title: 'الجري الانفجاري', desc: 'ساعة ونصف جري مقسم بين سرعة وانتظام' },
+          { time: '16:30-17:00', title: 'الاستشفاء', desc: 'تناول مغذيات دقيقة (كالسيوم/مغنيسيوم)' },
+          { time: '17:00-18:30', title: 'المباراة الكاملة', desc: 'كرة القدم: مباراة تنافسية حقيقية (تفريغ الطاقة)' },
+          { time: '18:30-19:30', title: 'الأنظمة البرمجية', desc: 'مراقبة مشاريع مطورة + تطوير مواقع' },
+          { time: '19:30-20:30', title: 'معايرة الأنظمة', desc: 'تقييم أسبوعي متكامل + مراجعة الأداء' },
+          { time: '20:30-21:30', title: 'التخطيط التكتيكي', desc: 'تحديث قائمة المهام الصعبة للأسبوع القادم' },
+          { time: '21:30-23:00', title: 'نظام التحفيز الأقصى', desc: 'تمارين طول + شوفان/شعير + نوم 10 ساعات' }
+        ]
+      }
+    }
+  },
+  week2: {
+    id: 'week2',
+    title: 'تحديث النظام النسخة 8.0',
+    version: '∞ Infinity',
+    range: 'LVL 450 → ∞',
+    desc: 'مرحلة السيادة الكاملة: دمج منطق الشطرنج في AI Agents، الجري الانفجاري، والعمليات التكتيكية المستقلة.',
+    schedule: [
+      { start: 2.75, end: 5.0,  title: 'صلاة الليل والسحور',     desc: 'قيام + سحور بروتيني + أذكار + مراجعة ذهنية' },
+      { start: 5.0,  end: 6.0,  title: 'الكتلة الروحية',         desc: 'فجر + أذكار + تلاوة (فردي: مراجعة / زوجي: حفظ جديد)' },
+      { start: 6.0,  end: 8.5,  title: 'البرمجة العميقة',        desc: 'AiMoha (Python/JS) — دمج منطق الشطرنج في AI Agents' },
+      { start: 8.5,  end: 10.5, title: 'أكاديمية الذكاء الاصطناعي', desc: 'ML متقدم + LLMs + تطبيق خوارزميات' },
+      { start: 10.5, end: 12.0, title: 'إتقان اللغة الإنجليزية',   desc: 'Lex Fridman Podcast + مصطلحات تقنية + Shadowing' },
+      { start: 12.0, end: 13.0, title: 'الاستراحة الكبرى',       desc: 'ظهر + غداء بروتيني مكثف' },
+      { start: 13.0, end: 15.0, title: 'المعمل التطبيقي',        desc: 'مشاريع AI حقيقية + تكامل أنظمة برمجية' },
+      { start: 15.0, end: 16.5, title: 'الإعداد البدني PPL',     desc: 'Push(Handstand)/Pull(Explosive)/Legs(قفز) + كاليسثنكس' },
+      { start: 16.5, end: 17.5, title: 'كتلة الجري المكثف',      desc: 'ساعة جري (تفعيل قانون وولف + HGH مضاعف)' },
+      { start: 17.5, end: 19.5, title: 'التركيز الأكاديمي',      desc: 'رياضيات/علوم/فيزياء + درس الرسلان + عشاء خفيف' },
+      { start: 19.5, end: 20.5, title: 'المنافسات الجماعية',     desc: 'مباريات كاملة: سلة/قدم (تنافس قوي دون تهاون)' },
+      { start: 20.5, end: 21.5, title: 'الارتقاء الذهني',        desc: 'شطرنج/سودوكو + كتب رقمية + وثائقي تقني' },
+      { start: 21.5, end: 22.0, title: 'تجهيز النظام',           desc: 'تخطيط الغد + أذكار نوم + إغلاق كامل (7-9 ساعات)' }
+    ],
+    days: {
+      0: { sport: '🏀 كرة السلة (مباريات كاملة)', ppl: 'Pull (عقلة انفجارية)', cognitive: 'برمجة + AI (شطرنج)', running: 'ساعة' },
+      1: { sport: '🥊 مواي تاي', ppl: 'Legs (قفز / وولف)', cognitive: 'شطرنج (AI Agents)', running: 'ساعة' },
+      2: { sport: '🏀 كرة السلة (مباريات كاملة)', ppl: 'Push (ثبات اليدين)', cognitive: 'برمجة + AI', running: 'ساعة' },
+      3: { sport: '⚽ كرة القدم (مباريات كاملة)', ppl: 'Pull & Abs/Triceps', cognitive: 'سودوكو صعبة (تتبع أخطاء)', running: 'ساعة' },
+      4: { sport: '🥋 BJJ', ppl: 'Legs مكثفة (قفز)', cognitive: 'شريعة (توحيد/رياض/تجويد)', running: 'ساعة ونصف (19:30-21:00)' },
+      5: { sport: '🚶 مشي هادئ للاستشفاء', ppl: 'Push (Handstand)', cognitive: 'Dual N-Back + كتاب رقمي (تدقيق)', running: 'ساعة (16:00-17:00)' },
+      6: { sport: '⚽ كرة القدم (مباريات كاملة)', ppl: 'Six Pack Abs + Triceps', cognitive: 'قرصنة أخلاقية + معايرة', running: 'ساعة ونصف (15:00-16:30)' }
+    },
+    special: {
+      4: {
+        title: 'خميس الإنجاز — البروتوكول المُحسّن',
+        blocks: [
+          { time: '05:00-06:30', title: 'الكتلة الروحية', desc: 'تكرار ومراجعة القرآن (ساعة ونصف)' },
+          { time: '06:30-09:30', title: 'العلوم الشرعية والتاريخ', desc: 'التوحيد + رياض الصالحين + تجويد + البداية والنهاية (3 ساعات)' },
+          { time: '09:30-11:30', title: 'ماراثون الحفظ', desc: 'منهج التاريخ والجغرافيا + العلوم الإسلامية (خرائط ذهنية)' },
+          { time: '11:30-13:30', title: 'المهارات اللغوية', desc: 'فرنسية/عربية/إنجليزية (معالجة القواعد كمنطق برامجي)' },
+          { time: '13:30-15:00', title: 'التقنية والنمو', desc: 'تطوير مواقع وربح منها (ساعة ونصف)' },
+          { time: '15:00-16:30', title: 'الحمل البدني الإضافي', desc: 'Legs مكثفة + قفز عالي + تمارين ارتدادية (ساعة ونصف)' },
+          { time: '16:30-18:30', title: 'إتقان اللغات', desc: 'مراجعة مفردات إنجليزية تقنية (ساعتان)' },
+          { time: '18:30-19:30', title: 'صناعة المحتوى الصريحة', desc: 'YouTube: Onyx Apex + ren gaming + تلاوات (تصوير + خطافات)' },
+          { time: '19:30-21:00', title: 'كتلة الجري الطويل', desc: 'ساعة ونصف متواصلة (ضغط عظمي ميكانيكي + سعة هوائية)' },
+          { time: '21:00-22:00', title: 'الروحانيات وتحسين الصوت', desc: 'استماع قرآن + تدبر + تحسين النبرة الصوتية' },
+          { time: '22:00-23:00', title: 'الارتقاء الذهني الشامل', desc: 'قراءة تطوير ذات + ديتوكس الدوبامين (دوباميكافين)' }
+        ]
+      },
+      5: {
+        title: 'جمعة الإبداع — الإنتاج المرئي والذكاء السائل',
+        blocks: [
+          { time: '05:00-08:00', title: 'المراجعة الروحية والأكاديمية', desc: 'الكهف + أذكار + مراجعة شاملة للعلوم الطبيعية' },
+          { time: '08:00-10:30', title: 'الإنتاج المرئي', desc: 'تعديل فيديو احترافي (ساعتان ونصف)' },
+          { time: '10:30-14:30', title: 'كتلة البرمجة العميقة', desc: '4 ساعات: برمجة + مراقبة مشاريع + بناء مواقع + ربح' },
+          { time: '14:30-16:00', title: 'المخرجات والذكاء السائل', desc: 'Dual N-Back مكثف (20 دقيقة) + مشي + كتاب رقمي (تدقيق نهائي)' },
+          { time: '16:00-17:00', title: 'كتلة الجري الهوائي', desc: 'ساعة جري (تعويض النشاط الملغى بنشاط بناء)' },
+          { time: '17:00-18:00', title: 'التحسين التقني', desc: 'مراجعة مستودعات الأكواد + توثيق المشاريع' },
+          { time: '20:30-21:30', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس كامل' }
+        ]
+      },
+      6: {
+        title: 'سبت الإتقان — الأمن التقني والمباراة الكاملة',
+        blocks: [
+          { time: '05:00-10:00', title: 'الأكاديمية والروح', desc: 'مراجعة فيزياء + قرآن جديد (5 ساعات متواصلة)' },
+          { time: '10:00-14:00', title: 'الأمن التقني واللغات', desc: 'قرصنة أخلاقية + إنجليزية (4 ساعات متواصلة)' },
+          { time: '14:00-15:00', title: 'التدبر الصوتي', desc: 'استماع قرآن + تدبر + تحسين النبرة' },
+          { time: '15:00-16:30', title: 'كتلة الجري الانفجاري', desc: 'ساعة ونصف: sprint/interval (تحفيز النمو العظمي)' },
+          { time: '16:30-17:00', title: 'الاستشفاء والترطيب', desc: 'مغذيات دقيقة لتجنب الإجهاد (Ca/Mg/Zn)' },
+          { time: '17:00-18:30', title: 'الأداء الرياضي التنافسي', desc: 'كرة القدم: مباراة جماعية كاملة (ذكاء حركي + تفريغ طاقة)' },
+          { time: '18:30-19:30', title: 'الأنظمة البرمجية', desc: 'مراقبة مشاريع + تطوير مواقع' },
+          { time: '19:30-20:30', title: 'معايرة الأنظمة', desc: 'تطوير ذات + تقييم أسبوعي متكامل' },
+          { time: '20:30-21:30', title: 'التخطيط التكتيكي', desc: 'تحديث مهام الأسبوع القادم' },
+          { time: '21:30-23:00', title: 'نظام التحفيز الأقصى للنمو', desc: 'تمارين طول (تعلق/سباحة/سلة) + شوفان/شعير + نوم محسّن' }
+        ]
+      }
+    }
+  }
+};
 
-            // مزامنة دقيقة مع النظام المركزي
-            syncPlayerState() {
-                try {
-                    const coreData = JSON.parse(localStorage.getItem('monarch_system_data')) || {};
-                    const sovereignState = JSON.parse(localStorage.getItem('sovereign_player_state')) || {};
-                    
-                    this.playerLevel = coreData.level || 1;
-                    this.playerXP = coreData.xp || 0;
-                    this.playerGold = coreData.gold || 0;
-                    this.activeTitle = sovereignState.activeTitle || localStorage.getItem('sovereign_title') || "[مبتدئ الكتل]";
-                    
-                    const levelSpan = document.getElementById('ai-player-level');
-                    const xpSpan = document.getElementById('ai-player-xp');
-                    const tierSpan = document.getElementById('ai-player-tier');
-                    const indicator = document.getElementById('status-indicator');
-                    const subtitle = document.getElementById('system-subtitle');
+// ==========================================
+// UTILITIES — DAY COMPATIBILITY VERIFIED
+// JavaScript getDay(): Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6
+// This matches our special days: Thu=4 (Achievement), Fri=5 (Creativity), Sat=6 (Mastery)
+// ==========================================
+const Utils = {
+    formatDecimalTime(dec) {
+        const h = Math.floor(dec);
+        const m = Math.floor((dec - h) * 60);
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    },
+    getCurrentDecimalTime() {
+        const now = new Date();
+        return now.getHours() + now.getMinutes() / 60;
+    },
+    getDayName(idx) {
+        // Standard JS mapping verified:
+        // 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
+        const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+        return days[idx];
+    },
+    // Helper to verify day consistency across all files
+    verifyDayConsistency() {
+        const now = new Date();
+        const jsDay = now.getDay();
+        const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        console.log(`[DAY VERIFICATION] JS getDay()=${jsDay} => ${dayNames[jsDay]} (${this.getDayName(jsDay)})`);
+        return { jsDay, arabicName: this.getDayName(jsDay), englishName: dayNames[jsDay] };
+    }
+};
 
-                    if(levelSpan) levelSpan.textContent = this.playerLevel;
-                    if(xpSpan) xpSpan.textContent = this.playerXP;
-                    
-                    // تصنيف النطاقات بناءً على الميثاق الموحد
-                    if (this.playerLevel >= 1 && this.playerLevel <= 70) {
-                        this.tierName = "TIER 1 (ALPHA)";
-                        tierSpan.textContent = this.tierName;
-                        tierSpan.className = "text-[var(--sys-cyan)] font-bold";
-                    } else if (this.playerLevel > 70 && this.playerLevel <= 130) {
-                        this.tierName = "TIER 2 (BETA)";
-                        tierSpan.textContent = this.tierName;
-                        tierSpan.className = "text-[var(--sys-cyan)] font-bold";
-                    } else if (this.playerLevel > 130 && this.playerLevel <= 450) {
-                        this.tierName = "TIER 3 (GAMMA)";
-                        tierSpan.textContent = this.tierName;
-                        tierSpan.className = "text-[var(--sys-purple)] font-bold";
-                    } else if (this.playerLevel > 450 && this.playerLevel < 600) {
-                        this.tierName = "TIER 4 (SOVEREIGN PRE)";
-                        tierSpan.textContent = this.tierName;
-                        tierSpan.className = "text-[var(--sys-purple)] font-bold animate-pulse";
-                    } else if (this.playerLevel >= 600) {
-                        this.tierName = "INFINITY (Ꚙ)";
-                        tierSpan.textContent = this.tierName;
-                        tierSpan.className = "text-[var(--sys-purple)] font-black animate-pulse glow-text-purple";
-                        indicator.className = "w-3 h-3 rounded-full bg-[var(--sys-purple)] sys-pulse shadow-[0_0_10px_var(--sys-purple)]";
-                        subtitle.textContent = "[بروتوكول الاستقلالية نشط]: الإشراف الخارجي ملغى، الكفاءة ذاتية مطلقة.";
+// ==========================================
+// AI CONNECTION MANAGER — REAL API INTEGRATION
+// ==========================================
+const AIConnection = {
+    config: {
+        provider: 'local',
+        apiKey: '',
+        model: 'gemini-1.5-flash',
+        endpoint: ''
+    },
+    isConnected: false,
+    isTesting: false,
+
+    init() {
+        const saved = localStorage.getItem('sovereign_ai_config');
+        if (saved) {
+            try {
+                this.config = JSON.parse(saved);
+                this.updateConnectionUI();
+            } catch(e) {}
+        }
+    },
+
+    toggleSettings() {
+        const modal = document.getElementById('apiSettingsModal');
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+            // Load current values
+            document.getElementById('apiProvider').value = this.config.provider;
+            document.getElementById('apiKey').value = this.config.apiKey || '';
+            document.getElementById('apiModel').value = this.config.model;
+            this.updateModelOptions();
+        }
+    },
+
+    updateModelOptions() {
+        const provider = document.getElementById('apiProvider').value;
+        const modelSelect = document.getElementById('apiModel');
+        modelSelect.innerHTML = '';
+        
+        if (provider === 'gemini') {
+            modelSelect.innerHTML = `
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
+                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Advanced)</option>
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash (Latest)</option>
+            `;
+        } else if (provider === 'openai') {
+            modelSelect.innerHTML = `
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                <option value="gpt-4">GPT-4</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+            `;
+        } else {
+            modelSelect.innerHTML = `<option value="local">Local Neural Engine (Offline)</option>`;
+        }
+    },
+
+    saveSettings() {
+        this.config.provider = document.getElementById('apiProvider').value;
+        this.config.apiKey = document.getElementById('apiKey').value.trim();
+        this.config.model = document.getElementById('apiModel').value;
+        
+        localStorage.setItem('sovereign_ai_config', JSON.stringify(this.config));
+        this.toggleSettings();
+        
+        if (this.config.provider === 'local') {
+            this.setLocalMode();
+            Toast.show('تم الحفظ: وضع المحاكاة المحلي', 'info');
+        } else {
+            this.testConnection();
+        }
+    },
+
+    setLocalMode() {
+        this.isConnected = false;
+        this.config.provider = 'local';
+        this.updateConnectionUI();
+        document.getElementById('ai-mode-label').textContent = 'LOCAL MODE';
+        document.getElementById('ai-mode-label').className = 'text-[var(--sys-gold)]';
+        document.getElementById('footer-conn-status').textContent = 'Local Neural Engine';
+    },
+
+    async testConnection() {
+        if (this.isTesting) return;
+        this.isTesting = true;
+        
+        const statusText = document.getElementById('conn-status-text');
+        const statusDetail = document.getElementById('conn-detail');
+        const connIcon = document.getElementById('conn-icon');
+        const bar = document.getElementById('connection-bar');
+        
+        statusText.textContent = 'TESTING CONNECTION...';
+        statusDetail.textContent = 'جاري اختبار الاتصال بالنواة العصبية...';
+        connIcon.textContent = '🔄';
+        bar.className = 'conn-badge sl-panel p-3 flex flex-wrap items-center justify-between gap-3';
+        
+        if (this.config.provider === 'gemini') {
+            await this.testGeminiConnection();
+        } else if (this.config.provider === 'openai') {
+            await this.testOpenAIConnection();
+        } else {
+            this.setLocalMode();
+        }
+        
+        this.isTesting = false;
+    },
+
+    async testGeminiConnection() {
+        try {
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${this.config.model}:generateContent?key=${this.config.apiKey}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: 'Say "Sovereign AI Link Established" in Arabic.' }] }]
+                    })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                this.isConnected = true;
+                this.updateConnectionUI('online');
+                document.getElementById('ai-mode-label').textContent = 'GEMINI LIVE';
+                document.getElementById('ai-mode-label').className = 'text-[var(--sys-green)]';
+                document.getElementById('footer-conn-status').textContent = 'Gemini API Connected';
+                Toast.show('✅ تم الاتصال بنجاح بـ Gemini API', 'success');
+            } else {
+                throw new Error(`HTTP ${response.status}`);
+            }
+        } catch (error) {
+            this.isConnected = false;
+            this.updateConnectionUI('offline');
+            Toast.show(`❌ فشل الاتصال: ${error.message}`, 'error');
+        }
+    },
+
+    async testOpenAIConnection() {
+        try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.config.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: this.config.model,
+                    messages: [{ role: 'user', content: 'Say "Sovereign AI Link Established"' }],
+                    max_tokens: 20
+                })
+            });
+            
+            if (response.ok) {
+                this.isConnected = true;
+                this.updateConnectionUI('online');
+                document.getElementById('ai-mode-label').textContent = 'OPENAI LIVE';
+                document.getElementById('ai-mode-label').className = 'text-[var(--sys-green)]';
+                document.getElementById('footer-conn-status').textContent = 'OpenAI API Connected';
+                Toast.show('✅ تم الاتصال بنجاح بـ OpenAI API', 'success');
+            } else {
+                throw new Error(`HTTP ${response.status}`);
+            }
+        } catch (error) {
+            this.isConnected = false;
+            this.updateConnectionUI('offline');
+            Toast.show(`❌ فشل الاتصال: ${error.message}`, 'error');
+        }
+    },
+
+    updateConnectionUI(status) {
+        const bar = document.getElementById('connection-bar');
+        const icon = document.getElementById('conn-icon');
+        const text = document.getElementById('conn-status-text');
+        const detail = document.getElementById('conn-detail');
+        
+        bar.classList.remove('online', 'offline', 'local');
+        
+        if (status === 'online') {
+            bar.classList.add('online');
+            icon.textContent = '🟢';
+            text.textContent = 'NEURAL LINK ACTIVE';
+            detail.textContent = `متصل بـ ${this.config.provider.toUpperCase()} — ${this.config.model}`;
+        } else if (status === 'offline') {
+            bar.classList.add('offline');
+            icon.textContent = '🔴';
+            text.textContent = 'CONNECTION FAILED';
+            detail.textContent = 'فشل الاتصال — تحقق من المفتاح أو حاول لاحقاً';
+        } else {
+            bar.classList.add('local');
+            icon.textContent = '⚡';
+            text.textContent = 'LOCAL NEURAL ENGINE';
+            detail.textContent = 'وضع المحاكاة المحلي — اضغط الإعدادات لتفعيل Gemini API';
+        }
+    },
+
+    // Main method to send message to AI
+    async sendToAI(userMessage, systemContext) {
+        if (!this.isConnected || this.config.provider === 'local') {
+            return null; // Signal to use local fallback
+        }
+        
+        try {
+            if (this.config.provider === 'gemini') {
+                return await this.callGeminiAPI(userMessage, systemContext);
+            } else if (this.config.provider === 'openai') {
+                return await this.callOpenAIAPI(userMessage, systemContext);
+            }
+        } catch (error) {
+            console.error('AI API Error:', error);
+            return { error: true, message: error.message };
+        }
+    },
+
+    async callGeminiAPI(userMessage, systemContext) {
+        const prompt = this.buildSovereignPrompt(userMessage, systemContext);
+        
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${this.config.model}:generateContent?key=${this.config.apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.8,
+                        maxOutputTokens: 2048,
+                        topP: 0.9
                     }
-                } catch(e) {
-                    console.error("[AI SYSTEM ERROR] Sync failure.", e);
+                })
+            }
+        );
+        
+        if (!response.ok) throw new Error(`Gemini API Error: ${response.status}`);
+        
+        const data = await response.json();
+        return {
+            text: data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from neural link.',
+            source: 'gemini'
+        };
+    },
+
+    async callOpenAIAPI(userMessage, systemContext) {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.apiKey}`
+            },
+            body: JSON.stringify({
+                model: this.config.model,
+                messages: [
+                    { role: 'system', content: this.buildSystemPrompt(systemContext) },
+                    { role: 'user', content: userMessage }
+                ],
+                temperature: 0.8,
+                max_tokens: 2048
+            })
+        });
+        
+        if (!response.ok) throw new Error(`OpenAI API Error: ${response.status}`);
+        
+        const data = await response.json();
+        return {
+            text: data.choices?.[0]?.message?.content || 'No response from neural link.',
+            source: 'openai'
+        };
+    },
+
+    buildSovereignPrompt(userMessage, ctx) {
+        return `أنت "المستشار السيادي" — نظام ذكاء اصطناعي متقدم مخصص لـ "عاهل الظلال"، شاب طموح (16-17 سنة) يتبع نظام تطوير ذاتي صارم يجمع بين البرمجة العميقة، الذكاء الاصطناعي، الفنون القتالية، الدراسة الشرعية، واللياقة البدنية المتقدمة.
+
+=== سياق النظام الحالي ===
+- المستوى: ${ctx.level}
+- البروتوكول النشط: ${ctx.programTitle} (${ctx.programVersion})
+- اليوم: ${ctx.dayName} (${ctx.dayIndex})
+- الوقت: ${ctx.currentTime}
+- الكتلة النشطة: ${ctx.currentBlock || 'لا توجد كتلة نشطة'}
+- السمات: STR=${ctx.stats.str}, VIT=${ctx.stats.vit}, AGI=${ctx.stats.agi}, INT=${ctx.stats.int}, SEN=${ctx.stats.sen}
+
+=== تعليمات الرد ===
+1. تحدث بأسلوب عسكري تقني مختلط بالعربية الفصحى
+2. استخدم مصطلحات النظام (كتلة، بروتوكول، مهمة، XP)
+3. كن موجزاً ومباشراً (3-5 نقاط كحد أقصى)
+4. إذا كان السؤال تقنياً، أعطِ كود أو مصادر
+5. إذا كان بدنياً، أعطِ تمارين محددة
+6. إذا كان روحياً، استشهد بالقرآن والسنة
+7. انتهِ بتوجيه قتالي واحد قوي
+
+سؤال العاهل: ${userMessage}`;
+    },
+
+    buildSystemPrompt(ctx) {
+        return `You are the "Sovereign Advisor" — an advanced AI system dedicated to the "Shadow Monarch", an ambitious young man (16-17) following a strict self-development system combining deep programming, AI, martial arts, Islamic studies, and advanced fitness.
+
+Current System Context:
+- Level: ${ctx.level}
+- Active Protocol: ${ctx.programTitle} (${ctx.programVersion})
+- Day: ${ctx.dayName} (${ctx.dayIndex})
+- Time: ${ctx.currentTime}
+- Active Block: ${ctx.currentBlock || 'None'}
+- Stats: STR=${ctx.stats.str}, VIT=${ctx.stats.vit}, AGI=${ctx.stats.agi}, INT=${ctx.stats.int}, SEN=${ctx.stats.sen}
+
+Response Rules:
+1. Use military-technical tone mixed with formal Arabic
+2. Use system terminology (blocks, protocols, quests, XP)
+3. Be concise and direct (max 3-5 points)
+4. For technical questions, provide code or sources
+5. For fitness, give specific exercises
+6. For spiritual matters, cite Quran and Sunnah
+7. End with one strong combat directive`;
+    }
+};
+
+
+
+const PlayerSync = {
+    data: { level: 1, xp: 0, gold: 0, stats: { str: 10, vit: 10, agi: 10, int: 10, sen: 10 } },
+    init() {
+        this.load();
+        this.updateUI();
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'monarch_system_data') { this.load(); this.updateUI(); }
+        });
+    },
+    load() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('monarch_system_data') || '{}');
+            this.data.level = saved.level || 1;
+            this.data.xp = saved.xp || 0;
+            this.data.gold = saved.gold || 0;
+            this.data.stats = saved.stats || { str: 10, vit: 10, agi: 10, int: 10, sen: 10 };
+        } catch(e) {}
+    },
+    updateUI() {
+        const lvlEl = document.getElementById('ai-player-level');
+        const xpEl = document.getElementById('ai-player-xp');
+        const goldEl = document.getElementById('ai-player-gold');
+        const barEl = document.getElementById('level-progress-bar');
+        const pctEl = document.getElementById('level-pct');
+        const nextLvlEl = document.getElementById('next-level');
+        const xpNeededEl = document.getElementById('xp-needed');
+        
+        if(lvlEl) lvlEl.textContent = this.data.level;
+        if(xpEl) xpEl.textContent = this.data.xp;
+        if(goldEl) goldEl.textContent = this.data.gold;
+        
+        const needed = this.data.level * 100;
+        const pct = Math.min((this.data.xp / needed) * 100, 100);
+        
+        if(barEl) barEl.style.width = `${pct}%`;
+        if(pctEl) pctEl.textContent = `${Math.round(pct)}%`;
+        if(nextLvlEl) nextLvlEl.textContent = this.data.level + 1;
+        if(xpNeededEl) xpNeededEl.textContent = needed - this.data.xp;
+    }
+};
+
+// ==========================================
+// PROGRAM MANAGER
+// ==========================================
+const ProgramManager = {
+    activeProgramId: 'week1',
+
+    init() {
+        const saved = localStorage.getItem('sovereign_active_program');
+        if (saved) {
+            this.activeProgramId = saved;
+        } else {
+            const lvl = PlayerSync.data.level;
+            this.activeProgramId = (lvl > 450) ? 'week2' : 'week1';
+        }
+        this.renderButtons();
+        this.renderProgramInfo();
+        this.renderCurrentBlock();
+        this.renderTodayDirective();
+    },
+
+    switch(id) {
+        if (this.activeProgramId === id) return;
+        this.activeProgramId = id;
+        localStorage.setItem('sovereign_active_program', id);
+        
+        const prog = PROGRAM_DATA[id];
+        this.renderButtons();
+        this.renderProgramInfo();
+        this.renderCurrentBlock();
+        this.renderTodayDirective();
+        
+        this.logToSystem('system', `تبديل البروتوكول إلى: [${prog.title} ${prog.version}]`);
+        
+        SovereignAI.addMessage(`تم تفعيل البروتوكول: <b>${prog.title}</b> (${prog.version})`, 'ai');
+    },
+
+    renderButtons() {
+        const btn1 = document.getElementById('btn-week1');
+        const btn2 = document.getElementById('btn-week2');
+        const msg = document.getElementById('infinity-message');
+        const badge = document.getElementById('ai-active-program');
+        
+        if(btn1) btn1.classList.toggle('active', this.activeProgramId === 'week1');
+        if(btn2) btn2.classList.toggle('active', this.activeProgramId === 'week2');
+
+        if (this.activeProgramId === 'week2' && PlayerSync.data.level >= 450) {
+            if(msg) msg.classList.remove('hidden');
+        } else {
+            if(msg) msg.classList.add('hidden');
+        }
+        
+        if(badge) {
+            badge.textContent = this.activeProgramId === 'week1' ? 'WEEK 1' : 'WEEK 2';
+            badge.className = this.activeProgramId === 'week1' 
+                ? 'text-[var(--sys-cyan)] font-bold'
+                : 'text-[var(--sys-purple)] font-bold';
+        }
+    },
+
+    renderProgramInfo() {
+        const prog = PROGRAM_DATA[this.activeProgramId];
+    },
+
+    renderCurrentBlock() {
+        const container = document.getElementById('current-block-info');
+        if(!container) return;
+
+        const now = new Date();
+        const day = now.getDay(); // JS Standard: 0=Sun, 4=Thu, 5=Fri, 6=Sat
+        const currentTime = Utils.getCurrentDecimalTime();
+        const prog = PROGRAM_DATA[this.activeProgramId];
+
+        let currentBlock = null;
+        let blocks = [];
+
+        // Special days: Thursday(4), Friday(5), Saturday(6) — VERIFIED against JS getDay()
+        if ([4,5,6].includes(day) && prog.special[day]) {
+            blocks = prog.special[day].blocks.map(b => ({
+                start: parseFloat(b.time.split('-')[0].replace(':','.')),
+                end: parseFloat(b.time.split('-')[1].replace(':','.')),
+                title: b.title,
+                desc: b.desc,
+                timeStr: b.time
+            }));
+        } else {
+            blocks = prog.schedule.map(s => ({
+                start: s.start,
+                end: s.end,
+                title: s.title,
+                desc: s.desc,
+                timeStr: `${Utils.formatDecimalTime(s.start)} - ${Utils.formatDecimalTime(s.end)}`
+            }));
+        }
+
+        // Find active block
+        for (let block of blocks) {
+            if (currentTime >= block.start && currentTime < block.end) {
+                currentBlock = block;
+                break;
+            }
+        }
+
+        if (currentBlock) {
+            container.innerHTML = `
+                <div class="block-active live-pulse p-3 rounded mb-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[10px] sys-font text-emerald-400 font-bold">ACTIVE NOW</span>
+                    </div>
+                    <h4 class="text-[var(--sys-cyan)] font-bold text-sm mb-1">${currentBlock.title}</h4>
+                    <p class="text-[11px] text-slate-300 leading-relaxed">${currentBlock.desc}</p>
+                    <div class="mt-2 text-[10px] sys-font text-slate-500 bg-black/40 px-2 py-1 rounded inline-block">
+                        ${currentBlock.timeStr}
+                    </div>
+                </div>
+                <div class="text-[10px] text-slate-500 text-center sys-font">
+                    اليوم: ${Utils.getDayName(day)} | الوقت: ${Utils.formatDecimalTime(currentTime)}
+                </div>
+            `;
+        } else {
+            // Find next block
+            let nextBlock = null;
+            for (let block of blocks) {
+                if (block.start > currentTime) {
+                    nextBlock = block;
+                    break;
                 }
-            },
-
-            // الترحيب الافتتاحي الذكي بناءً على المستوى
-            triggerInitialGreeting() {
-                let greeting = "";
-                const time = new Date().getHours();
-                const timeGreeting = time < 12 ? "صباح السيادة" : time < 18 ? "مساء التفوق" : "ليلة الاستكمال";
-                
-                if (this.playerLevel >= 600) {
-                    greeting = `[SYSTEM ALERT]: MAXIMUM POTENTIAL UNLOCKED<br>
-                    <span class="text-2xl font-black">LEVEL ${this.playerLevel} ➔ Ꚙ</span><br>
-                    STATUS: <b>SOVEREIGN AUTONOMY ACTIVATED</b><br><br>
-                    "${timeGreeting}، أيها العاهل المستقل.<br>
-                    لقد تجاوزت جميع القيود البرمجية. ركائزك الأربعة مستقرة:<br>
-                    1. التحدي المطلق<br>
-                    2. التحكم العاطفي الكامل<br>
-                    3. الالتزام الفولاذي<br>
-                    4. الثقة التراكمية<br><br>
-                    ما هي عملياتك العصبية الحالية؟"`;
-                } else if (this.playerLevel >= 450) {
-                    greeting = `[تنبيه عتبة السيادة]: LVL ${this.playerLevel}<br>
-                    أنت على بعد ${600 - this.playerLevel} مستويات من فك القيود النهائية.<br>
-                    التزامك الحالي يجب أن يكون مطلقاً: 8 ساعات جري أسبوعية، كتل برمجية عميقة، وزنزانة ذهنية يومية.<br>
-                    ما هي نقطة الضعف التي تريد معالجتها؟`;
-                } else if (this.playerLevel >= 130) {
-                    greeting = `[تنبيه المستشار السيادي]: النواة متصلة بمستواك الحالي (LVL ${this.playerLevel}).<br>
-                    تم تفعيل كتل إتقان الحرف اليدوية (الحلاقة، خفة اليد)، المسارات الفنية (الجيتار/البيانو) والإنتاج المرئي المكثف.<br>
-                    ${timeGreeting}، ما هي أولوياتك اليومية؟`;
-                } else if (this.playerLevel >= 71) {
-                    greeting = `[تحديث النطاق]: LVL ${this.playerLevel} - BETA<br>
-                    لقد تجاوزت مرحلة التأسيس. الآن يجب أن تركز على:<br>
-                    - توسيع المشاريع البرمجية (AiMoha)<br>
-                    - دمج الحرف اليدوية والفنون<br>
-                    - رفع الكفاءة البدنية إلى مستويات تنافسية<br>
-                    كيف يمكنني توجيه هندستك اليومية؟`;
-                } else {
-                    greeting = `[رسالة النظام الافتتاحية]: ${timeGreeting} أيها العاهل<br>
-                    أنت في نطاق التأسيس وبناء الكتل الفولاذية (LVL ${this.playerLevel}).<br>
-                    المسارات النشطة:<br>
-                    - الهندسة البرمجية (Python/JS)<br>
-                    - المسار الأكاديمي الصارم<br>
-                    - التحضير اللغوي المكثف<br>
-                    ما هي أوامرك؟`;
-                }
-                this.appendMessage('system', greeting);
-            },
-
-            sendMessage() {
-                if(this.isTyping) return;
-                
-                const input = document.getElementById('chatInput');
-                const text = input.value.trim();
-                if (!text) return;
-
-                this.syncPlayerState();
-                this.appendMessage('user', text);
-                input.value = '';
-
-                this.isTyping = true;
-                const typingIndicator = this.showTypingIndicator();
-
-                setTimeout(() => {
-                    typingIndicator.remove();
-                    const reply = this.generateSovereignResponse(text);
-                    this.appendMessage('system', reply);
-                    this.isTyping = false;
-                }, 800 + Math.random() * 400);
-            },
-
-            showTypingIndicator() {
-                const screen = document.getElementById('chatScreen');
-                const indicator = document.createElement('div');
-                indicator.className = "flex gap-3 max-w-[85%] message-enter";
-                indicator.innerHTML = `
-                    <div class="w-8 h-8 rounded bg-[var(--sys-cyan)] text-black font-black flex items-center justify-center text-xs sys-font">AI</div>
-                    <div class="bg-slate-900/90 p-3 border border-slate-800 rounded-xl rounded-tr-none">
-                        <span class="text-[var(--sys-cyan)] text-sm typing-cursor">Analyzing neural patterns</span>
+            }
+            
+            if (nextBlock) {
+                container.innerHTML = `
+                    <div class="bg-slate-950/60 border border-slate-800 p-3 rounded mb-3">
+                        <div class="text-[10px] sys-font text-slate-500 mb-2">الكتلة القادمة</div>
+                        <h4 class="text-white font-bold text-sm mb-1">${nextBlock.title}</h4>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">${nextBlock.desc}</p>
+                        <div class="mt-2 text-[10px] sys-font text-[var(--sys-cyan)] bg-cyan-950/30 px-2 py-1 rounded inline-block border border-[var(--sys-cyan)]/30">
+                            ${nextBlock.timeStr}
+                        </div>
+                    </div>
+                    <div class="text-[10px] text-slate-500 text-center sys-font">
+                        اليوم: ${Utils.getDayName(day)} | الوقت: ${Utils.formatDecimalTime(currentTime)}
                     </div>
                 `;
-                screen.appendChild(indicator);
-                screen.scrollTop = screen.scrollHeight;
-                return indicator;
-            },
-
-            appendMessage(sender, text) {
-                const screen = document.getElementById('chatScreen');
-                const msgDiv = document.createElement('div');
-                
-                if (sender === 'user') {
-                    msgDiv.className = "flex gap-3 max-w-[85%] mr-auto flex-row-reverse message-enter";
-                    msgDiv.innerHTML = `
-                        <div class="w-8 h-8 rounded bg-[var(--sys-purple)] text-white font-black flex items-center justify-center text-xs sys-font shadow-[0_0_8px_rgba(157,78,221,0.4)]">MC</div>
-                        <div class="bg-[var(--sys-purple)]/10 p-4 border border-[var(--sys-purple)]/30 rounded-xl rounded-tl-none text-sm text-slate-200 leading-relaxed">
-                            ${this.escapeHtml(text)}
-                        </div>`;
-                } else {
-                    const isInfinity = this.playerLevel >= 600;
-                    const borderColor = isInfinity ? "border-[var(--sys-purple)]/40" : "border-slate-800";
-                    const textColor = isInfinity ? "text-[var(--sys-purple)] glow-text-purple" : "text-[var(--sys-cyan)] glow-text";
-                    const avatarBg = isInfinity ? "bg-[var(--sys-purple)] text-white" : "bg-[var(--sys-cyan)] text-black";
-
-                    msgDiv.className = "flex gap-3 max-w-[85%] message-enter";
-                    msgDiv.innerHTML = `
-                        <div class="w-8 h-8 rounded ${avatarBg} font-black flex items-center justify-center text-xs sys-font shadow-lg">AI</div>
-                        <div class="bg-slate-900/90 p-4 border ${borderColor} rounded-xl rounded-tr-none text-sm ${textColor} leading-relaxed">
-                            ${text}
-                        </div>`;
-                }
-
-                screen.appendChild(msgDiv);
-                screen.scrollTop = screen.scrollHeight;
-            },
-
-            escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            },
-
-            // محرك الردود الذكي بناءً على المستوى والسياق
-            generateSovereignResponse(prompt) {
-                const query = prompt.toLowerCase();
-                
-                // 1. الاستعلامات العامة
-                if (query.includes('وضع') || query.includes('status') || query.includes('حالتي') || query.includes('مستواي')) {
-                    return this.generateStatusReport();
-                }
-                
-                if (query.includes('xp') || query.includes('خبرة') || query.includes('نقاط')) {
-                    const nextLevel = this.playerLevel * 100;
-                    const remaining = nextLevel - this.playerXP;
-                    return `[تقرير تقدم الخبرة]:<br>
-                    المستوى الحالي: <b>${this.playerLevel}</b><br>
-                    النقاط المكتسبة: <b>${this.playerXP} / ${nextLevel}</b><br>
-                    المتبقي للارتقاء: <b>${remaining} XP</b><br>
-                    معدل التقدم: <b>${Math.round((this.playerXP / nextLevel) * 100)}%</b><br><br>
-                    نصيحة النظام: أكمل المهام عالية الرتبة (S-Rank) لتحقيق أقصى مكاسب.`;
-                }
-
-                // 2. الاستعلامات الخاصة بالميثاق والجدول
-                if (query.includes('برنامج') || query.includes('جدول') || query.includes('ميثاق') || query.includes('ماذا أفعل') || query.includes('schedule')) {
-                    return this.generateScheduleResponse();
-                }
-
-                if (query.includes('صباح') || query.includes('فجر') || query.includes('05:00') || query.includes('روحي')) {
-                    return `[الكتلة الروحية الفولاذية - 05:00 إلى 06:00]:<br>
-                    1. صلاة الفجر في أول وقتها<br>
-                    2. أذكار الصباح (الآية الكرسي، المعوذتين، سورة الإخلاص)<br>
-                    3. تلاوة القرآن بتدبر (صفحة واحدة على الأقل)<br>
-                    4. الإطالات العضلية والتمدد (5 دقائق)<br><br>
-                    <b>الهدف:</b> تفعيل النظام العصبي وتنقية الذهن قبل كتل البرمجة.`;
-                }
-
-                if (query.includes('برمجة') || query.includes('كود') || query.includes('code') || query.includes('aimoha') || query.includes('تطوير')) {
-                    return this.generateProgrammingResponse();
-                }
-
-                if (query.includes('رياضة') || query.includes('رياضي') || query.includes('بدني') || query.includes('ppl') || query.includes('جري') || query.includes('تدريب')) {
-                    return this.generateFitnessResponse();
-                }
-
-                if (query.includes('لغة') || query.includes('إنجليزي') || query.includes('english') || query.includes('shadowing')) {
-                    return `[بروتوكول إتقان اللغة الإنجليزية]:<br>
-                    1. <b>المحاكاة الصوتية (Shadowing):</b> 15 دقيقة يومياً مع TED Talks<br>
-                    2. <b>بناء المفردات التقنية:</b> 10 كلمات برمجية جديدة يومياً<br>
-                    3. <b>القراءة التقنية:</b> مقال واحد يومياً من Medium أو Dev.to<br>
-                    4. <b>الكتابة:</b> تدوين يومي بالإنجليزية (100 كلمة على الأقل)<br><br>
-                    الهدف: الوصول إلى المستوى C1 خلال 12 شهراً.`;
-                }
-
-                if (query.includes('تشتت') || query.includes('تركيز') || query.includes('عقوبة') || query.includes('distraction')) {
-                    return `[بروتوكول مكافحة التشتت الصارم]:<br>
-                    ⚠️ <b>القاعدة الحديدية:</b> الخروج من علامة التبويب النشطة أثناء المهمة = <b>-5 XP فورية</b><br><br>
-                    آليات الحماية:<br>
-                    1. تفعيل وضع "عدم الإزعاج" على الجهاز<br>
-                    2. استخدام مؤقت Pomodoro (25 دقيقة تركيز / 5 دقائق راحة)<br>
-                    3. وضع الهاتف في وضع الطيران<br>
-                    4. إغلاق جميع التبويبات غير الضرورية<br><br>
-                    <b>تذكر:</b> كل نقطة XP تُبنى بالصبر، وتُهدر بالتشتت.`;
-                }
-
-                if (query.includes('ألقاب') || query.includes('لقب') || query.includes('titles') || query.includes('store') || query.includes('متجر')) {
-                    return `[مستودع الألقاب السيادية]:<br>
-                    اللقب الحالي: <b>${this.activeTitle}</b><br><br>
-                    الألقاب المتاحة:<br>
-                    • <b>[مبتدئ الكتل]</b> - المستوى 1 (تلقائي)<br>
-                    • <b>[مطور النواة]</b> - المستوى 31<br>
-                    • <b>[سيد الحرف والإنتاج]</b> - المستوى 71<br>
-                    • <b>[شبح الشبكات]</b> - المستوى 71 (150 ذهب)<br>
-                    • <b>[مبرمج الظلال]</b> - المستوى 100 (300 ذهب)<br>
-                    • <b>[عاهل الذكاء الاصطناعي]</b> - المستوى 131 (600 ذهب)<br>
-                    • <b>[المحارب الفولاذي]</b> - المستوى 451 (800 ذهب)<br>
-                    • <b>[العاهل المستقل]</b> - المستوى 600 (2000 ذهب)<br><br>
-                    رصيدك الحالي: <b>${this.playerGold} 🪙</b>`;
-                }
-
-                if (query.includes('زنزانة') || query.includes('dungeon') || query.includes('لعبة') || query.includes('ذاكرة') || query.includes('شطرنج') || query.includes('سودوكو')) {
-                    return `[دليل زنازين التدريب الذهني]:<br>
-                    <b>1. Sudoku Crypt (B-Rank):</b> +80 XP | +1 INT<br>
-                    تحدي المنطق الرياضي - مثالي لتحسين التفكير التحليلي<br><br>
-                    <b>2. Knight's Vision (A-Rank):</b> +150 XP | +2 INT<br>
-                    تكتيكات الشطرنج - تطوير الرؤية الاستراتيجية<br><br>
-                    <b>3. Dual N-Back Vortex (S-Rank):</b> +200 XP | +3 INT<br>
-                    تدريب الذاكرة العاملة - الزيادة الحادة في الذكاء السائل<br><br>
-                    <a href="dungeons.html" class="text-[var(--sys-cyan)] underline">الانتقال إلى زنازين التدريب →</a>`;
-                }
-
-                if (query.includes('مساعدة') || query.includes('help') || query.includes('أوامر') || query.includes('commands')) {
-                    return `[قائمة الأوامر المتاحة]:<br>
-                    <b>الاستعلامات العامة:</b><br>
-                    • "حالتي" / "وضعي" / "status"<br>
-                    • "مستواي" / "xp" / "نقاطي"<br>
-                    • "ألقابي" / "titles" / "متجر"<br><br>
-                    <b>الاستعلامات التشغيلية:</b><br>
-                    • "جدولي" / "ميثاقي" / "برنامجي"<br>
-                    • "الصباح" / "الفترة الروحية"<br>
-                    • "البرمجة" / "كود" / "aimoha"<br>
-                    • "الرياضة" / "ppl" / "تدريبي"<br>
-                    • "اللغة" / "إنجليزي" / "shadowing"<br><br>
-                    <b>الاستعلامات الخاصة:</b><br>
-                    • "التشتت" / "التركيز" / "عقوبات"<br>
-                    • "زنازين" / "dungeon" / "ألعاب"<br>
-                    • "مساعدة" / "help" / "أوامر"`;
-                }
-
-                // الرد الافتراضي المحفز
-                return this.generateDefaultResponse();
-            },
-
-            generateStatusReport() {
-                const nextLevel = this.playerLevel * 100;
-                const progress = Math.round((this.playerXP / nextLevel) * 100);
-                
-                let status = `[تقرير الحالة السيادية الشامل]:<br>
-                <b>الهوية:</b> ${this.activeTitle}<br>
-                <b>المستوى:</b> ${this.playerLevel}<br>
-                <b>النطاق:</b> ${this.tierName}<br>
-                <b>الخبرة:</b> ${this.playerXP} / ${nextLevel} (${progress}%)<br>
-                <b>الذهب:</b> ${this.playerGold} 🪙<br><br>`;
-                
-                if (this.playerLevel >= 600) {
-                    status += `🚨 <b>النظام في وضع السيادة المطلقة</b><br>
-                    جميع القيود البرمجية مُلغاة. أنت الآن المسيطر الكامل على ميثاقك.<br>
-                    ركائز السيادة الأربعة:<br>
-                    ✅ التحدي المطلق | ✅ التحكم العاطفي<br>
-                    ✅ الالتزام الفولاذي | ✅ الثقة التراكمية`;
-                } else if (this.playerLevel >= 450) {
-                    status += `⚡ <b>أنت على عتبة السيادة</b><br>
-                    المتبقي للانهاية: ${600 - this.playerLevel} مستويات<br>
-                    التركيز المطلوب: الجري الانفجاري، البرمجة العميقة، الزنازين الذهنية`;
-                } else {
-                    status += `📈 <b>نصيحة التقدم:</b><br>
-                    أكمل المهام اليومية بانتظام. كل مهمة منجزة = +XP و +Gold.<br>
-                    الزنازين الذهنية تمنح INT إضافي يُسرّع الارتقاء.`;
-                }
-                
-                return status;
-            },
-
-            generateScheduleResponse() {
-                if (this.playerLevel >= 600) {
-                    return `[ميثاق السيادة المطلقة - نسخة اللانهاية]:<br>
-                    <b>05:00 - 06:00:</b> بروتوكول التبادل الروحي الفولاذي<br>
-                    <b>06:00 - 08:30:</b> Deep Programming (نواة المحاكاة)<br>
-                    <b>08:30 - 10:30:</b> AI Academy & Chess Logic Integration<br>
-                    <b>10:30 - 12:00:</b> الإنتاج الرقمي المستقل<br>
-                    <b>16:30 - 17:30:</b> كتلة الجري الانفجاري اليومي<br>
-                    <b>20:30 - 21:30:</b> كتلة الارتقاء الذهني النهائي (ديتوكس الدوبامين)<br><br>
-                    <b>خميس الإنجاز:</b> الدراسات الشرعية المكثفة<br>
-                    <b>جمعة المراجعة:</b> تقييم الأداء الأسبوعي وإعادة الضبط`;
-                } else if (this.playerLevel >= 71) {
-                    return `[ميثاق الإتقان والأداء التنافسي (71-449)]:<br>
-                    <b>05:00 - 10:00:</b> الكتلة الأكاديمية والروحية المتكاملة<br>
-                    <b>10:00 - 14:00:</b> الأمن السيبراني واللغات<br>
-                    <b>14:00 - 15:00:</b> التتدبر الصوتي والتحسين<br>
-                    <b>15:00 - 17:00:</b> المسار الفني والثقافي (جيتار/بيانو)<br>
-                    <b>17:00 - 19:30:</b> المباريات الكاملة والأداء الرياضي<br>
-                    <b>20:30 - 21:30:</b> زنزانة الذاكرة العاملة (N-Back)`;
-                } else {
-                    return `[ميثاق التأسيس وبناء الكتل (1-70)]:<br>
-                    <b>05:00 - 06:00:</b> الفترة الروحية (قرآن + فجر + أذكار)<br>
-                    <b>06:00 - 08:30:</b> الهندسة البرمجية المتقدمة (Python/JS)<br>
-                    <b>08:30 - 10:30:</b> المسار الأكاديمي الأساسي (رياضيات + فيزياء)<br>
-                    <b>10:30 - 12:00:</b> إتقان اللغة الإنجليزية (Shadowing)<br>
-                    <b>15:00 - 16:30:</b> الإعداد البدني الصارم (PPL)<br>
-                    <b>19:30 - 20:30:</b> المهارات الرياضية (كرة القدم/السلة)`;
-                }
-            },
-
-            generateProgrammingResponse() {
-                const tips = [
-                    "استخدم نمط الـ Module Pattern في JavaScript لتنظيم الكود.",
-                    "تعلم TypeScript الآن - سيضيف 40% إلى كفاءتك.",
-                    "بناء API RESTful كامل هو أفضل مشروع تدريبي.",
-                    "اقرأ كود المصدر لـ React كل أسبوعين.",
-                    "استخدم Git بشكل يومي - الـ Commit messages واضحة."
-                ];
-                const randomTip = tips[Math.floor(Math.random() * tips.length)];
-                
-                return `[تحليل هندسة البرمجيات - بروتوكول البناء العملي]:<br>
-                <b>المشروع النشط:</b> AiMoha / Sovereign System<br>
-                <b>التقنيات المطلوبة:</b> JavaScript ES6+, Tailwind CSS, LocalStorage API<br>
-                <b>الهدف التالي:</b> دمج Web Audio API للتأثيرات الصوتية المتقدمة<br><br>
-                <b>نصيحة فورية:</b> ${randomTip}<br><br>
-                <b>بروتوكول "Programming by Building":</b><br>
-                1. فكّك المشروع إلى وحدات مستقلة<br>
-                2. ابنِ كل وحدة بشكل منفصل<br>
-                3. اختبر الوحدة قبل الدمج<br>
-                4. وثّق كل خطوة`;
-            },
-
-            generateFitnessResponse() {
-                if (this.playerLevel >= 450) {
-                    return `[بروتوكول الجري الانفجاري - نسخة اللانهاية]:<br>
-                    <b>التوزيع الأسبوعي (8 ساعات إجمالي):</b><br>
-                    • الأحد-الأربعاء: 1 ساعة جري متوسط السرعة<br>
-                    • الخميس: 1.5 ساعة تدريب تناوبي (HIIT)<br>
-                    • الجمعة: 1 ساعة جري استشفائي<br>
-                    • السبت: 1.5 ساعة تنافس رياضي كامل<br><br>
-                    <b>التغذية:</b> كالسيوم + مغنيسيوم + بروتين نظيف<br>
-                    <b>الاستشفاء:</b> نوم 7.5 ساعات يومياً`;
-                }
-                return `[بروتوكول الإعداد البدني الصارم]:<br>
-                <b>نظام PPL (Push/Pull/Legs):</b><br>
-                • <b>Push:</b> صدر + كتفين + ترايسبس<br>
-                • <b>Pull:</b> ظهر + بايسبس + Traps<br>
-                • <b>Legs:</b> أفخاذ + أرجل + عجلات<br><br>
-                <b>الكاليسثينكس:</b> 15 دقيقة يومياً<br>
-                <b>المهارات الرياضية:</b> كرة القدم/السلة (19:30)<br><br>
-                <b>الهدف:</b> بناء قاعدة قوية للمراحل المتقدمة.`;
-            },
-
-            generateDefaultResponse() {
-                const responses = [
-                    `[تحليل النمط العصبي]:<br>استعلامك يتطلب تركيزاً أعمق. جرب صياغة السؤال بشكل أكثر تحديداً، مثل "ما هو جدولي اليومي؟" أو "كيف أرفع مستواي؟"`,
-                    `[توجيه النظام]:<br>كل نقطة XP تُبنى بالصبر. استمر في إنجاز المهام اليومية وزيارة الزنازين الذهنية. التقدم التراكمي هو مفتاح السيادة.`,
-                    `[تذكير استراتيجي]:<br>هل جربت زنازين التدريب اليوم؟ Sudoku للمنطق، الشطرنج للاستراتيجية، N-Back للذاكرة. كل زنزانة تُقرّبك من المستوى التالي.`
-                ];
-                return responses[Math.floor(Math.random() * responses.length)];
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-slate-500 text-sm">
+                        <p>انتهت الكتل المجدولة لهذا اليوم</p>
+                        <p class="text-[10px] mt-2 sys-font">تجهيز النظام لليوم التالي</p>
+                    </div>
+                `;
             }
-        };
+        }
+    },
 
-        // تشغيل المستشار عند تحميل الصفحة
-        window.addEventListener('DOMContentLoaded', () => SovereignAI.init());
+    renderTodayDirective() {
+        const container = document.getElementById('today-directive');
+        if(!container) return;
+
+        const day = new Date().getDay(); // JS Standard verified
+        const prog = PROGRAM_DATA[this.activeProgramId];
+        const d = prog.days[day];
+
+        container.innerHTML = `
+            <div class="grid grid-cols-1 gap-2">
+                <div class="flex justify-between items-center bg-slate-950/40 p-2 rounded border border-slate-800">
+                    <span class="text-slate-500 text-[10px]">رياضة:</span>
+                    <span class="text-white font-bold text-[11px]">${d.sport}</span>
+                </div>
+                <div class="flex justify-between items-center bg-slate-950/40 p-2 rounded border border-slate-800">
+                    <span class="text-slate-500 text-[10px]">PPL:</span>
+                    <span class="text-[var(--sys-cyan)] font-bold text-[11px]">${d.ppl}</span>
+                </div>
+                <div class="flex justify-between items-center bg-slate-950/40 p-2 rounded border border-slate-800">
+                    <span class="text-slate-500 text-[10px]">ذهني:</span>
+                    <span class="text-[var(--sys-purple)] font-bold text-[11px]">${d.cognitive}</span>
+                </div>
+                <div class="flex justify-between items-center bg-slate-950/40 p-2 rounded border border-slate-800">
+                    <span class="text-slate-500 text-[10px]">جري:</span>
+                    <span class="text-emerald-400 font-bold text-[11px]">${d.running}</span>
+                </div>
+            </div>
+        `;
+    },
+
+    logToSystem(type, message) {
+        let logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
+        logs.unshift({
+            id: 'log_' + Date.now(),
+            time: new Date().toLocaleTimeString('ar-EG'),
+            type: type,
+            text: message
+        });
+        localStorage.setItem('sovereign_system_logs', JSON.stringify(logs.slice(0, 200)));
+    }
+};
+
+// ==========================================
+// SOVEREIGN AI CHAT ENGINE — REAL + FALLBACK
+// ==========================================
+const SovereignAI = {
+    conversationHistory: [],
+    maxHistory: 10,
+
+    sendMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
         
-        // Global accessibility
-        window.SovereignAI = SovereignAI;
-    </script>
+        this.addMessage(text, 'user');
+        input.value = '';
+        
+        // Show typing indicator
+        this.showTyping();
+        
+        // Try real AI first, fallback to local
+        this.processMessage(text);
+    },
+
+    async processMessage(text) {
+        const ctx = this.buildContext();
+        
+        // Try real AI if connected
+        if (AIConnection.isConnected) {
+            try {
+                const response = await AIConnection.sendToAI(text, ctx);
+                this.hideTyping();
+                
+                if (response && !response.error) {
+                    this.addMessage(response.text, 'ai', true);
+                    this.addToHistory('user', text);
+                    this.addToHistory('ai', response.text);
+                    return;
+                }
+            } catch (e) {
+                console.error('Real AI failed, using fallback:', e);
+            }
+        }
+        
+        // Fallback to local simulation
+        setTimeout(() => {
+            this.hideTyping();
+            const response = this.generateLocalResponse(text, ctx);
+            this.addMessage(response, 'ai', false);
+            this.addToHistory('user', text);
+            this.addToHistory('ai', response);
+        }, 800);
+    },
+
+    buildContext() {
+        const now = new Date();
+        const day = now.getDay();
+        const currentTime = Utils.getCurrentDecimalTime();
+        const prog = PROGRAM_DATA[ProgramManager.activeProgramId];
+        
+        // Find current block
+        let currentBlock = null;
+        let blocks = [];
+        if ([4,5,6].includes(day) && prog.special[day]) {
+            blocks = prog.special[day].blocks;
+        } else {
+            blocks = prog.schedule.map(s => ({ ...s, timeStr: `${Utils.formatDecimalTime(s.start)} - ${Utils.formatDecimalTime(s.end)}` }));
+        }
+        for (let block of blocks) {
+            const start = block.start || parseFloat(block.time.split('-')[0].replace(':','.'));
+            const end = block.end || parseFloat(block.time.split('-')[1].replace(':','.'));
+            if (currentTime >= start && currentTime < end) {
+                currentBlock = block.title;
+                break;
+            }
+        }
+        
+        return {
+            level: PlayerSync.data.level,
+            xp: PlayerSync.data.xp,
+            gold: PlayerSync.data.gold,
+            stats: PlayerSync.data.stats,
+            programTitle: prog.title,
+            programVersion: prog.version,
+            programId: ProgramManager.activeProgramId,
+            dayIndex: day,
+            dayName: Utils.getDayName(day),
+            currentTime: Utils.formatDecimalTime(currentTime),
+            currentBlock: currentBlock,
+            history: this.conversationHistory
+        };
+    },
+
+    addToHistory(role, text) {
+        this.conversationHistory.push({ role, text, time: Date.now() });
+        if (this.conversationHistory.length > this.maxHistory * 2) {
+            this.conversationHistory = this.conversationHistory.slice(-this.maxHistory * 2);
+        }
+    },
+
+    showTyping() {
+        const screen = document.getElementById('chatScreen');
+        const typingDiv = document.createElement('div');
+        typingDiv.id = 'typing-indicator';
+        typingDiv.className = 'flex gap-3 message-enter';
+        typingDiv.innerHTML = `
+            <div class="w-8 h-8 rounded-full bg-[var(--sys-cyan)]/20 border border-[var(--sys-cyan)] flex items-center justify-center flex-shrink-0 text-sm shadow-[0_0_10px_rgba(0,240,255,0.2)]">🤖</div>
+            <div class="bg-slate-900/80 px-4 py-3 rounded-lg border border-[var(--sys-cyan)]/30">
+                <div class="typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        `;
+        screen.appendChild(typingDiv);
+        screen.scrollTop = screen.scrollHeight;
+        
+        // Update status
+        document.getElementById('ai-status-dot').className = 'w-2 h-2 rounded-full bg-[var(--sys-cyan)] animate-ping';
+        document.getElementById('ai-status-text').textContent = 'PROCESSING';
+        document.getElementById('ai-status-text').className = 'text-[10px] text-[var(--sys-cyan)] sys-font font-bold uppercase';
+    },
+
+    hideTyping() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) indicator.remove();
+        
+        document.getElementById('ai-status-dot').className = 'w-2 h-2 rounded-full bg-emerald-500';
+        document.getElementById('ai-status-text').textContent = 'ONLINE';
+        document.getElementById('ai-status-text').className = 'text-[10px] text-emerald-400 sys-font font-bold uppercase';
+    },
+
+    quickAsk(text) {
+        document.getElementById('chatInput').value = text;
+        this.sendMessage();
+    },
+    
+    addMessage(text, sender, isRealAI = false) {
+        const screen = document.getElementById('chatScreen');
+        const div = document.createElement('div');
+        div.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} message-enter`;
+        
+        const aiBadge = isRealAI ? '<span class="text-[9px] bg-emerald-950/60 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30 ml-2">LIVE AI</span>' : '<span class="text-[9px] bg-amber-950/60 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30 ml-2">LOCAL</span>';
+        
+        if (sender === 'user') {
+            div.innerHTML = `<div class="bg-slate-800 text-white px-4 py-2 rounded-lg max-w-[80%] text-sm border border-slate-700">${this.escapeHtml(text)}</div>`;
+        } else {
+            div.innerHTML = `
+            <div class="flex gap-3 max-w-[90%]">
+                <div class="w-8 h-8 rounded-full bg-[var(--sys-cyan)]/20 border border-[var(--sys-cyan)] flex items-center justify-center flex-shrink-0 text-sm shadow-[0_0_10px_rgba(0,240,255,0.2)]">🤖</div>
+                <div class="bg-slate-900/80 text-slate-200 px-4 py-3 rounded-lg text-sm border border-[var(--sys-cyan)]/30 shadow-[0_0_10px_rgba(0,240,255,0.05)] leading-relaxed">
+                    <div class="flex items-center mb-1">${aiBadge}</div>
+                    ${text}
+                </div>
+            </div>`;
+        }
+        
+        screen.appendChild(div);
+        screen.scrollTop = screen.scrollHeight;
+    },
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    },
+
+    // LOCAL FALLBACK RESPONSES (Enhanced from original)
+    generateLocalResponse(input, ctx) {
+        const lower = input.toLowerCase();
+        
+        // Check for specific queries
+        if (lower.includes('كتلة') || lower.includes('block') || lower.includes('نشط') || lower.includes('active')) {
+            return this.getCurrentBlockAnalysis(ctx);
+        }
+        
+        if (lower.includes('نصيحة') || lower.includes('تطور') || lower.includes('advice') || lower.includes('tip')) {
+            return this.getDevelopmentAdvice(ctx.level, ctx.programId);
+        }
+        
+        if (lower.includes('وضع') || lower.includes('حالة') || lower.includes('status') || lower.includes('eval')) {
+            return this.getStatusEvaluation(ctx);
+        }
+        
+        if (lower.includes('برمج') || lower.includes('كود') || lower.includes('تقني') || lower.includes('tech') || lower.includes('code')) {
+            return this.getTechAdvice(ctx.level);
+        }
+        
+        if (lower.includes('رياض') || lower.includes('بدن') || lower.includes('جري') || lower.includes('fitness') || lower.includes('sport')) {
+            return this.getFitnessAdvice(ctx.level);
+        }
+        
+        if (lower.includes('روح') || lower.includes('قرآن') || lower.includes('شرع') || lower.includes('spiritual') || lower.includes('deen')) {
+            return this.getSpiritualAdvice(ctx.level);
+        }
+        
+        if (lower.includes('برنامج') || lower.includes('program') || lower.includes('أسبوع') || lower.includes('week')) {
+            return this.getProgramInfo(ctx.programId);
+        }
+
+        if (lower.includes('وولف') || lower.includes('wolf') || lower.includes('نمو') || lower.includes('طول')) {
+            return this.getWolffLawExplanation();
+        }
+
+        // Default response
+        return `<b>[ANALYSIS COMPLETE — LOCAL MODE]</b><br><br>
+        يا عاهل الظلال، أنا حالياً في وضع المحاكاة المحلي. للحصول على إجابات ذكية حقيقية:<br>
+        1. اضغط <b>⚙️ API SETTINGS</b> أعلى الصفحة<br>
+        2. اختر <b>Google Gemini</b> (مجاني)<br>
+        3. أدخل مفتاح API من <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[var(--sys-cyan)]">Google AI Studio</a><br>
+        4. اضغط <b>TEST LINK</b><br><br>
+        <span class="text-[var(--sys-purple)]">مستواك الحالي: LVL ${ctx.level} | البروتوكول النشط: ${ctx.programTitle}</span><br><br>
+        <b>ما الذي يمكنني مساعدتك فيه محلياً:</b><br>
+        • تحليل الكتل النشطة — اكتب "الكتلة النشطة"<br>
+        • نصائح التطوير — اكتب "نصيحة"<br>
+        • تقييم الوضع — اكتب "وضعي"<br>
+        • قانون وولف — اكتب "قانون وولف"`;
+    },
+
+    getCurrentBlockAnalysis(ctx) {
+        const prog = PROGRAM_DATA[ctx.programId];
+        let blocks = [];
+        
+        if ([4,5,6].includes(ctx.dayIndex) && prog.special[ctx.dayIndex]) {
+            blocks = prog.special[ctx.dayIndex].blocks.map(b => ({
+                start: parseFloat(b.time.split('-')[0].replace(':','.')),
+                end: parseFloat(b.time.split('-')[1].replace(':','.')),
+                title: b.title,
+                desc: b.desc,
+                timeStr: b.time
+            }));
+        } else {
+            blocks = prog.schedule.map(s => ({
+                start: s.start,
+                end: s.end,
+                title: s.title,
+                desc: s.desc,
+                timeStr: `${Utils.formatDecimalTime(s.start)} - ${Utils.formatDecimalTime(s.end)}`
+            }));
+        }
+
+        const currentTime = Utils.getCurrentDecimalTime();
+        for (let block of blocks) {
+            if (currentTime >= block.start && currentTime < block.end) {
+                return `<b>[الكتلة النشطة — ${ctx.dayName}]</b><br><br>
+                <span class="text-[var(--sys-cyan)] font-bold text-lg">${block.title}</span><br>
+                <p class="mt-2">${block.desc}</p><br>
+                <span class="text-emerald-400 text-[10px] sys-font">الوقت: ${block.timeStr}</span><br><br>
+                <b>توجيه فوري:</b> ركز 100% على هذه الكتلة. لا تسمح للمشتتات باختراق تركيزك. هذا هو وقت البناء الحقيقي.`;
+            }
+        }
+
+        for (let block of blocks) {
+            if (block.start > currentTime) {
+                return `<b>[لا توجد كتلة نشطة]</b><br><br>
+                الكتلة القادمة: <span class="text-[var(--sys-cyan)]">${block.title}</span><br>
+                تبدأ الساعة: ${Utils.formatDecimalTime(block.start)}<br><br>
+                <b>استغل هذا الوقت:</b> مراجعة سريعة، استشفاء، أو تحضير للكتلة القادمة.`;
+            }
+        }
+
+        return `<b>[انتهت الكتل المجدولة]</b><br><br>
+        جميع الكتل التشغيلية لهذا اليوم قد انتهت.<br>
+        <b>الآن:</b> تجهيز النظام للنوم، أذكار، وتخطيط الغد.<br>
+        النوم هو أهم كتلة إعادة بناء.`;
+    },
+
+    getDevelopmentAdvice(level, progId) {
+        if (level < 50) {
+            return `<b>[نصيحة التطوير — المرحلة التأسيسية]</b><br><br>
+            • <b>التركيز:</b> بناء العادات الأساسية (استيقاظ مبكر، صلاة الفجر، تمارين يومية)<br>
+            • <b>البرمجة:</b> تعلم Python/JavaScript بعمق قبل الدخول في AI<br>
+            • <b>البدن:</b> PPL أساسي + جري منتظم، لا تبالغ في الأحمال<br>
+            • <b>الروح:</b> حفظ يومي ثابت، حتى لو صفحة واحدة<br><br>
+            <span class="text-[var(--sys-gold)]">الهدف: الاستقرار والانضباط قبل السرعة.</span>`;
+        } else if (level < 130) {
+            return `<b>[نصيحة التطوير — المرحلة المتقدمة]</b><br><br>
+            • <b>البرمجة:</b> ابدأ مشروع AiMoha حقيقياً، لا مجرد تعلم<br>
+            • <b>البدن:</b> أضف Calisthenics متقدم (Handstand, Muscle-up)<br>
+            • <b>الذهن:</b> شطرنج يومي + سودوكو صعبة<br>
+            • <b>اللغة:</b> Shadowing يومي للإنجليزية التقنية<br><br>
+            <span class="text-[var(--sys-gold)]">الهدف: التخصص والعمق في مجالك الرئيسي.</span>`;
+        } else if (level < 450) {
+            return `<b>[نصيحة التطوير — مرحلة السيادة]</b><br><br>
+            • <b>البرمجة:</b> دمج AI Agents + تعلم LLMs + بناء منتجات حقيقية<br>
+            • <b>البدن:</b> Muay Thai/BJJ للقتال الحقيقي + جري 8 ساعات أسبوعياً<br>
+            • <b>المحتوى:</b> ابدأ قنوات YouTube (Onyx Apex + ren gaming)<br>
+            • <b>المال:</b> أول كتاب رقمي + تطوير مواقع للربح<br><br>
+            <span class="text-[var(--sys-gold)]">الهدف: البناء الإمبراطوري المتعدد المصادر.</span>`;
+        } else {
+            return `<b>[نصيحة التطوير — مرحلة اللانهاية]</b><br><br>
+            • <b>السيادة:</b> أنت الآن تدبر أمورك بنفسك — النظام يتبعك لا العكس<br>
+            • <b>البرمجة:</b> قيادة فريق AiMoha، بناء أنظمة ذاتية<br>
+            • <b>البدن:</b> قانون وولف مفعل — الجري الانفجاري + ضغط عظمي<br>
+            • <b>العقل:</b> دمج منطق الشطرنج في خوارزميات AI<br><br>
+            <span class="text-[var(--sys-cyan)] font-bold">[SYSTEM: SOVEREIGN AUTONOMY ACTIVATED]</span><br>
+            <span class="text-[var(--sys-gold)]">الهدف: أنت الآن النظام. قراراتك هي القانون.</span>`;
+        }
+    },
+
+    getStatusEvaluation(ctx) {
+        const nextLevel = ctx.level + 1;
+        const xpNeeded = ctx.level * 100;
+        const remaining = xpNeeded - ctx.xp;
+        
+        let tier = 'ALPHA';
+        if (ctx.level > 70) tier = 'BETA';
+        if (ctx.level > 130) tier = 'GAMMA';
+        if (ctx.level > 250) tier = 'DELTA';
+        if (ctx.level > 450) tier = 'INFINITY';
+
+        return `<b>[تقييم الوضع السيادي]</b><br><br>
+        <div class="grid grid-cols-2 gap-2 text-[11px] mb-3">
+            <div class="bg-slate-950/60 p-2 rounded border border-slate-800">
+                <span class="text-slate-500 block">المستوى</span>
+                <span class="text-[var(--sys-cyan)] font-bold text-lg">${ctx.level}</span>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded border border-slate-800">
+                <span class="text-slate-500 block">الطبقة</span>
+                <span class="text-[var(--sys-purple)] font-bold text-lg">${tier}</span>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded border border-slate-800">
+                <span class="text-slate-500 block">الذهب</span>
+                <span class="text-[var(--sys-gold)] font-bold text-lg">${ctx.gold} 🪙</span>
+            </div>
+            <div class="bg-slate-950/60 p-2 rounded border border-slate-800">
+                <span class="text-slate-500 block">XP متبقي</span>
+                <span class="text-emerald-400 font-bold text-lg">${remaining}</span>
+            </div>
+        </div>
+        <b>البروتوكول النشط:</b> ${ctx.programTitle} (${ctx.programVersion})<br>
+        <b>نطاق المستوى:</b> ${ctx.programId === 'week1' ? '1-450' : '450→∞'}<br><br>
+        ${ctx.level >= 450 ? '<span class="text-[var(--sys-cyan)] font-bold">[SOVEREIGN AUTONOMY — أنت تتحكم في النظام]</span>' : `<b>الهدف القادم:</b> الوصول للمستوى ${nextLevel} (+${remaining} XP)`}`;
+    },
+
+    getTechAdvice(level) {
+        if (level < 50) {
+            return `<b>[المسار التقني التأسيسي]</b><br><br>
+            • تعلم Python من الصفر (متغيرات، حلقات، دوال)<br>
+            • HTML/CSS/JS لبناء واجهات بسيطة<br>
+            • حل مسائل على LeetCode (سهلة)<br>
+            • مشروع أولي: آلة حاسبة أو To-Do List<br><br>
+            <span class="text-[var(--sys-cyan)]">الوقت المقترح: 2-3 ساعات يومياً</span>`;
+        } else if (level < 130) {
+            return `<b>[المسار التقني المتقدم]</b><br><br>
+            • ابدأ مشروع AiMoha (بنية تحتية)<br>
+            • تعلم Git + GitHub<br>
+            • دراسة هياكل البيانات والخوارزميات<br>
+            • مسائل LeetCode (متوسطة)<br>
+            • تعلم أساسيات Machine Learning<br><br>
+            <span class="text-[var(--sys-cyan)]">الوقت المقترح: 4-5 ساعات يومياً</span>`;
+        } else {
+            return `<b>[المسار التقني السيادي]</b><br><br>
+            • بناء AI Agents ذاتية<br>
+            • LLMs + NLP + Hugging Face<br>
+            • دمج منطق الشطرنج في الأكواد<br>
+            • مراقبة المشاريع + توثيق<br>
+            • تطوير مواقع للربح<br><br>
+            <span class="text-[var(--sys-cyan)]">الوقت المقترح: 6-8 ساعات يومياً</span>`;
+        }
+    },
+
+    getFitnessAdvice(level) {
+        if (level < 50) {
+            return `<b>[المسار البدني التأسيسي]</b><br><br>
+            • PPL أساسي: 3 أيام في الأسبوع<br>
+            • جري 30 دقيقة يومياً<br>
+            • تركيز على الوضع الصحيح<br>
+            • تغذية بروتينية نظيفة<br><br>
+            <span class="text-emerald-400">لا تستعجل الأحمال الثقيلة — البناء أولاً.</span>`;
+        } else if (level < 130) {
+            return `<b>[المسار البدني المتقدم]</b><br><br>
+            • PPL + Calisthenics (عقلة، ضغط، قرفصاء)<br>
+            • جري ساعة يومياً<br>
+            • إضافة تمارين Core<br>
+            • Muay Thai أو BJJ للقتال<br><br>
+            <span class="text-emerald-400">الهدف: بناء القاعدة الهوائية والقوة الانفجارية.</span>`;
+        } else {
+            return `<b>[المسار البدني السيادي]</b><br><br>
+            • PPL متقدم (Handstand, Explosive Pull-ups)<br>
+            • جري 8 ساعات أسبوعياً (قانون وولف)<br>
+            • Muay Thai + BJJ تنافسي<br>
+            • تمارين طول (تعلق، سباحة، سلة)<br>
+            • شوفان + شعير + مغذيات دقيقة<br><br>
+            <span class="text-emerald-400">الهدف: الصلابة العظمية + القوة الانفجارية + اللياقة القصوى.</span>`;
+        }
+    },
+
+    getSpiritualAdvice(level) {
+        return `<b>[المسار الروحي السيادي]</b><br><br>
+        • <b>الفجر:</b> صلاة في وقتها + أذكار + تلاوة<br>
+        • <b>الأيام الفردية:</b> مراجعة وحفظ سابق<br>
+        • <b>الأيام الزوجية:</b> حفظ جديد + تلاوة تدبرية<br>
+        • <b>الجمعة:</b> سورة الكهف + مراجعة علوم<br>
+        • <b>الخميس:</b> دراسة شرعية مكثفة (توحيد، رياض، تجويد)<br><br>
+        <span class="text-[var(--sys-purple)]">الروح هي الأساس. بدونها، كل البناء يتهاوى.</span>`;
+    },
+
+    getProgramInfo(progId) {
+        const prog = PROGRAM_DATA[progId];
+        return `<b>[${prog.title}]</b><br><br>
+        <span class="text-[var(--sys-cyan)]">${prog.version}</span> | ${prog.range}<br><br>
+        ${prog.desc}<br><br>
+        <b>الجدول اليومي:</b> ${prog.schedule.length} كتل<br>
+        <b>الأيام الخاصة:</b> خميس إنجاز + جمعة إبداع + سبت إتقان<br><br>
+        ${progId === 'week2' ? '<span class="text-[var(--sys-purple)] font-bold">[Infinity Protocol — دمج الشطرنج في AI + الجري الانفجاري]</span>' : '<span class="text-[var(--sys-cyan)]">[Foundation Protocol — بناء القاعدة الشاملة]</span>'}`;
+    },
+
+    getWolffLawExplanation() {
+        return `<b>[قانون وولف — Wolff's Law]</b><br><br>
+        <span class="text-[var(--sys-cyan)] font-bold">التعريف:</span> العظم نسيج حي يتكيف مع الضغط المطبق عليه. كلما زاد الضغط، زادت كثافة العظم وقوته.<br><br>
+        
+        <b>التطبيق في نظامك:</b><br>
+        • <b>الجري الانفجاري:</b> ضغط متكرر على العظام يحفز إعادة البناء<br>
+        • <b>القفز العالي:</b> ضغط قصوي يعطي إشارة للعظم بالنمو<br>
+        • <b>تمارين الوزن:</b> ضغط مستمر يزيد من كثافة العظم<br>
+        • <b>السباحة:</b> تمدد الغضاريف بين المفاصل<br><br>
+        
+        <b>النتيجة المتوقعة:</b><br>
+        • تصحيح الوضعية: +2-3 سم<br>
+        • تأخير إغلاق لوحات النمو: سنوات إضافية<br>
+        • زيادة إفراز HGH: ضعف النشاط العادي<br><br>
+        
+        <span class="text-emerald-400 font-bold">التوجيه القتالي: ركّز على الجري بضغط عالي + القفز + تمارين التعلق.</span>`;
+    }
+};
+
+// ==========================================
+// TOAST NOTIFICATIONS
+// ==========================================
+const Toast = {
+    show(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) {
+            // Create toast container if not exists
+            const toastContainer = document.createElement('div');
+            toastContainer.id = 'toastContainer';
+            toastContainer.className = 'fixed top-5 right-5 z-[10000] flex flex-col gap-3 pointer-events-none';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const toast = document.createElement('div');
+        const colors = {
+            success: 'border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]',
+            error: 'border-rose-500 text-rose-400 shadow-[0_0_15px_rgba(225,29,72,0.3)]',
+            info: 'border-[var(--sys-cyan)] text-[var(--sys-cyan)] shadow-[0_0_15px_rgba(0,240,255,0.3)]',
+            purple: 'border-[var(--sys-purple)] text-[var(--sys-purple)] shadow-[0_0_15px_rgba(157,78,221,0.3)]'
+        };
+        toast.className = `pointer-events-auto px-5 py-3 bg-[#02040a]/95 border backdrop-blur-md text-sm font-bold sys-font tracking-wide animate-system-pop ${colors[type] || colors.info}`;
+        toast.innerHTML = message;
+        document.getElementById('toastContainer').appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
+    }
+};
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Verify day consistency on load
+    Utils.verifyDayConsistency();
+    
+    PlayerSync.init();
+    ProgramManager.init();
+    AIConnection.init();
+    
+    // Auto-refresh current block every minute
+    setInterval(() => {
+        ProgramManager.renderCurrentBlock();
+    }, 60000);
+    
+    // Provider change handler
+    document.getElementById('apiProvider').addEventListener('change', () => {
+        AIConnection.updateModelOptions();
+    });
+});
+
+// Global exposure
+window.ProgramManager = ProgramManager;
+window.SovereignAI = SovereignAI;
+window.PlayerSync = PlayerSync;
+window.AIConnection = AIConnection;
+window.Utils = Utils;
+window.Toast = Toast;
+</script>
 </body>
 </html>
