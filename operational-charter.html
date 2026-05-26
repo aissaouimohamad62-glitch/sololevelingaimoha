@@ -5,252 +5,606 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sovereign System | Operational Charter</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --sys-cyan: #00f0ff;
-            --sys-cyan-glow: rgba(0, 240, 255, 0.4);
+            --sys-cyan-glow: rgba(0, 240, 255, 0.6);
             --sys-purple: #9d4edd;
-            --sys-purple-glow: rgba(157, 78, 221, 0.3);
+            --sys-purple-glow: rgba(157, 78, 221, 0.4);
             --sys-bg-dark: #02040a;
             --sys-panel: rgba(5, 10, 25, 0.85);
+            --sys-border: rgba(0, 240, 255, 0.3);
         }
-        body { 
-            font-family: 'Cairo', sans-serif; 
+        body {
+            font-family: 'Cairo', sans-serif;
             background-color: var(--sys-bg-dark);
             background-image: 
                 radial-gradient(circle at 15% 50%, var(--sys-cyan-glow) 0%, transparent 25%),
-                radial-gradient(circle at 85% 50%, var(--sys-purple-glow) 0%, transparent 25%);
+                radial-gradient(circle at 85% 30%, var(--sys-purple-glow) 0%, transparent 25%);
             background-attachment: fixed;
             color: #e2e8f0;
+            min-height: 100vh;
         }
-        .font-mono {
-            font-family: 'Rajdhani', sans-serif;
-        }
-        .sovereign-panel {
+        .sys-font { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em; }
+        .sl-panel {
             background: var(--sys-panel);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 240, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(16px);
+            border: 2px solid var(--sys-border);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.1);
+            position: relative;
         }
-        .text-glow {
-            text-shadow: 0 0 10px var(--sys-cyan-glow);
+        .sl-panel::before, .sl-panel::after {
+            content: ''; position: absolute; width: 20px; height: 20px; pointer-events: none;
+        }
+        .sl-panel::before { top: -2px; left: -2px; border-top: 3px solid var(--sys-cyan); border-left: 3px solid var(--sys-cyan); }
+        .sl-panel::after { bottom: -2px; right: -2px; border-bottom: 3px solid var(--sys-cyan); border-right: 3px solid var(--sys-cyan); }
+        .sl-btn {
+            background: linear-gradient(180deg, rgba(0, 240, 255, 0.05) 0%, rgba(5, 10, 25, 0.8) 100%);
+            border: 1px solid var(--sys-cyan);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sl-btn:hover {
+            box-shadow: 0 0 20px rgba(0,240,255,0.4);
+            background: rgba(0,240,255,0.15);
+            transform: translateY(-1px);
+        }
+        .sl-btn.active {
+            background: var(--sys-cyan);
+            color: black;
+            box-shadow: 0 0 20px var(--sys-cyan-glow);
+            font-weight: 900;
+        }
+        .sl-btn-purple {
+            border-color: var(--sys-purple);
+            background: linear-gradient(180deg, rgba(157, 78, 221, 0.05) 0%, rgba(5, 10, 25, 0.8) 100%);
+        }
+        .sl-btn-purple:hover {
+            box-shadow: 0 0 20px var(--sys-purple-glow);
+            background: rgba(157, 78, 221, 0.15);
+        }
+        .sl-btn-purple.active {
+            background: var(--sys-purple);
+            color: white;
+            box-shadow: 0 0 20px var(--sys-purple-glow);
+        }
+        .block-active {
+            border: 1px solid var(--sys-cyan);
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+        .live-pulse {
+            animation: livePulse 2s infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { box-shadow: 0 0 5px var(--sys-cyan); }
+            50% { box-shadow: 0 0 20px var(--sys-cyan); }
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--sys-cyan); }
+        .animate-system-pop { animation: systemPopIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        @keyframes systemPopIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); filter: brightness(2); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8">
+<body class="p-2 md:p-6">
 
-    <div class="max-w-5xl mx-auto space-y-6">
-        <header class="sovereign-panel rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b-2 border-[var(--sys-cyan)]">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-lg bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] flex items-center justify-center text-xl shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                    📜
+<div class="max-w-[1400px] mx-auto space-y-6 relative z-10">
+
+    <!-- HEADER -->
+    <header class="sl-panel p-4 md:p-6 flex flex-col lg:flex-row justify-between items-center gap-4 animate-system-pop" style="border-color: rgba(157, 78, 221, 0.6);">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-lg bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] flex items-center justify-center text-xl shadow-[0_0_15px_rgba(0,240,255,0.2)]">📜</div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black tracking-wide text-white">SOVEREIGN SYSTEM</h1>
+                <p class="text-xs text-[var(--sys-cyan)] sys-font tracking-widest">OPERATIONAL CHARTER — الميثاق التشغيلي</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-4 bg-slate-950/60 px-6 py-3 rounded-lg border border-slate-800">
+            <div class="text-center">
+                <span class="block text-[10px] text-slate-500 sys-font">LEVEL</span>
+                <span id="player-level" class="text-xl font-bold text-white sys-font">1</span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-800"></div>
+            <div class="text-right min-w-[120px]">
+                <span class="block text-[10px] text-slate-500 sys-font">EXP PROGRESS</span>
+                <div class="w-full bg-slate-800 h-2 rounded-full mt-1 overflow-hidden">
+                    <div id="player-xp-bar" class="bg-[var(--sys-cyan)] h-full transition-all duration-500" style="width: 0%"></div>
                 </div>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-800"></div>
+            <div class="text-center">
+                <span class="block text-[10px] text-slate-500 sys-font">GOLD</span>
+                <div class="flex items-center gap-1">
+                    <span class="text-yellow-500 text-sm">🪙</span>
+                    <span id="player-gold" class="text-lg font-bold text-yellow-400 sys-font">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION -->
+    <nav class="flex flex-wrap gap-2 justify-center md:justify-start animate-system-pop" style="animation-delay: 0.1s;">
+        <a href="index.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">🏠 DASHBOARD</a>
+        <a href="active-quests.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">⚔️ ACTIVE QUESTS</a>
+        <a href="brain-stats.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">🧠 BRAIN STATS</a>
+        <a href="system-logs.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">📊 SYSTEM LOGS</a>
+        <a href="monarch-ai.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">🤖 MONARCH AI</a>
+        <a href="operational-charter.html" class="px-4 py-2 text-xs sys-font bg-cyan-950/40 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded font-bold shadow-[0_0_10px_rgba(0,240,255,0.1)]">📜 CHARTER</a>
+    </nav>
+
+    <!-- PROGRAM SWITCHER -->
+    <div class="sl-panel p-5 animate-system-pop" style="animation-delay: 0.2s;">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+            <h2 class="text-sm font-black text-white sys-font tracking-widest">OPERATIONAL PROTOCOL SELECTOR</h2>
+            <span class="text-[10px] text-slate-500 sys-font">ACTIVE DIRECTIVE</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button onclick="Charter.switch('week1')" id="btn-week1" class="sl-btn w-full text-left p-4 rounded flex justify-between items-center group">
                 <div>
-                    <h1 class="text-xl md:text-2xl font-black tracking-wide text-white text-glow">SOVEREIGN SYSTEM</h1>
-                    <p class="text-xs text-[var(--sys-cyan)] font-mono tracking-widest">OPERATIONAL CHARTER (الميثاق التشغيلي)</p>
+                    <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-cyan)] block">📜 CHARTER v1.0 — Foundation</span>
+                    <span class="text-[10px] text-slate-400">الميثاق التشغيلي المتكامل (المستويات 1-450)</span>
                 </div>
-            </div>
-            
-            <div class="flex items-center gap-6 bg-slate-950/60 px-6 py-3 rounded-lg border border-slate-800">
-                <div class="text-center">
-                    <span class="block text-[10px] text-slate-500 font-mono">LEVEL</span>
-                    <span id="player-level" class="text-xl font-bold text-white font-mono">1</span>
+                <span class="sys-font text-[10px] bg-cyan-950 text-[var(--sys-cyan)] px-2 py-0.5 border border-[var(--sys-cyan)]">WEEK 1</span>
+            </button>
+            <button onclick="Charter.switch('week2')" id="btn-week2" class="sl-btn-purple sl-btn w-full text-left p-4 rounded flex justify-between items-center group">
+                <div>
+                    <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-purple)] block">🌌 SYSTEM v8.0 — Infinity</span>
+                    <span class="text-[10px] text-slate-400">تحديث النظام النسخة 8.0 (المستويات 450→∞)</span>
                 </div>
-                <div class="h-8 w-[1px] bg-slate-800"></div>
-                <div class="text-right min-w-[120px]">
-                    <span class="block text-[10px] text-slate-500 font-mono">EXP PROGRESS</span>
-                    <div class="w-full bg-slate-800 h-2 rounded-full mt-1 overflow-hidden">
-                        <div id="player-xp-bar" class="bg-[var(--sys-cyan)] h-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <nav class="flex flex-wrap gap-2 justify-center md:justify-start">
-            <a href="index.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
-                🏠 DASHBOARD
-            </a>
-            <a href="active-quests.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
-                ⚔️ ACTIVE QUESTS
-            </a>
-            <a href="brain-stats.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
-                🧠 BRAIN STATS
-            </a>
-            <a href="operational-charter.html" class="px-4 py-2 text-xs font-mono bg-cyan-950/40 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded font-bold shadow-[0_0_10px_rgba(0,240,255,0.1)]">
-                📜 OPERATIONAL CHARTER
-            </a>
-            <a href="monarch-ai.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
-                🤖 MONARCH AI
-            </a>
-            <a href="system-logs.html" class="px-4 py-2 text-xs font-mono sovereign-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300">
-                📊 SYSTEM LOGS
-            </a>
-        </nav>
-
-        <main class="space-y-6">
-            
-            <div class="sovereign-panel rounded-xl p-6 lg:p-8 border-t-4 border-[var(--sys-cyan)]">
-                <div class="flex items-center gap-3 mb-6">
-                    <span class="text-3xl text-[var(--sys-cyan)]">🦅</span>
-                    <h2 class="text-2xl font-black text-white">الميثاق السيادي الموحد (النسخة المبسطة المطلقة)</h2>
-                </div>
-                <p class="text-sm text-slate-300 leading-relaxed max-w-4xl">
-                    هذا هو الميثاق التشغيلي النهائي الذي يحكم عمل النظام بعد بروتوكول التطهير العظيم. تم إزالة كل الكتل المشتتة (المتجر، زنزانات ألعاب العقل المستنزفة للموارد، الألقاب المعقدة، وألوان الهالات المتعددة). التركيز الآن ينصب حصرياً على الإنجاز الفعلي للمهام، مراكمة الـ XP، والارتقاء في مستويات القوة الذهنية والبدنية تحت هالتين فقط (السيادية المظلمة والقرمزية).
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="sovereign-panel rounded-xl p-6 border border-slate-700 hover:border-[var(--sys-cyan)]/50 transition">
-                    <h3 class="text-lg font-bold text-[var(--sys-cyan)] mb-4 flex items-center gap-2">
-                        <span>📅</span> البروتوكول الأول: النظام اليومي المستقر (الأيام العادية)
-                    </h3>
-                    <ul class="space-y-4 text-sm text-slate-300">
-                        <li class="flex items-start gap-3">
-                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">05:00-06:00</span>
-                            <div>
-                                <strong class="text-white block">الكتلة الروحية الثابتة:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">الأيام الفردية (تلاوة تدبرية + مراجعة المحفوظ). الأيام الزوجية (تثبيت حفظ جديد وتلاوة منظمة).</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">06:00-08:30</span>
-                            <div>
-                                <strong class="text-white block">البرمجة العميقة:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">العمل المباشر والمكثف على تطوير مشروعك البرمجي (Python / JS).</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">08:30-10:30</span>
-                            <div>
-                                <strong class="text-white block">أكاديمية الذكاء الاصطناعي:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">دراسة وتطبيق هندسة النماذج اللغوية الكبيرة (LLMs) والتعلم الآلي المتقدم.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">10:30-12:00</span>
-                            <div>
-                                <strong class="text-white block">التمكن اللغوي:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">انغماس تقني كامل وممارسة اللغة الإنجليزية الفنية والمصطلحات المتقدمة.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-[var(--sys-cyan)] font-bold mt-0.5 min-w-[80px]">15:00-18:30</span>
-                            <div>
-                                <strong class="text-white block">التدريب البدني:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">جري مسافات طويلة، تمارين الضغط والبلانك، ومباريات التنافس الكامل.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="sovereign-panel rounded-xl p-6 border border-slate-700 hover:border-rose-500/50 transition">
-                    <h3 class="text-lg font-bold text-rose-500 mb-4 flex items-center gap-2">
-                        <span>🕌</span> البروتوكول الثاني: كتلة الصيام والقيام (الإثنين والخميس)
-                    </h3>
-                    <ul class="space-y-4 text-sm text-slate-300">
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-400 font-bold mt-0.5 min-w-[80px]">02:45-05:00</span>
-                            <div>
-                                <strong class="text-white block">نافذة القيام والسحور:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">صلاة القيام، إعداد سحور غني بالبروتين، كتل المراجعة الصامتة والأذكار المركزية.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-400 font-bold mt-0.5 min-w-[80px]">05:00-06:00</span>
-                            <div>
-                                <strong class="text-white block">صلاة الفجر:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">الالتحاق بالكتل البرمجية الثابتة والنشاط الذهني الصافي أثناء الصيام.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-400 font-bold mt-0.5 min-w-[80px]">16:00-17:30</span>
-                            <div>
-                                <strong class="text-white block">نافذة الحفاظ الانفجاري:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">جلسة ركض وجري هوائي منتظم لحرق السعرات ورفع اللياقة دون إجهاد عضلي مفرط.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-rose-400 font-bold mt-0.5 min-w-[80px]">بعد الإفطار</span>
-                            <div>
-                                <strong class="text-white block">كتل الارتقاء والوعي:</strong> 
-                                <p class="text-xs text-slate-400 mt-1">قراءة كتب تطوير العقل، والابتعاد بالكامل عن المشتتات الرقمية السطحية (ديتوكس الدوبامين).</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="sovereign-panel rounded-xl p-6 border-l-4 border-emerald-500">
-                <h3 class="text-lg font-bold text-white mb-4">⚖️ قوانين الاشتباك السيادية</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
-                        <h4 class="text-emerald-400 font-bold text-sm mb-2">1. لا توجد عقوبات (No Penalties)</h4>
-                        <p class="text-xs text-slate-400 leading-relaxed">تم إلغاء نظام خصم نقاط الـ XP عند تأجيل أو تفويت المهام. التقدم يعتمد كلياً على الإنجاز الإيجابي فقط للحفاظ على استقرارية النظام النفسي.</p>
-                    </div>
-                    <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
-                        <h4 class="text-emerald-400 font-bold text-sm mb-2">2. بساطة الاستخدام والتوثيق</h4>
-                        <p class="text-xs text-slate-400 leading-relaxed">لا روابط خارجية إجبارية للمهام. التوثيق يتم بإضافة المهمة وإتمامها ببساطة للحصول على المكافآت النقية في اللوحة الرئيسية.</p>
-                    </div>
-                    <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
-                        <h4 class="text-emerald-400 font-bold text-sm mb-2">3. الهيمنة التلقائية (Auto-Stats)</h4>
-                        <p class="text-xs text-slate-400 leading-relaxed">يتولى النظام قياس إحصائياتك (Brain Stats) تلقائياً عبر مُحلل الكلمات الذكي بناءً على تصنيف المهام التي تنجزها كل يوم.</p>
-                    </div>
-                </div>
-            </div>
-
-        </main>
+                <span class="sys-font text-[10px] bg-purple-950 text-[var(--sys-purple)] px-2 py-0.5 border border-[var(--sys-purple)]">WEEK 2</span>
+            </button>
+        </div>
+        <div id="infinity-message" class="hidden mt-4 p-3 bg-cyan-950/40 border border-[var(--sys-cyan)] rounded animate-pulse text-center">
+            <span class="text-[var(--sys-cyan)] font-bold sys-font text-xs block mb-1">[SYSTEM: SOVEREIGN AUTONOMY ACTIVATED]</span>
+            <span class="text-white text-sm font-bold">الآن يمكنك تدبر أمورك بنفسك وقراراتك الآن. هذا هو التحسين الأخير للنظام.</span>
+        </div>
     </div>
 
-    <script>
-        const OperationalCharterEngine = {
-            data: {
-                level: 1,
-                xp: 0
-            },
+    <!-- TODAY'S PROTOCOL -->
+    <div class="sl-panel p-5 animate-system-pop" style="animation-delay: 0.3s; border-color: rgba(16, 185, 129, 0.4);">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+            <h2 class="text-sm font-black text-emerald-400 sys-font tracking-widest flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                TODAY'S PROTOCOL
+            </h2>
+            <span id="current-day-label" class="text-[10px] text-slate-500 sys-font bg-slate-900 px-2 py-1 rounded border border-slate-800">SUNDAY</span>
+        </div>
+        <div id="day-summary" class="mb-4 p-3 bg-slate-950/60 border border-slate-800 rounded"></div>
+        <div id="today-schedule-container" class="space-y-2 max-h-[500px] overflow-y-auto pr-1"></div>
+    </div>
 
-            init() {
-                this.loadData();
-                this.updateUI();
-            },
+    <!-- WEEKLY MATRIX -->
+    <div class="sl-panel p-5 animate-system-pop" style="animation-delay: 0.4s;">
+        <h2 class="text-sm font-black text-white sys-font tracking-widest mb-4 border-b border-slate-800 pb-3">📅 WEEKLY MATRIX — مصفوفة التوزيع الأسبوعي</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                    <tr class="text-slate-400 sys-font border-b border-slate-800">
+                        <th class="p-3">اليوم</th>
+                        <th class="p-3">الرياضة الجماعية</th>
+                        <th class="p-3">كتلة الجري</th>
+                        <th class="p-3">التركيز الذهني / التقني</th>
+                        <th class="p-3">PPL &amp; التركيز العضلي</th>
+                    </tr>
+                </thead>
+                <tbody id="weekly-matrix-body" class="text-slate-200"></tbody>
+            </table>
+        </div>
+    </div>
 
-            loadData() {
-                const saved = localStorage.getItem('monarch_system_data');
-                if (saved) {
-                    try {
-                        const parsed = JSON.parse(saved);
-                        this.data.level = parsed.level || 1;
-                        this.data.xp = parsed.xp || 0;
-                    } catch (e) {
-                        console.error("Error parsing system data:", e);
-                    }
-                }
-            },
+    <!-- SPECIAL DAYS -->
+    <div id="special-days-container" class="space-y-6 animate-system-pop" style="animation-delay: 0.5s;"></div>
 
-            updateUI() {
-                const lvlEl = document.getElementById('player-level');
-                const barEl = document.getElementById('player-xp-bar');
-                
-                if (lvlEl) lvlEl.textContent = this.data.level;
-                if (barEl) {
-                    let xpNeeded = this.data.level * 100;
-                    let percentage = Math.min((this.data.xp / xpNeeded) * 100, 100);
-                    barEl.style.width = `${percentage}%`;
-                }
-            }
-        };
+    <!-- SOVEREIGN LAWS -->
+    <div class="sl-panel p-6 border-l-4 border-emerald-500 animate-system-pop" style="animation-delay: 0.6s;">
+        <h3 class="text-lg font-bold text-white mb-4">⚖️ قوانين الاشتباك السيادية</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
+                <h4 class="text-emerald-400 font-bold text-sm mb-2">1. لا توجد عقوبات</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">تم إلغاء نظام خصم نقاط الـ XP عند تأجيل المهام. التقدم يعتمد كلياً على الإنجاز الإيجابي فقط.</p>
+            </div>
+            <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
+                <h4 class="text-emerald-400 font-bold text-sm mb-2">2. بساطة التوثيق</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">لا روابط خارجية إجبارية. التوثيق يتم بإضافة المهمة وإتمامها ببساطة للحصول على المكافآت النقية.</p>
+            </div>
+            <div class="bg-slate-950/60 p-4 rounded border border-slate-800">
+                <h4 class="text-emerald-400 font-bold text-sm mb-2">3. الهيمنة التلقائية</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">يتولى النظام قياس إحصائياتك (Brain Stats) تلقائياً عبر مُحلل الكلمات الذكي بناءً على تصنيف المهام.</p>
+            </div>
+        </div>
+    </div>
 
-        // تهيئة النظام
-        window.addEventListener('DOMContentLoaded', () => {
-            OperationalCharterEngine.init();
+    <footer class="text-center text-[10px] text-slate-600 mt-8 sys-font uppercase tracking-widest pb-4">
+        Sovereign Core Intellect Layer | Operational Charter v8.0 | No Penalties Enforced
+    </footer>
+</div>
 
-            // الاستماع الحي لتغيرات البيانات من الصفحات الأخرى
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'monarch_system_data') {
-                    OperationalCharterEngine.init();
-                }
-            });
+<script>
+// ==========================================
+// PROGRAM DATA (Extracted from 08.txt & 09.txt)
+// ==========================================
+const PROGRAM_DATA = {
+  week1: {
+    id: 'week1',
+    title: 'الميثاق التشغيلي المتكامل',
+    version: 'v1.0',
+    range: 'LVL 1 → 450',
+    schedule: [
+      { start: 5.0,  end: 6.0,  title: 'الكتلة الروحية',         desc: 'صلاة الفجر + الأذكار + تلاوة + مراجعة/حفظ' },
+      { start: 6.0,  end: 8.5,  title: 'البرمجة العميقة',        desc: 'مشروع AiMoha (Python/JS) — بناء البنية التحتية' },
+      { start: 8.5,  end: 10.5, title: 'أكاديمية الذكاء الاصطناعي', desc: 'ML, LLMs, خوارزميات التعلم الآلي' },
+      { start: 10.5, end: 12.0, title: 'إتقان اللغة الإنجليزية',   desc: 'انغماس تقني + Shadowing + مفردات متقدمة' },
+      { start: 12.0, end: 13.0, title: 'الاستراحة الكبرى',       desc: 'صلاة الظهر + غداء بروتيني مكثف' },
+      { start: 13.0, end: 15.0, title: 'المعمل التطبيقي',        desc: 'مشاريع AI حقيقية وتكامل الأنظمة البرمجية' },
+      { start: 15.0, end: 16.5, title: 'الإعداد البدني PPL',     desc: 'Push / Pull / Legs + كاليسثينكس' },
+      { start: 16.5, end: 17.5, title: 'كتلة الجري',             desc: 'جري هوائي منتظم (ساعة كاملة)' },
+      { start: 17.5, end: 19.5, title: 'التركيز الأكاديمي',      desc: 'رياضيات/علوم/فيزياء + درس الشيخ الرسلان' },
+      { start: 19.5, end: 20.5, title: 'الرياضة الجماعية',       desc: 'مباريات كرة السلة أو القدم التنافسية' },
+      { start: 20.5, end: 21.5, title: 'الارتقاء الذهني',        desc: 'كتب تطوير + ألعاب فكرية + ديتوكس الدوبامين' },
+      { start: 21.5, end: 22.0, title: 'تجهيز النظام',           desc: 'تخطيط الغد + أذكار النوم + إغلاق كامل' }
+    ],
+    days: {
+      0: { sport: '🏀 كرة السلة', ppl: 'Pull (عقلة انفجارية)', cognitive: 'إنشاء كتاب رقمي (جلسة 1)', running: 'ساعة (16:30-17:30)' },
+      1: { sport: '🥊 مواي تاي', ppl: 'Legs (قفز)', cognitive: 'شطرنج + وثائقي', running: 'ساعة (16:30-17:30)' },
+      2: { sport: '🏀 كرة السلة', ppl: 'Push (ثبات اليدين)', cognitive: 'قراءة + ديتوكس', running: 'ساعة (16:30-17:30)' },
+      3: { sport: '⚽ كرة القدم', ppl: 'Pull & Abs/Triceps', cognitive: 'سودوكو صعبة + وثائقي', running: 'ساعة (16:30-17:30)' },
+      4: { sport: '🥋 BJJ', ppl: 'Six Pack Abs + Triceps', cognitive: 'قراءة + ديتوكس', running: 'ساعة ونصف' },
+      5: { sport: '🚶 مشي هادئ', ppl: 'Push (Chest & Shoulders)', cognitive: 'Dual N-Back + كتاب رقمي', running: 'ساعة (16:30-17:30)' },
+      6: { sport: '⚽ كرة القدم', ppl: 'Six Pack Abs + Triceps', cognitive: 'تقييم أسبوعي', running: 'ساعة ونصف' }
+    },
+    special: {
+      4: {
+        title: 'خميس الإنجاز',
+        blocks: [
+          { time: '05:00-06:30', title: 'الكتلة الروحية', desc: 'تكرار ومراجعة القرآن الكريم (ساعة ونصف)' },
+          { time: '06:30-09:30', title: 'العلوم الشرعية', desc: 'التوحيد + رياض الصالحين + تجويد + البداية والنهاية (3 ساعات)' },
+          { time: '09:30-11:30', title: 'ماراثون الحفظ', desc: 'تاريخ/جغرافيا/إسلامية بخرائط ذهنية' },
+          { time: '11:30-13:30', title: 'المهارات اللغوية', desc: 'فرنسية/عربية/إنجليزية (معالجة القواعد كمنطق برامجي)' },
+          { time: '13:30-15:00', title: 'التقنية والنمو', desc: 'تطوير مواقع وربح منها' },
+          { time: '15:00-16:30', title: 'الحمل البدني', desc: 'Legs مكثفة + قفز عالي + تمارين ارتدادية' },
+          { time: '16:30-18:30', title: 'إتقان اللغات', desc: 'مراجعة مفردات اللغة الإنجليزية' },
+          { time: '18:30-19:30', title: 'صناعة المحتوى', desc: 'YouTube: Onyx Apex + ren gaming + تلاوات (تصوير + خطافات)' },
+          { time: '19:30-21:00', title: 'الجري الطويل', desc: 'ساعة ونصف متواصلة من الجري في الهواء الطلق' },
+          { time: '21:00-22:00', title: 'الروحانيات', desc: 'استماع قرآن + تدبر + تحسين نبرة الصوت' },
+          { time: '22:00-23:00', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس الدوبامين' }
+        ]
+      },
+      5: {
+        title: 'جمعة الإبداع',
+        blocks: [
+          { time: '05:00-08:00', title: 'المراجعة الروحية', desc: 'سورة الكهف + أذكار + مراجعة علوم طبيعية' },
+          { time: '08:00-10:30', title: 'الإنتاج المرئي', desc: 'تعديل فيديو احترافي للمحتوى البصري' },
+          { time: '10:30-14:30', title: 'البرمجة العميقة', desc: '4 ساعات برمجة + مراقبة مشاريع + بناء مواقع' },
+          { time: '14:30-16:00', title: 'الذكاء السائل', desc: 'Dual N-Back مكثف (20 دقيقة) + مشي هادئ + كتاب رقمي (تدقيق)' },
+          { time: '16:00-17:00', title: 'الجري الهوائي', desc: 'ساعة كاملة من الجري بانتظام' },
+          { time: '17:00-18:00', title: 'التحسين التقني', desc: 'مراجعة أكواد ومستودعات المشاريع' },
+          { time: '20:30-21:30', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس كامل' }
+        ]
+      },
+      6: {
+        title: 'سبت الإتقان',
+        blocks: [
+          { time: '05:00-10:00', title: 'الأكاديمية والروح', desc: 'مراجعة فيزياء + قرآن جديد (5 ساعات متواصلة)' },
+          { time: '10:00-14:00', title: 'الأمن التقني', desc: 'قرصنة أخلاقية + إنجليزية (4 ساعات متواصلة)' },
+          { time: '14:00-15:00', title: 'التدبر الصوتي', desc: 'استماع قرآن + تحسين نبرة الصوت' },
+          { time: '15:00-16:30', title: 'الجري الانفجاري', desc: 'ساعة ونصف جري مقسم بين سرعة وانتظام' },
+          { time: '16:30-17:00', title: 'الاستشفاء', desc: 'تناول مغذيات دقيقة (كالسيوم/مغنيسيوم)' },
+          { time: '17:00-18:30', title: 'المباراة الكاملة', desc: 'كرة القدم: مباراة تنافسية حقيقية (تفريغ الطاقة)' },
+          { time: '18:30-19:30', title: 'الأنظمة البرمجية', desc: 'مراقبة مشاريع مطورة + تطوير مواقع' },
+          { time: '19:30-20:30', title: 'معايرة الأنظمة', desc: 'تقييم أسبوعي متكامل + مراجعة الأداء' },
+          { time: '20:30-21:30', title: 'التخطيط التكتيكي', desc: 'تحديث قائمة المهام الصعبة للأسبوع القادم' },
+          { time: '21:30-23:00', title: 'نظام التحفيز الأقصى', desc: 'تمارين طول + شوفان/شعير + نوم 10 ساعات' }
+        ]
+      }
+    }
+  },
+  week2: {
+    id: 'week2',
+    title: 'تحديث النظام 8.0 — Infinity',
+    version: '∞',
+    range: 'LVL 450 → ∞',
+    schedule: [
+      { start: 2.75, end: 5.0,  title: 'صلاة الليل والسحور',     desc: 'قيام + سحور بروتيني + أذكار + مراجعة ذهنية' },
+      { start: 5.0,  end: 6.0,  title: 'الكتلة الروحية',         desc: 'فجر + أذكار + تلاوة (فردي: مراجعة / زوجي: حفظ جديد)' },
+      { start: 6.0,  end: 8.5,  title: 'البرمجة العميقة',        desc: 'AiMoha (Python/JS) — دمج منطق الشطرنج في AI Agents' },
+      { start: 8.5,  end: 10.5, title: 'أكاديمية الذكاء الاصطناعي', desc: 'ML متقدم + LLMs + تطبيق خوارزميات' },
+      { start: 10.5, end: 12.0, title: 'إتقان اللغة الإنجليزية',   desc: 'Lex Fridman Podcast + مصطلحات تقنية + Shadowing' },
+      { start: 12.0, end: 13.0, title: 'الاستراحة الكبرى',       desc: 'ظهر + غداء بروتيني مكثف' },
+      { start: 13.0, end: 15.0, title: 'المعمل التطبيقي',        desc: 'مشاريع AI حقيقية + تكامل أنظمة برمجية' },
+      { start: 15.0, end: 16.5, title: 'الإعداد البدني PPL',     desc: 'Push(Handstand)/Pull(Explosive)/Legs(قفز) + كاليسثنكس' },
+      { start: 16.5, end: 17.5, title: 'كتلة الجري المكثف',      desc: 'ساعة جري (تفعيل قانون وولف + HGH مضاعف)' },
+      { start: 17.5, end: 19.5, title: 'التركيز الأكاديمي',      desc: 'رياضيات/علوم/فيزياء + درس الرسلان + عشاء خفيف' },
+      { start: 19.5, end: 20.5, title: 'المنافسات الجماعية',     desc: 'مباريات كاملة: سلة/قدم (تنافس قوي دون تهاون)' },
+      { start: 20.5, end: 21.5, title: 'الارتقاء الذهني',        desc: 'شطرنج/سودوكو + كتب رقمية + وثائقي تقني' },
+      { start: 21.5, end: 22.0, title: 'تجهيز النظام',           desc: 'تخطيط الغد + أذكار نوم + إغلاق كامل (7-9 ساعات)' }
+    ],
+    days: {
+      0: { sport: '🏀 كرة السلة (مباريات كاملة)', ppl: 'Pull (عقلة انفجارية)', cognitive: 'برمجة + AI (دمج منطق الشطرنج)', running: 'ساعة (16:30-17:30)' },
+      1: { sport: '🥊 مواي تاي', ppl: 'Legs (قفز / وولف)', cognitive: 'شطرنج (تحليل منطق AI Agents)', running: 'ساعة (16:30-17:30)' },
+      2: { sport: '🏀 كرة السلة (مباريات كاملة)', ppl: 'Push (ثبات اليدين Handstand)', cognitive: 'برمجة + AI', running: 'ساعة (16:30-17:30)' },
+      3: { sport: '⚽ كرة القدم (مباريات كاملة)', ppl: 'Pull & Abs/Triceps', cognitive: 'سودوكو صعبة (تتبع أخطاء)', running: 'ساعة (16:30-17:30)' },
+      4: { sport: '🥋 BJJ', ppl: 'Legs مكثفة (قفز)', cognitive: 'شريعة (توحيد/رياض/تجويد)', running: 'ساعة ونصف (19:30-21:00)' },
+      5: { sport: '🚶 مشي هادئ للاستشفاء', ppl: 'Push (Handstand)', cognitive: 'Dual N-Back + كتاب رقمي (تدقيق)', running: 'ساعة (16:00-17:00)' },
+      6: { sport: '⚽ كرة القدم (مباريات كاملة)', ppl: 'Six Pack Abs + Triceps', cognitive: 'قرصنة أخلاقية + معايرة', running: 'ساعة ونصف (15:00-16:30)' }
+    },
+    special: {
+      4: {
+        title: 'خميس الإنجاز — البروتوكول المُحسّن',
+        blocks: [
+          { time: '05:00-06:30', title: 'الكتلة الروحية', desc: 'تكرار ومراجعة القرآن (ساعة ونصف)' },
+          { time: '06:30-09:30', title: 'العلوم الشرعية والتاريخ', desc: 'التوحيد + رياض الصالحين + تجويد + البداية والنهاية (3 ساعات)' },
+          { time: '09:30-11:30', title: 'ماراثون الحفظ', desc: 'منهج التاريخ والجغرافيا + العلوم الإسلامية (خرائط ذهنية)' },
+          { time: '11:30-13:30', title: 'المهارات اللغوية', desc: 'فرنسية/عربية/إنجليزية (معالجة القواعد كمنطق برامجي)' },
+          { time: '13:30-15:00', title: 'التقنية والنمو', desc: 'تطوير مواقع وربح منها (ساعة ونصف)' },
+          { time: '15:00-16:30', title: 'الحمل البدني الإضافي', desc: 'Legs مكثفة + قفز عالي + تمارين ارتدادية (ساعة ونصف)' },
+          { time: '16:30-18:30', title: 'إتقان اللغات', desc: 'مراجعة مفردات إنجليزية تقنية (ساعتان)' },
+          { time: '18:30-19:30', title: 'صناعة المحتوى الصريحة', desc: 'YouTube: Onyx Apex + ren gaming + تلاوات (تصوير + خطافات)' },
+          { time: '19:30-21:00', title: 'كتلة الجري الطويل', desc: 'ساعة ونصف متواصلة (ضغط عظمي ميكانيكي + سعة هوائية)' },
+          { time: '21:00-22:00', title: 'الروحانيات وتحسين الصوت', desc: 'استماع قرآن + تدبر + تحسين النبرة الصوتية' },
+          { time: '22:00-23:00', title: 'الارتقاء الذهني الشامل', desc: 'قراءة تطوير ذات + ديتوكس الدوبامين (دوباميكافين)' }
+        ]
+      },
+      5: {
+        title: 'جمعة الإبداع — الإنتاج المرئي والذكاء السائل',
+        blocks: [
+          { time: '05:00-08:00', title: 'المراجعة الروحية والأكاديمية', desc: 'الكهف + أذكار + مراجعة شاملة للعلوم الطبيعية' },
+          { time: '08:00-10:30', title: 'الإنتاج المرئي', desc: 'تعديل فيديو احترافي (ساعتان ونصف)' },
+          { time: '10:30-14:30', title: 'كتلة البرمجة العميقة', desc: '4 ساعات: برمجة + مراقبة مشاريع + بناء مواقع + ربح' },
+          { time: '14:30-16:00', title: 'المخرجات والذكاء السائل', desc: 'Dual N-Back مكثف (20 دقيقة) + مشي + كتاب رقمي (تدقيق نهائي)' },
+          { time: '16:00-17:00', title: 'كتلة الجري الهوائي', desc: 'ساعة جري (تعويض النشاط الملغى بنشاط بناء)' },
+          { time: '17:00-18:00', title: 'التحسين التقني', desc: 'مراجعة مستودعات الأكواد + توثيق المشاريع' },
+          { time: '20:30-21:30', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس كامل' }
+        ]
+      },
+      6: {
+        title: 'سبت الإتقان — الأمن التقني والمباراة الكاملة',
+        blocks: [
+          { time: '05:00-10:00', title: 'الأكاديمية والروح', desc: 'مراجعة فيزياء + قرآن جديد (5 ساعات متواصلة)' },
+          { time: '10:00-14:00', title: 'الأمن التقني واللغات', desc: 'قرصنة أخلاقية + إنجليزية (4 ساعات متواصلة)' },
+          { time: '14:00-15:00', title: 'التدبر الصوتي', desc: 'استماع قرآن + تدبر + تحسين النبرة' },
+          { time: '15:00-16:30', title: 'كتلة الجري الانفجاري', desc: 'ساعة ونصف: sprint/interval (تحفيز النمو العظمي)' },
+          { time: '16:30-17:00', title: 'الاستشفاء والترطيب', desc: 'مغذيات دقيقة لتجنب الإجهاد (Ca/Mg/Zn)' },
+          { time: '17:00-18:30', title: 'الأداء الرياضي التنافسي', desc: 'كرة القدم: مباراة جماعية كاملة (ذكاء حركي + تفريغ طاقة)' },
+          { time: '18:30-19:30', title: 'الأنظمة البرمجية', desc: 'مراقبة مشاريع + تطوير مواقع' },
+          { time: '19:30-20:30', title: 'معايرة الأنظمة', desc: 'تطوير ذات + تقييم أسبوعي متكامل' },
+          { time: '20:30-21:30', title: 'التخطيط التكتيكي', desc: 'تحديث مهام الأسبوع القادم' },
+          { time: '21:30-23:00', title: 'نظام التحفيز الأقصى للنمو', desc: 'تمارين طول (تعلق/سباحة/سلة) + شوفان/شعير + نوم محسّن' }
+        ]
+      }
+    }
+  }
+};
+
+// ==========================================
+// UTILITIES
+// ==========================================
+const Utils = {
+    formatDecimalTime(dec) {
+        const h = Math.floor(dec);
+        const m = Math.floor((dec - h) * 60);
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    },
+    getCurrentDecimalTime() {
+        const now = new Date();
+        return now.getHours() + now.getMinutes() / 60;
+    },
+    getDayName(idx) {
+        const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+        return days[idx];
+    }
+};
+
+// ==========================================
+// PLAYER SYNC (Compatible with index9 engine)
+// ==========================================
+const PlayerSync = {
+    data: { level: 1, xp: 0, gold: 0 },
+    init() {
+        this.load();
+        this.updateUI();
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'monarch_system_data') { this.load(); this.updateUI(); }
         });
-    </script>
+    },
+    load() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('monarch_system_data') || '{}');
+            this.data.level = saved.level || 1;
+            this.data.xp = saved.xp || 0;
+            this.data.gold = saved.gold || 0;
+        } catch(e) {}
+    },
+    updateUI() {
+        const lvlEl = document.getElementById('player-level');
+        const barEl = document.getElementById('player-xp-bar');
+        const goldEl = document.getElementById('player-gold');
+        if(lvlEl) lvlEl.textContent = this.data.level;
+        if(goldEl) goldEl.textContent = this.data.gold;
+        if(barEl) {
+            const needed = this.data.level * 100;
+            const pct = Math.min((this.data.xp / needed) * 100, 100);
+            barEl.style.width = `${pct}%`;
+        }
+    }
+};
+
+// ==========================================
+// CHARTER ENGINE
+// ==========================================
+const Charter = {
+    activeProgramId: 'week1',
+
+    init() {
+        // Auto-select based on level if no manual override exists
+        const saved = localStorage.getItem('sovereign_active_program');
+        if (saved) {
+            this.activeProgramId = saved;
+        } else {
+            const lvl = PlayerSync.data.level;
+            this.activeProgramId = (lvl > 450) ? 'week2' : 'week1';
+        }
+        this.renderButtons();
+        this.renderToday();
+        this.renderWeeklyMatrix();
+        this.renderSpecialDays();
+    },
+
+    switch(id) {
+        if (this.activeProgramId === id) return;
+        this.activeProgramId = id;
+        localStorage.setItem('sovereign_active_program', id);
+        this.renderButtons();
+        this.renderToday();
+        this.renderWeeklyMatrix();
+        this.renderSpecialDays();
+    },
+
+    renderButtons() {
+        const btn1 = document.getElementById('btn-week1');
+        const btn2 = document.getElementById('btn-week2');
+        const msg = document.getElementById('infinity-message');
+        if(btn1) btn1.classList.toggle('active', this.activeProgramId === 'week1');
+        if(btn2) btn2.classList.toggle('active', this.activeProgramId === 'week2');
+
+        if (this.activeProgramId === 'week2' && PlayerSync.data.level >= 450) {
+            msg.classList.remove('hidden');
+        } else {
+            msg.classList.add('hidden');
+        }
+    },
+
+    renderToday() {
+        const container = document.getElementById('today-schedule-container');
+        const summary = document.getElementById('day-summary');
+        const dayLabel = document.getElementById('current-day-label');
+        const prog = PROGRAM_DATA[this.activeProgramId];
+
+        const now = new Date();
+        const day = now.getDay();
+        const currentTime = Utils.getCurrentDecimalTime();
+
+        if(dayLabel) dayLabel.textContent = Utils.getDayName(day);
+
+        // Day summary card
+        const d = prog.days[day];
+        summary.innerHTML = `
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
+                <div class="bg-slate-950/40 p-2 rounded border border-slate-800"><span class="text-slate-500 block">رياضة</span><span class="text-white font-bold">${d.sport}</span></div>
+                <div class="bg-slate-950/40 p-2 rounded border border-slate-800"><span class="text-slate-500 block">PPL</span><span class="text-[var(--sys-cyan)] font-bold">${d.ppl}</span></div>
+                <div class="bg-slate-950/40 p-2 rounded border border-slate-800"><span class="text-slate-500 block">ذهني</span><span class="text-[var(--sys-purple)] font-bold">${d.cognitive}</span></div>
+                <div class="bg-slate-950/40 p-2 rounded border border-slate-800"><span class="text-slate-500 block">جري</span><span class="text-emerald-400 font-bold">${d.running}</span></div>
+            </div>
+        `;
+
+        // Schedule blocks
+        let blocks = [];
+        if ([4,5,6].includes(day) && prog.special[day]) {
+            const sp = prog.special[day];
+            blocks = sp.blocks.map(b => ({
+                start: parseFloat(b.time.split('-')[0].replace(':','.')),
+                end: parseFloat(b.time.split('-')[1].replace(':','.')),
+                title: b.title,
+                desc: b.desc,
+                timeStr: b.time
+            }));
+            // Inject special header
+            let html = `<div class="mb-2 px-2 py-1 bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)]/30 rounded text-center"><span class="text-[var(--sys-purple)] font-bold text-xs">${sp.title}</span></div>`;
+            html += this.buildBlocksHtml(blocks, currentTime);
+            container.innerHTML = html;
+        } else {
+            blocks = prog.schedule.map(s => ({
+                start: s.start,
+                end: s.end,
+                title: s.title,
+                desc: s.desc,
+                timeStr: `${Utils.formatDecimalTime(s.start)} - ${Utils.formatDecimalTime(s.end)}`
+            }));
+            container.innerHTML = this.buildBlocksHtml(blocks, currentTime);
+        }
+    },
+
+    buildBlocksHtml(blocks, currentTime) {
+        let activeFound = false;
+        return blocks.map(block => {
+            const isActive = !activeFound && currentTime >= block.start && currentTime < block.end;
+            if (isActive) activeFound = true;
+            const activeClass = isActive ? 'block-active live-pulse' : 'bg-slate-950/40 border-slate-800';
+            const titleColor = isActive ? 'text-[var(--sys-cyan)]' : 'text-slate-300';
+            const icon = isActive ? '<span class="text-[var(--sys-cyan)] animate-pulse">●</span>' : '<span class="text-slate-700">○</span>';
+            return `
+            <div class="p-3 rounded border ${activeClass} mb-2 transition-all">
+                <div class="flex justify-between items-start mb-1">
+                    <div class="flex items-center gap-2">${icon}<span class="font-bold text-sm ${titleColor}">${block.title}</span></div>
+                    <span class="sys-font text-[10px] text-slate-500 bg-black/40 px-1.5 py-0.5 rounded">${block.timeStr}</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed pr-5">${block.desc}</p>
+                ${isActive ? '<div class="mt-2 flex items-center gap-2"><span class="text-[9px] sys-font text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-500/30">ACTIVE BLOCK</span><span class="text-[9px] sys-font text-slate-500">NOW</span></div>' : ''}
+            </div>`;
+        }).join('');
+    },
+
+    renderWeeklyMatrix() {
+        const tbody = document.getElementById('weekly-matrix-body');
+        const prog = PROGRAM_DATA[this.activeProgramId];
+        let html = '';
+        for (let i = 0; i < 7; i++) {
+            const d = prog.days[i];
+            const isToday = (new Date().getDay() === i);
+            const rowClass = isToday ? 'bg-[var(--sys-cyan)]/5 border-[var(--sys-cyan)]/30' : 'border-slate-800 hover:bg-white/5';
+            html += `
+            <tr class="border-b ${rowClass} transition-colors">
+                <td class="p-3 font-bold text-white whitespace-nowrap">${Utils.getDayName(i)} ${isToday ? '<span class="text-[var(--sys-cyan)] text-[10px] border border-[var(--sys-cyan)] px-1 rounded ml-1">TODAY</span>' : ''}</td>
+                <td class="p-3 text-slate-300">${d.sport}</td>
+                <td class="p-3 text-slate-300">${d.running}</td>
+                <td class="p-3 text-slate-300">${d.cognitive}</td>
+                <td class="p-3 text-[var(--sys-cyan)] font-bold">${d.ppl}</td>
+            </tr>`;
+        }
+        tbody.innerHTML = html;
+    },
+
+    renderSpecialDays() {
+        const container = document.getElementById('special-days-container');
+        const prog = PROGRAM_DATA[this.activeProgramId];
+        let html = '';
+
+        [4,5,6].forEach(dayIdx => {
+            const sp = prog.special[dayIdx];
+            html += `
+            <div class="sl-panel p-5 border-t-4 ${dayIdx === 4 ? 'border-t-rose-500' : dayIdx === 5 ? 'border-t-[var(--sys-purple)]' : 'border-t-[var(--sys-cyan)]'}">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl">${dayIdx === 4 ? '🕌' : dayIdx === 5 ? '🎨' : '🛡️'}</span>
+                    <h3 class="text-lg font-black text-white">${sp.title}</h3>
+                    <span class="text-[10px] sys-font text-slate-500 bg-slate-900 px-2 py-1 rounded border border-slate-800">${Utils.getDayName(dayIdx)}</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    ${sp.blocks.map(b => `
+                        <div class="bg-slate-950/60 p-3 rounded border border-slate-800 hover:border-slate-600 transition">
+                            <div class="text-[10px] sys-font text-[var(--sys-cyan)] mb-1 bg-black/40 inline-block px-2 py-0.5 rounded">${b.time}</div>
+                            <h4 class="text-sm font-bold text-white mb-1">${b.title}</h4>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">${b.desc}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        });
+
+        container.innerHTML = html;
+    }
+};
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    PlayerSync.init();
+    Charter.init();
+    // Refresh active block every minute
+    setInterval(() => Charter.renderToday(), 60000);
+});
+</script>
 </body>
 </html>
