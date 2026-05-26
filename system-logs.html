@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sovereign System | سجلات النظام التاريخية</title>
+    <title>Sovereign System | System Logs & Protocol Monitor</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --sys-cyan: #00f0ff;
-            --sys-cyan-glow: rgba(0, 240, 255, 0.4);
+            --sys-cyan-glow: rgba(0, 240, 255, 0.6);
             --sys-purple: #9d4edd;
-            --sys-purple-glow: rgba(157, 78, 221, 0.3);
+            --sys-purple-glow: rgba(157, 78, 221, 0.4);
             --sys-bg-dark: #02040a;
             --sys-panel: rgba(5, 10, 25, 0.85);
-            --sys-red: #ef4444;
-            --sys-red-glow: rgba(239, 68, 68, 0.4);
+            --sys-border: rgba(0, 240, 255, 0.3);
             --sys-gold: #fbbf24;
+            --sys-red: #ef4444;
+            --sys-green: #10b981;
         }
-        
         body {
             font-family: 'Cairo', sans-serif;
             background-color: var(--sys-bg-dark);
@@ -29,367 +29,800 @@
             color: #e2e8f0;
             min-height: 100vh;
         }
-        
         .sys-font { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em; }
-        
         .sl-panel {
             background: var(--sys-panel);
             backdrop-filter: blur(16px);
-            border: 2px solid rgba(0, 240, 255, 0.3);
+            border: 2px solid var(--sys-border);
             box-shadow: 0 0 25px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.1);
             position: relative;
         }
-        
         .sl-panel::before, .sl-panel::after {
-            content: ''; position: absolute; width: 20px; height: 20px; pointer-events: none;
+            content: ''; position: absolute; width: 20px; height: 20px;
+            pointer-events: none;
         }
         .sl-panel::before { top: -2px; left: -2px; border-top: 3px solid var(--sys-cyan); border-left: 3px solid var(--sys-cyan); }
         .sl-panel::after { bottom: -2px; right: -2px; border-bottom: 3px solid var(--sys-cyan); border-right: 3px solid var(--sys-cyan); }
-        
+        .sl-glow-text {
+            color: var(--sys-cyan);
+            text-shadow: 0 0 8px var(--sys-cyan-glow);
+        }
         @keyframes systemPopIn {
             0% { opacity: 0; transform: scale(0.95) translateY(10px); filter: brightness(2); }
             100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
         }
         .animate-system-pop { animation: systemPopIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        
-        .log-card {
+        .sl-btn {
+            background: linear-gradient(180deg, rgba(0, 240, 255, 0.05) 0%, rgba(5, 10, 25, 0.8) 100%);
+            border: 1px solid var(--sys-cyan);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sl-btn:hover {
+            box-shadow: 0 0 20px rgba(0,240,255,0.4);
+            background: rgba(0,240,255,0.15);
+            transform: translateY(-1px);
+        }
+        .sl-btn.active {
+            background: var(--sys-cyan);
+            color: black;
+            box-shadow: 0 0 20px var(--sys-cyan-glow);
+            font-weight: 900;
+        }
+        .sl-btn-purple {
+            border-color: var(--sys-purple);
+            background: linear-gradient(180deg, rgba(157, 78, 221, 0.05) 0%, rgba(5, 10, 25, 0.8) 100%);
+        }
+        .sl-btn-purple:hover {
+            box-shadow: 0 0 20px var(--sys-purple-glow);
+            background: rgba(157, 78, 221, 0.15);
+        }
+        .sl-btn-purple.active {
+            background: var(--sys-purple);
+            color: white;
+            box-shadow: 0 0 20px var(--sys-purple-glow);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--sys-cyan); }
+        .log-item {
             transition: all 0.3s ease;
             border-right: 3px solid transparent;
         }
-        .log-card:hover {
-            transform: translateX(-4px);
-            background: rgba(5, 10, 25, 0.95);
+        .log-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateX(-5px);
         }
-        
-        .type-quest { border-right-color: var(--sys-cyan); background: linear-gradient(90deg, rgba(0,240,255,0.05) 0%, transparent 100%); }
-        .type-system { border-right-color: var(--sys-purple); background: linear-gradient(90deg, rgba(157,78,221,0.05) 0%, transparent 100%); }
-        .type-penalty { border-right-color: var(--sys-red); background: linear-gradient(90deg, rgba(239,68,68,0.05) 0%, transparent 100%); }
-        .type-dungeon { border-right-color: #10b981; background: linear-gradient(90deg, rgba(16,185,129,0.05) 0%, transparent 100%); }
-        
-        .filter-btn.active {
-            background: rgba(0, 240, 255, 0.1);
-            border-color: var(--sys-cyan);
-            color: var(--sys-cyan);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        .log-quest { border-right-color: var(--sys-gold); }
+        .log-system { border-right-color: var(--sys-cyan); }
+        .log-level { border-right-color: var(--sys-purple); }
+        .log-error { border-right-color: var(--sys-red); }
+        .block-active {
+            border: 1px solid var(--sys-cyan);
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
         }
-        
-        .glow-text-cyan { color: var(--sys-cyan); text-shadow: 0 0 8px var(--sys-cyan-glow); }
-        .glow-text-purple { color: var(--sys-purple); text-shadow: 0 0 8px var(--sys-purple-glow); }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-        ::-webkit-scrollbar-thumb { background: var(--sys-cyan); border-radius: 3px; }
-        
-        .stat-pill {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
+        .live-pulse {
+            animation: livePulse 2s infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { box-shadow: 0 0 5px var(--sys-cyan); }
+            50% { box-shadow: 0 0 20px var(--sys-cyan); }
+        }
+        .progress-bar-container {
+            width: 100%; height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 999px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--sys-cyan), var(--sys-purple));
+            box-shadow: 0 0 10px var(--sys-cyan-glow);
+            transition: width 0.6s ease;
         }
     </style>
+<base target="_blank">
 </head>
-<body class="p-4 md:p-8">
-    <nav class="max-w-6xl mx-auto mb-4 p-2 bg-slate-900/60 backdrop-blur border border-slate-800 rounded-lg flex flex-wrap justify-center gap-2">
-    <a href="index.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">🏠 الرئيسية</a>
-    <a href="schedule.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-cyan)] text-white rounded transition sys-font font-bold uppercase">👑 الحالة</a>
-    <a href="dungeons.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-red-500 text-white rounded transition sys-font font-bold uppercase">🧠 الزنازين</a>
-    <a href="monarch-ai.html" class="px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 hover:border-[var(--sys-purple)] text-white rounded transition sys-font font-bold uppercase">🤖 المستشار</a>
-    <a href="system-logs.html" class="px-3 py-1.5 text-xs bg-slate-700 border border-slate-500 text-white rounded transition sys-font font-bold uppercase">📂 السجلات</a>
-</nav>
+<body class="p-2 md:p-6">
 
-    <!-- Header synced with PlayerState -->
-    <header class="max-w-6xl mx-auto mb-8 p-4 bg-slate-900/60 backdrop-blur border border-slate-800 flex flex-col md:flex-row justify-between items-center rounded-lg animate-system-pop gap-4">
+<div class="max-w-[1400px] mx-auto space-y-6 relative z-10">
+
+    <!-- HEADER -->
+    <header class="sl-panel p-4 md:p-6 flex flex-col lg:flex-row justify-between items-center gap-4 animate-system-pop" style="border-color: rgba(157, 78, 221, 0.6);">
         <div class="flex items-center gap-4">
-            <a href="index.html" class="text-xs bg-slate-800 px-3 py-2 border border-slate-700 hover:border-[var(--sys-cyan)] transition text-white rounded">↩ العودة للرئيسية</a>
-            <div class="w-10 h-10 rounded bg-gradient-to-br from-[var(--sys-cyan)] to-[var(--sys-purple)] flex items-center justify-center font-black text-black text-lg sys-font">LOG</div>
+            <div class="w-12 h-12 rounded-lg bg-[var(--sys-cyan)]/10 border border-[var(--sys-cyan)] flex items-center justify-center text-xl shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                📊
+            </div>
             <div>
-                <h1 class="sys-font text-xl font-black tracking-widest text-[var(--sys-cyan)] uppercase">System Logs Archive</h1>
-                <p class="text-[10px] text-slate-400">شاشة التاريخ والتوثيق العملياتي لتحركات العاهل</p>
+                <h1 class="text-xl md:text-2xl font-black tracking-wide text-white">SOVEREIGN SYSTEM</h1>
+                <p class="text-xs text-[var(--sys-cyan)] sys-font tracking-widest">SYSTEM LOGS & PROTOCOL MONITOR</p>
             </div>
         </div>
-        <div class="flex items-center gap-6 sys-font">
-            <div class="text-right">
-                <span class="text-[10px] text-slate-400 block">MONARCH LEVEL</span>
-                <span id="currentLevel" class="text-xl font-bold text-[var(--sys-cyan)]">1</span>
+
+        <div class="flex flex-wrap items-center gap-4 bg-slate-950/60 px-6 py-3 rounded-lg border border-slate-800">
+            <div class="text-center">
+                <span class="block text-[10px] text-slate-500 sys-font">LEVEL</span>
+                <span id="player-level" class="text-xl font-bold text-white sys-font">1</span>
             </div>
-            <div class="text-right">
-                <span class="text-[10px] text-slate-400 block">XP</span>
-                <span id="player-xp" class="text-xl font-bold text-emerald-400">0</span>
+            <div class="h-8 w-[1px] bg-slate-800"></div>
+            <div class="text-right min-w-[120px]">
+                <span class="block text-[10px] text-slate-500 sys-font">EXP PROGRESS</span>
+                <div class="w-full bg-slate-800 h-2 rounded-full mt-1 overflow-hidden">
+                    <div id="player-xp-bar" class="bg-[var(--sys-cyan)] h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
             </div>
-            <div class="text-right">
-                <span class="text-[10px] text-slate-400 block">GOLD</span>
-                <span id="player-gold" class="text-xl font-bold text-[var(--sys-gold)]">0</span>
+            <div class="h-8 w-[1px] bg-slate-800"></div>
+            <div class="text-center">
+                <span class="block text-[10px] text-slate-500 sys-font">GOLD</span>
+                <div class="flex items-center gap-1">
+                    <span class="text-yellow-500 text-sm">🪙</span>
+                    <span id="player-gold" class="text-lg font-bold text-yellow-400 sys-font">0</span>
+                </div>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-800"></div>
+            <div class="text-center">
+                <span class="block text-[10px] text-slate-500 sys-font">PROGRAM</span>
+                <span id="active-program-badge" class="text-xs font-bold text-[var(--sys-purple)] sys-font border border-[var(--sys-purple)] px-2 py-0.5 rounded bg-[var(--sys-purple)]/10">WEEK 1</span>
             </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        <!-- Sidebar: Stats & Filters -->
-        <aside class="lg:col-span-3 space-y-4">
-            <div class="sl-panel p-5 animate-system-pop">
-                <h3 class="sys-font text-xs font-bold text-[var(--sys-cyan)] uppercase tracking-widest mb-4 border-b border-slate-800 pb-2">Log Analytics</h3>
-                
-                <div class="space-y-3 mb-6">
-                    <div class="flex justify-between items-center p-3 bg-slate-950/50 rounded border border-slate-800">
-                        <span class="text-xs text-slate-400">إجمالي السجلات</span>
-                        <span id="stat-total" class="sys-font text-lg font-bold text-white">0</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-cyan-950/10 rounded border border-cyan-900/30">
-                        <span class="text-xs text-cyan-400">مهام منجزة</span>
-                        <span id="stat-quest" class="sys-font text-lg font-bold text-[var(--sys-cyan)]">0</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-purple-950/10 rounded border border-purple-900/30">
-                        <span class="text-xs text-purple-400">ترقيات / ألقاب</span>
-                        <span id="stat-system" class="sys-font text-lg font-bold text-[var(--sys-purple)]">0</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-rose-950/10 rounded border border-rose-900/30">
-                        <span class="text-xs text-rose-400">عقوبات تشتت</span>
-                        <span id="stat-penalty" class="sys-font text-lg font-bold text-[var(--sys-red)]">0</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 bg-emerald-950/10 rounded border border-emerald-900/30">
-                        <span class="text-xs text-emerald-400">زنازين ذهنية</span>
-                        <span id="stat-dungeon" class="sys-font text-lg font-bold text-emerald-400">0</span>
-                    </div>
+    <!-- NAVIGATION -->
+    <nav class="flex flex-wrap gap-2 justify-center md:justify-start animate-system-pop" style="animation-delay: 0.1s;">
+        <a href="index.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">
+            🏠 DASHBOARD
+        </a>
+        <a href="active-quests.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">
+            ⚔️ ACTIVE QUESTS
+        </a>
+        <a href="brain-stats.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">
+            🧠 BRAIN STATS
+        </a>
+        <a href="operational-charter.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">
+            📜 CHARTER
+        </a>
+        <a href="monarch-ai.html" class="px-4 py-2 text-xs sys-font sl-panel rounded hover:bg-[var(--sys-cyan)] hover:text-black transition duration-300 text-slate-300 border border-slate-800">
+            🤖 MONARCH AI
+        </a>
+        <a href="system-logs.html" class="px-4 py-2 text-xs sys-font bg-cyan-950/40 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded font-bold shadow-[0_0_10px_rgba(0,240,255,0.1)]">
+            📊 SYSTEM LOGS
+        </a>
+    </nav>
+
+    <!-- PROGRAM SWITCHER & TODAY PROTOCOL -->
+    <main class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+
+        <!-- LEFT: Program Control & Today's Blocks -->
+        <aside class="xl:col-span-5 space-y-6">
+            <!-- Program Switcher -->
+            <div class="sl-panel p-5 animate-system-pop" style="animation-delay: 0.2s;">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                    <h2 class="text-sm font-black text-white sys-font tracking-widest">OPERATIONAL PROTOCOL SELECTOR</h2>
+                    <span class="text-[10px] text-slate-500 sys-font">ACTIVE DIRECTIVE</span>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <button onclick="LogManager.exportLogs()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold rounded transition flex items-center justify-center gap-2">
-                        <span>⬇️</span> تصدير السجلات (JSON)
+                <div class="space-y-3">
+                    <button onclick="ProgramManager.switch('week1')" id="btn-week1" class="sl-btn w-full text-left p-3 rounded flex justify-between items-center group">
+                        <div>
+                            <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-cyan)] block">📜 CHARTER v1.0 — Foundation</span>
+                            <span class="text-[10px] text-slate-400">الميثاق التشغيلي المتكامل (المستويات 1-450)</span>
+                        </div>
+                        <span class="sys-font text-[10px] bg-cyan-950 text-[var(--sys-cyan)] px-2 py-0.5 border border-[var(--sys-cyan)]">WEEK 1</span>
                     </button>
-                    <button onclick="LogManager.clearLogs()" class="w-full py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800 text-rose-400 text-xs font-bold rounded transition">
-                        🗑️ تطهير السجلات
+
+                    <button onclick="ProgramManager.switch('week2')" id="btn-week2" class="sl-btn-purple sl-btn w-full text-left p-3 rounded flex justify-between items-center group">
+                        <div>
+                            <span class="sys-font text-sm font-black text-white group-hover:text-[var(--sys-purple)] block">🌌 SYSTEM v8.0 — Infinity</span>
+                            <span class="text-[10px] text-slate-400">تحديث النظام النسخة 8.0 (المستويات 450→∞)</span>
+                        </div>
+                        <span class="sys-font text-[10px] bg-purple-950 text-[var(--sys-purple)] px-2 py-0.5 border border-[var(--sys-purple)]">WEEK 2</span>
                     </button>
+                </div>
+
+                <div id="program-message" class="mt-4 p-3 bg-slate-950/60 border border-slate-800 rounded text-xs text-slate-400 leading-relaxed hidden">
+                    <!-- Dynamic system message for level 450+ -->
+                </div>
+            </div>
+
+            <!-- Today's Sovereign Schedule -->
+            <div class="sl-panel p-5 animate-system-pop" style="animation-delay: 0.3s; border-color: rgba(16, 185, 129, 0.4);">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                    <h2 class="text-sm font-black text-emerald-400 sys-font tracking-widest flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        TODAY'S PROTOCOL
+                    </h2>
+                    <span id="current-day-label" class="text-[10px] text-slate-500 sys-font bg-slate-900 px-2 py-1 rounded border border-slate-800">SUNDAY</span>
+                </div>
+
+                <div id="today-schedule-container" class="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                    <!-- Injected by JS -->
                 </div>
             </div>
         </aside>
 
-        <!-- Main Log Feed -->
-        <section class="lg:col-span-9 space-y-4">
-            <!-- Filter Bar -->
-            <div class="flex flex-wrap gap-2 p-3 bg-slate-900/40 backdrop-blur border border-slate-800 rounded-lg animate-system-pop" style="animation-delay: 0.1s;">
-                <button onclick="LogManager.filter('all')" id="btn-all" class="filter-btn active px-4 py-2 text-xs font-bold border border-slate-700 text-slate-400 rounded transition hover:text-white">الكل</button>
-                <button onclick="LogManager.filter('quest')" id="btn-quest" class="filter-btn px-4 py-2 text-xs font-bold border border-slate-700 text-slate-400 rounded transition hover:text-[var(--sys-cyan)] hover:border-[var(--sys-cyan)]">المهام المنجزة</button>
-                <button onclick="LogManager.filter('system')" id="btn-system" class="filter-btn px-4 py-2 text-xs font-bold border border-slate-700 text-slate-400 rounded transition hover:text-[var(--sys-purple)] hover:border-[var(--sys-purple)]">الترقيات والألقاب</button>
-                <button onclick="LogManager.filter('penalty')" id="btn-penalty" class="filter-btn px-4 py-2 text-xs font-bold border border-slate-700 text-slate-400 rounded transition hover:text-[var(--sys-red)] hover:border-[var(--sys-red)]">العقوبات والتشتت</button>
-                <button onclick="LogManager.filter('dungeon')" id="btn-dungeon" class="filter-btn px-4 py-2 text-xs font-bold border border-slate-700 text-slate-400 rounded transition hover:text-emerald-400 hover:border-emerald-500">الزنازين الذهنية</button>
+        <!-- RIGHT: Logs Archive -->
+        <section class="xl:col-span-7 space-y-6">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-system-pop" style="animation-delay: 0.4s;">
+                <div class="sl-panel p-4 border-t-2 border-t-[var(--sys-cyan)]">
+                    <div class="text-slate-400 text-[10px] uppercase tracking-wider mb-1 sys-font">Total Logs</div>
+                    <div id="stat-total" class="text-3xl font-black text-white sys-font">0</div>
+                </div>
+                <div class="sl-panel p-4 border-t-2 border-t-[var(--sys-gold)]">
+                    <div class="text-slate-400 text-[10px] uppercase tracking-wider mb-1 sys-font">Quests</div>
+                    <div id="stat-quests" class="text-3xl font-black text-white sys-font">0</div>
+                </div>
+                <div class="sl-panel p-4 border-t-2 border-t-[var(--sys-purple)]">
+                    <div class="text-slate-400 text-[10px] uppercase tracking-wider mb-1 sys-font">System</div>
+                    <div id="stat-system" class="text-3xl font-black text-white sys-font">0</div>
+                </div>
+                <div class="sl-panel p-4 border-t-2 border-t-[var(--sys-red)]">
+                    <div class="text-slate-400 text-[10px] uppercase tracking-wider mb-1 sys-font">Alerts</div>
+                    <div id="stat-errors" class="text-3xl font-black text-white sys-font">0</div>
+                </div>
             </div>
 
-            <!-- Logs Container -->
-            <div id="logsContainer" class="space-y-3 min-h-[500px] animate-system-pop" style="animation-delay: 0.2s;">
-                <div class="text-center py-20 text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-900/20">
-                    <div class="text-4xl mb-3">📂</div>
-                    <p class="text-sm font-bold">[لا يوجد أي سجلات مسجلة في الذاكرة حتى الآن]</p>
-                    <p class="text-[10px] text-slate-600 mt-2">تبدأ السجلات بالظهور بمجرد إنجاز المهام أو استلام العقوبات</p>
+            <!-- Logs Control Panel -->
+            <div class="sl-panel p-0 overflow-hidden flex flex-col min-h-[500px] animate-system-pop" style="animation-delay: 0.5s;">
+                <div class="bg-slate-950/50 p-4 border-b border-slate-800 flex flex-wrap gap-2 items-center justify-between">
+                    <div class="flex flex-wrap gap-2" id="filterContainer">
+                        <button class="filter-btn active px-4 py-1.5 rounded-full border border-slate-600 text-xs font-bold text-slate-300 hover:border-[var(--sys-cyan)] transition sys-font" data-filter="all">ALL</button>
+                        <button class="filter-btn px-4 py-1.5 rounded-full border border-slate-600 text-xs font-bold text-slate-300 hover:border-[var(--sys-gold)] transition sys-font" data-filter="quest">QUESTS</button>
+                        <button class="filter-btn px-4 py-1.5 rounded-full border border-slate-600 text-xs font-bold text-slate-300 hover:border-[var(--sys-cyan)] transition sys-font" data-filter="system">SYSTEM</button>
+                        <button class="filter-btn px-4 py-1.5 rounded-full border border-slate-600 text-xs font-bold text-slate-300 hover:border-[var(--sys-purple)] transition sys-font" data-filter="level">LEVEL UP</button>
+                        <button class="filter-btn px-4 py-1.5 rounded-full border border-slate-600 text-xs font-bold text-slate-300 hover:border-[var(--sys-red)] transition sys-font" data-filter="error">ALERTS</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="LogManager.exportLogs()" class="px-3 py-1.5 bg-slate-900 border border-[var(--sys-cyan)] text-[var(--sys-cyan)] rounded hover:bg-[var(--sys-cyan)] hover:text-black transition text-xs font-bold sys-font flex items-center gap-1">
+                            <span>⬇</span> EXPORT
+                        </button>
+                        <button onclick="LogManager.clearLogs()" class="px-3 py-1.5 bg-slate-900 border border-rose-500/50 text-rose-400 hover:bg-rose-500 hover:text-white transition text-xs font-bold sys-font flex items-center gap-1">
+                            <span>✕</span> CLEAR
+                        </button>
+                    </div>
+                </div>
+
+                <div id="logsContainer" class="p-3 flex-1 overflow-y-auto space-y-2 bg-[#02040a]/40">
+                    <!-- Logs injected here -->
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="max-w-6xl mx-auto mt-12 text-center text-[10px] text-slate-600 sys-font uppercase tracking-widest border-t border-slate-800 pt-4">
-        Sovereign Autonomy Matrix v9.0 • Secured Database • Cross-Page Sync Active
+    <footer class="text-center text-[10px] text-slate-600 mt-8 sys-font uppercase tracking-widest pb-4">
+        Sovereign Core Intellect Layer Ver 9.0 | Protocol Monitor Active | No Penalties Enforced
     </footer>
+</div>
 
-    <script>
-        // ==========================================
-        // PLAYER STATE SYNC (متوافق مع index.html)
-        // ==========================================
-        const PlayerState = {
-            data: { level: 1, xp: 0, gold: 0 },
-            
-            init() {
-                const saved = localStorage.getItem('monarch_system_data');
-                if(saved) {
-                    try { this.data = JSON.parse(saved); } catch(e) {}
-                }
-                this.updateUI();
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-5 right-5 z-[10000] flex flex-col gap-3 pointer-events-none"></div>
+
+<script>
+// ==========================================
+// SOVEREIGN PROGRAM DATA (08.txt & 09.txt)
+// ==========================================
+const PROGRAM_DATA = {
+    week1: {
+        id: 'week1',
+        title: 'الميثاق التشغيلي المتكامل',
+        version: 'v1.0',
+        range: 'LVL 1 → 450',
+        desc: 'المرحلة التأسيسية: بناء القاعدة البرمجية والبدنية والروحية.',
+        schedule: [
+            { start: 5.0,  end: 6.0,  title: 'الكتلة الروحية',         desc: 'صلاة الفجر + الأذكار + تلاوة + مراجعة/حفظ' },
+            { start: 6.0,  end: 8.5,  title: 'البرمجة العميقة',        desc: 'مشروع AiMoha (Python/JS) — بناء البنية التحتية' },
+            { start: 8.5,  end: 10.5, title: 'أكاديمية الذكاء الاصطناعي', desc: 'ML, LLMs, خوارزميات التعلم الآلي' },
+            { start: 10.5, end: 12.0, title: 'إتقان اللغة الإنجليزية',   desc: 'انغماس تقني + Shadowing + مفردات متقدمة' },
+            { start: 12.0, end: 13.0, title: 'الاستراحة الكبرى',       desc: 'صلاة الظهر + غداء بروتيني مكثف' },
+            { start: 13.0, end: 15.0, title: 'المعمل التطبيقي',        desc: 'مشاريع AI حقيقية وتكامل الأنظمة البرمجية' },
+            { start: 15.0, end: 16.5, title: 'الإعداد البدني PPL',     desc: 'Push / Pull / Legs + كاليسثنكس' },
+            { start: 16.5, end: 17.5, title: 'كتلة الجري',             desc: 'جري هوائي منتظم (ساعة كاملة)' },
+            { start: 17.5, end: 19.5, title: 'التركيز الأكاديمي',      desc: 'رياضيات/علوم/فيزياء + درس الشيخ الرسلان' },
+            { start: 19.5, end: 20.5, title: 'الرياضة الجماعية',       desc: 'مباريات كرة السلة أو القدم التنافسية' },
+            { start: 20.5, end: 21.5, title: 'الارتقاء الذهني',        desc: 'كتب تطوير + ألعاب فكرية + ديتوكس' },
+            { start: 21.5, end: 22.0, title: 'تجهيز النظام',           desc: 'تخطيط الغد + أذكار النوم + إغلاق كامل' }
+        ],
+        days: {
+            0: { sport: '🏀 كرة السلة', ppl: 'Pull (عقلة انفجارية)', cognitive: 'برمجة + AI', running: 'ساعة' },
+            1: { sport: '🥊 مواي تاي', ppl: 'Legs (قفز)', cognitive: 'شطرنج (استراتيجية)', running: 'ساعة' },
+            2: { sport: '🏀 كرة السلة', ppl: 'Push (ثبات اليدين)', cognitive: 'برمجة + AI', running: 'ساعة' },
+            3: { sport: '⚽ كرة القدم', ppl: 'Pull & Abs/Triceps', cognitive: 'سودوكو صعبة', running: 'ساعة' },
+            4: { sport: '🥋 BJJ', ppl: 'Legs مكثفة', cognitive: 'دراسة شرعية', running: 'ساعة ونصف' },
+            5: { sport: '🚶 مشي هادئ', ppl: 'Push', cognitive: 'Dual N-Back + كتاب رقمي', running: 'ساعة' },
+            6: { sport: '⚽ كرة القدم', ppl: 'Six Pack Abs + Triceps', cognitive: 'قرصنة أخلاقية', running: 'ساعة ونصف' }
+        },
+        special: {
+            4: { // Thursday
+                title: 'خميس الإنجاز',
+                blocks: [
+                    { time: '05:00-06:30', title: 'الكتلة الروحية', desc: 'تكرار ومراجعة القرآن الكريم' },
+                    { time: '06:30-09:30', title: 'العلوم الشرعية', desc: 'التوحيد + رياض الصالحين + التجويد + البداية والنهاية' },
+                    { time: '09:30-11:30', title: 'ماراثون الحفظ', desc: 'تاريخ/جغرافيا/إسلامية بخرائط ذهنية' },
+                    { time: '11:30-13:30', title: 'المهارات اللغوية', desc: 'فرنسية/عربية/إنجليزية (معالجة القواعد كمنطق برامجي)' },
+                    { time: '13:30-15:00', title: 'التقنية والنمو', desc: 'تطوير مواقع وربح منها' },
+                    { time: '15:00-16:30', title: 'الحمل البدني', desc: 'Legs مكثفة + قفز عالي + تمارين ارتدادية' },
+                    { time: '16:30-18:30', title: 'إتقان اللغات', desc: 'مراجعة مفردات اللغة الإنجليزية' },
+                    { time: '18:30-19:30', title: 'صناعة المحتوى', desc: 'YouTube: Onyx Apex + ren gaming + تلاوات' },
+                    { time: '19:30-21:00', title: 'الجري الطويل', desc: 'ساعة ونصف متواصلة من الجري في الهواء الطلق' },
+                    { time: '21:00-22:00', title: 'الروحانيات', desc: 'استماع قرآن + تدبر + تحسين نبرة الصوت' },
+                    { time: '22:00-23:00', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس الدوبامين' }
+                ]
             },
-            
-            updateUI() {
-                if(document.getElementById('currentLevel')) document.getElementById('currentLevel').textContent = this.data.level || 1;
-                if(document.getElementById('player-xp')) document.getElementById('player-xp').textContent = this.data.xp || 0;
-                if(document.getElementById('player-gold')) document.getElementById('player-gold').textContent = this.data.gold || 0;
+            5: { // Friday
+                title: 'جمعة الإبداع',
+                blocks: [
+                    { time: '05:00-08:00', title: 'المراجعة الروحية', desc: 'سورة الكهف + أذكار + مراجعة علوم طبيعية' },
+                    { time: '08:00-10:30', title: 'الإنتاج المرئي', desc: 'تعديل فيديو احترافي للمحتوى البصري' },
+                    { time: '10:30-14:30', title: 'البرمجة العميقة', desc: '4 ساعات برمجة + مراقبة مشاريع + بناء مواقع' },
+                    { time: '14:30-16:00', title: 'الذكاء السائل', desc: 'Dual N-Back + مشي هادئ + كتاب رقمي (تدقيق)' },
+                    { time: '16:00-17:00', title: 'الجري الهوائي', desc: 'ساعة كاملة من الجري بانتظام' },
+                    { time: '17:00-18:00', title: 'التحسين التقني', desc: 'مراجعة أكواد ومستودعات المشاريع' },
+                    { time: '20:30-21:30', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس' }
+                ]
+            },
+            6: { // Saturday
+                title: 'سبت الإتقان',
+                blocks: [
+                    { time: '05:00-10:00', title: 'الأكاديمية والروح', desc: 'مراجعة فيزياء + قرآن جديد (5 ساعات متواصلة)' },
+                    { time: '10:00-14:00', title: 'الأمن التقني', desc: 'قرصنة أخلاقية + إنجليزية (4 ساعات متواصلة)' },
+                    { time: '14:00-15:00', title: 'التدبر الصوتي', desc: 'استماع قرآن + تحسين نبرة الصوت' },
+                    { time: '15:00-16:30', title: 'الجري الانفجاري', desc: 'ساعة ونصف جري مقسم بين سرعة وانتظام' },
+                    { time: '16:30-17:00', title: 'الاستشفاء', desc: 'تناول مغذيات دقيقة (كالسيوم/مغنيسيوم)' },
+                    { time: '17:00-18:30', title: 'المباراة الكاملة', desc: 'كرة القدم: مباراة تنافسية حقيقية (تفريغ الطاقة)' },
+                    { time: '18:30-19:30', title: 'الأنظمة البرمجية', desc: 'مراقبة مشاريع مطورة + تطوير مواقع' },
+                    { time: '19:30-20:30', title: 'معايرة الأنظمة', desc: 'تقييم أسبوعي متكامل + مراجعة الأداء' },
+                    { time: '20:30-21:30', title: 'التخطيط التكتيكي', desc: 'تحديث قائمة المهام الصعبة للأسبوع القادم' },
+                    { time: '21:30-23:00', title: 'نظام التحفيز الأقصى', desc: 'تمارين طول + شوفان/شعير + نوم 10 ساعات' }
+                ]
             }
-        };
-
-        // ==========================================
-        // LOG MANAGER ENGINE
-        // ==========================================
-        const LogManager = {
-            currentFilter: 'all',
-            
-            init() {
-                PlayerState.init();
-                this.render();
-                
-                // Listen for storage changes from other pages
-                window.addEventListener('storage', (e) => {
-                    if(e.key === 'sovereign_system_logs') this.render();
-                });
+        }
+    },
+    week2: {
+        id: 'week2',
+        title: 'تحديث النظام النسخة 8.0',
+        version: '∞ Infinity',
+        range: 'LVL 450 → ∞',
+        desc: 'مرحلة السيادة الكاملة: دمج منطق الشطرنج في AI Agents، الجري الانفجاري، والعمليات التكتيكية المستقلة.',
+        schedule: [
+            { start: 2.75, end: 5.0,  title: 'صلاة الليل والسحور',     desc: 'قيام + سحور بروتيني + أذكار + مراجعة ذهنية' },
+            { start: 5.0,  end: 6.0,  title: 'الكتلة الروحية',         desc: 'فجر + أذكار + تلاوة (فردي: مراجعة / زوجي: حفظ جديد)' },
+            { start: 6.0,  end: 8.5,  title: 'البرمجة العميقة',        desc: 'AiMoha (Python/JS) — دمج منطق الشطرنج في AI Agents' },
+            { start: 8.5,  end: 10.5, title: 'أكاديمية الذكاء الاصطناعي', desc: 'ML متقدم + LLMs + تطبيق خوارزميات' },
+            { start: 10.5, end: 12.0, title: 'إتقان اللغة الإنجليزية',   desc: 'Lex Fridman Podcast + مصطلحات تقنية + Shadowing' },
+            { start: 12.0, end: 13.0, title: 'الاستراحة الكبرى',       desc: 'ظهر + غداء بروتيني مكثف' },
+            { start: 13.0, end: 15.0, title: 'المعمل التطبيقي',        desc: 'مشاريع AI حقيقية + تكامل أنظمة برمجية' },
+            { start: 15.0, end: 16.5, title: 'الإعداد البدني PPL',     desc: 'Push(Handstand)/Pull(Explosive)/Legs(قفز) + كاليسثنكس' },
+            { start: 16.5, end: 17.5, title: 'كتلة الجري المكثف',      desc: 'ساعة جري (تفعيل قانون وولف + HGH مضاعف)' },
+            { start: 17.5, end: 19.5, title: 'التركيز الأكاديمي',      desc: 'رياضيات/علوم/فيزياء + درس الرسلان + عشاء خفيف' },
+            { start: 19.5, end: 20.5, title: 'المنافسات الجماعية',     desc: 'مباريات كاملة: سلة/قدم (تنافس قوي دون تهاون)' },
+            { start: 20.5, end: 21.5, title: 'الارتقاء الذهني',        desc: 'شطرنج/سودوكو + كتب رقمية + وثائقي تقني' },
+            { start: 21.5, end: 22.0, title: 'تجهيز النظام',           desc: 'تخطيط الغد + أذكار نوم + إغلاق كامل (7-9 ساعات)' }
+        ],
+        days: {
+            0: { sport: '🏀 كرة السلة (مباريات كاملة)', ppl: 'Pull (عقلة انفجارية)', cognitive: 'برمجة + AI (شطرنج)', running: 'ساعة' },
+            1: { sport: '🥊 مواي تاي', ppl: 'Legs (قفز / وولف)', cognitive: 'شطرنج (AI Agents)', running: 'ساعة' },
+            2: { sport: '🏀 كرة السلة (مباريات كاملة)', ppl: 'Push (ثبات اليدين)', cognitive: 'برمجة + AI', running: 'ساعة' },
+            3: { sport: '⚽ كرة القدم (مباريات كاملة)', ppl: 'Pull & Abs/Triceps', cognitive: 'سودوكو صعبة (تتبع أخطاء)', running: 'ساعة' },
+            4: { sport: '🥋 BJJ', ppl: 'Legs مكثفة (قفز)', cognitive: 'شريعة (توحيد/رياض/تجويد)', running: 'ساعة ونصف (19:30-21:00)' },
+            5: { sport: '🚶 مشي هادئ للاستشفاء', ppl: 'Push (Handstand)', cognitive: 'Dual N-Back + كتاب رقمي (تدقيق)', running: 'ساعة (16:00-17:00)' },
+            6: { sport: '⚽ كرة القدم (مباريات كاملة)', ppl: 'Six Pack Abs + Triceps', cognitive: 'قرصنة أخلاقية + معايرة', running: 'ساعة ونصف (15:00-16:30)' }
+        },
+        special: {
+            4: { // Thursday
+                title: 'خميس الإنجاز — البروتوكول المُحسّن',
+                blocks: [
+                    { time: '05:00-06:30', title: 'الكتلة الروحية', desc: 'تكرار ومراجعة القرآن (ساعة ونصف)' },
+                    { time: '06:30-09:30', title: 'العلوم الشرعية والتاريخ', desc: 'التوحيد + رياض الصالحين + تجويد + البداية والنهاية (3 ساعات)' },
+                    { time: '09:30-11:30', title: 'ماراثون الحفظ', desc: 'منهج التاريخ والجغرافيا + العلوم الإسلامية (خرائط ذهنية)' },
+                    { time: '11:30-13:30', title: 'المهارات اللغوية', desc: 'فرنسية/عربية/إنجليزية (معالجة القواعد كمنطق برامجي)' },
+                    { time: '13:30-15:00', title: 'التقنية والنمو', desc: 'تطوير مواقع وربح منها (ساعة ونصف)' },
+                    { time: '15:00-16:30', title: 'الحمل البدني الإضافي', desc: 'Legs مكثفة + قفز عالي + تمارين ارتدادية (ساعة ونصف)' },
+                    { time: '16:30-18:30', title: 'إتقان اللغات', desc: 'مراجعة مفردات إنجليزية تقنية (ساعتان)' },
+                    { time: '18:30-19:30', title: 'صناعة المحتوى الصريحة', desc: 'YouTube: Onyx Apex + ren gaming + تلاوات (تصوير + خطافات)' },
+                    { time: '19:30-21:00', title: 'كتلة الجري الطويل', desc: 'ساعة ونصف متواصلة (ضغط عظمي ميكانيكي + سعة هوائية)' },
+                    { time: '21:00-22:00', title: 'الروحانيات وتحسين الصوت', desc: 'استماع قرآن + تدبر + تحسين النبرة الصوتية' },
+                    { time: '22:00-23:00', title: 'الارتقاء الذهني الشامل', desc: 'قراءة تطوير ذات + ديتوكس الدوبامين (دوباميكافين)' }
+                ]
             },
-
-            getLogs() {
-                try {
-                    return JSON.parse(localStorage.getItem('sovereign_system_logs')) || [];
-                } catch(e) {
-                    return [];
-                }
+            5: { // Friday
+                title: 'جمعة الإبداع — الإنتاج المرئي والذكاء السائل',
+                blocks: [
+                    { time: '05:00-08:00', title: 'المراجعة الروحية والأكاديمية', desc: 'الكهف + أذكار + مراجعة شاملة للعلوم الطبيعية' },
+                    { time: '08:00-10:30', title: 'الإنتاج المرئي', desc: 'تعديل فيديو احترافي (ساعتان ونصف)' },
+                    { time: '10:30-14:30', title: 'كتلة البرمجة العميقة', desc: '4 ساعات: برمجة + مراقبة مشاريع + بناء مواقع + ربح' },
+                    { time: '14:30-16:00', title: 'المخرجات والذكاء السائل', desc: 'Dual N-Back مكثف (20 دقيقة) + مشي + كتاب رقمي (تدقيق نهائي)' },
+                    { time: '16:00-17:00', title: 'كتلة الجري الهوائي', desc: 'ساعة جري (تعويض النشاط الملغى بنشاط بناء)' },
+                    { time: '17:00-18:00', title: 'التحسين التقني', desc: 'مراجعة مستودعات الأكواد + توثيق المشاريع' },
+                    { time: '20:30-21:30', title: 'الارتقاء الذهني', desc: 'قراءة كتب تطوير الذات + ديتوكس كامل' }
+                ]
             },
-
-            getLogIcon(type) {
-                const icons = {
-                    quest: '⚔️',
-                    system: '⚡',
-                    penalty: '🚨',
-                    dungeon: '🧠',
-                    default: '📌'
-                };
-                return icons[type] || icons.default;
-            },
-
-            getLogColorClass(type) {
-                const classes = {
-                    quest: 'type-quest',
-                    system: 'type-system',
-                    penalty: 'type-penalty',
-                    dungeon: 'type-dungeon'
-                };
-                return classes[type] || '';
-            },
-
-            getLogBadge(type) {
-                const badges = {
-                    quest: { text: 'QUEST CLEARED', class: 'bg-cyan-500/10 text-[var(--sys-cyan)] border border-cyan-500/20' },
-                    system: { text: 'SYSTEM EVENT', class: 'bg-purple-500/10 text-[var(--sys-purple)] border border-purple-500/20' },
-                    penalty: { text: 'DISTRACTION ALERT', class: 'bg-rose-500/10 text-[var(--sys-red)] border border-rose-500/20' },
-                    dungeon: { text: 'DUNGEON CLEARED', class: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' }
-                };
-                const badge = badges[type] || badges.system;
-                return `<span class="text-[10px] px-2 py-1 rounded font-bold uppercase sys-font ${badge.class}">${badge.text}</span>`;
-            },
-
-            updateStats(logs) {
-                const stats = { total: logs.length, quest: 0, system: 0, penalty: 0, dungeon: 0 };
-                logs.forEach(log => {
-                    if(stats[log.type] !== undefined) stats[log.type]++;
-                });
-                
-                document.getElementById('stat-total').textContent = stats.total;
-                document.getElementById('stat-quest').textContent = stats.quest;
-                document.getElementById('stat-system').textContent = stats.system;
-                document.getElementById('stat-penalty').textContent = stats.penalty;
-                document.getElementById('stat-dungeon').textContent = stats.dungeon;
-            },
-
-            render() {
-                const container = document.getElementById('logsContainer');
-                const allLogs = this.getLogs();
-                this.updateStats(allLogs);
-                
-                const filteredLogs = this.currentFilter === 'all' 
-                    ? allLogs 
-                    : allLogs.filter(log => log.type === this.currentFilter);
-
-                container.innerHTML = '';
-
-                if (filteredLogs.length === 0) {
-                    const emptyMessages = {
-                        all: { title: 'لا يوجد أي سجلات مسجلة', sub: 'تبدأ السجلات بالظهور بمجرد إنجاز المهام أو استلام العقوبات' },
-                        quest: { title: 'لا توجد مهام منجزة مسجلة', sub: 'أكمل مهامك اليومية لرؤية السجلات هنا' },
-                        system: { title: 'لا توجد ترقيات أو ألقاب', sub: 'ارتقِ بالمستويات واشتري الألقاب لتملأ هذا السجل' },
-                        penalty: { title: 'سجل نظيف من العقوبات', sub: 'حافظ على تركيزك لتجنب التشتت والخصومات' },
-                        dungeon: { title: 'لم يتم اقتحام أي زنزانة', sub: 'زُر صفحة الزنازين الذهنية لبدء التحديات' }
-                    };
-                    const msg = emptyMessages[this.currentFilter] || emptyMessages.all;
-                    
-                    container.innerHTML = `
-                        <div class="text-center py-20 text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-900/20 animate-system-pop">
-                            <div class="text-4xl mb-3">📂</div>
-                            <p class="text-sm font-bold">[${msg.title}]</p>
-                            <p class="text-[10px] text-slate-600 mt-2">${msg.sub}</p>
-                        </div>`;
-                    return;
-                }
-
-                // Show newest first
-                [...filteredLogs].reverse().forEach((log, index) => {
-                    const dateObj = new Date(log.id || Date.now());
-                    const timeStr = log.time || dateObj.toLocaleTimeString('ar-EG');
-                    const dateStr = dateObj.toLocaleDateString('ar-EG');
-                    const typeClass = this.getLogColorClass(log.type);
-                    const icon = this.getLogIcon(log.type);
-                    
-                    const card = document.createElement('div');
-                    card.className = `log-card p-4 border border-slate-800 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 ${typeClass} animate-system-pop`;
-                    card.style.animationDelay = `${index * 0.05}s`;
-                    
-                    card.innerHTML = `
-                        <div class="flex gap-3 items-start w-full md:w-auto">
-                            <div class="w-10 h-10 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center text-lg flex-shrink-0">
-                                ${icon}
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex flex-wrap items-center gap-2 mb-1">
-                                    ${this.getLogBadge(log.type)}
-                                    <span class="text-[10px] text-slate-500 sys-font">${dateStr} • ${timeStr}</span>
-                                </div>
-                                <p class="text-sm text-slate-200 font-medium leading-relaxed">${log.text || 'سجل نظام بدون وصف'}</p>
-                            </div>
-                        </div>
-                        ${log.change ? `
-                        <div class="text-right w-full md:w-auto border-t md:border-t-0 md:border-r border-slate-800/60 pt-2 md:pt-0 md:pr-4 md:pl-4">
-                            <span class="text-xs sys-font font-bold ${log.change.includes('-') ? 'text-[var(--sys-red)]' : 'text-emerald-400'}">${log.change}</span>
-                        </div>` : ''}
-                    `;
-                    container.appendChild(card);
-                });
-            },
-
-            filter(type) {
-                this.currentFilter = type;
-                
-                // Update buttons
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if(btn.id === `btn-${type}`) btn.classList.add('active');
-                });
-                
-                this.render();
-            },
-
-            clearLogs() {
-                if (confirm("⚠️ هل أنت متأكد من رغبتك في تطهير سجلات النظام الشاملة؟\n\nلا يمكن التراجع عن هذا الإجراء، وسيتم فقدان تاريخ التقدم الدائم.")) {
-                    localStorage.removeItem('sovereign_system_logs');
-                    this.render();
-                    
-                    // Dispatch event for other pages
-                    window.dispatchEvent(new StorageEvent('storage', { key: 'sovereign_system_logs' }));
-                }
-            },
-
-            exportLogs() {
-                const logs = this.getLogs();
-                if(logs.length === 0) {
-                    alert('لا توجد سجلات للتصدير حالياً.');
-                    return;
-                }
-                
-                const dataStr = JSON.stringify(logs, null, 2);
-                const blob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `sovereign_logs_${new Date().toISOString().slice(0,10)}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+            6: { // Saturday
+                title: 'سبت الإتقان — الأمن التقني والمباراة الكاملة',
+                blocks: [
+                    { time: '05:00-10:00', title: 'الأكاديمية والروح', desc: 'مراجعة فيزياء + قرآن جديد (5 ساعات متواصلة)' },
+                    { time: '10:00-14:00', title: 'الأمن التقني واللغات', desc: 'قرصنة أخلاقية + إنجليزية (4 ساعات متواصلة)' },
+                    { time: '14:00-15:00', title: 'التدبر الصوتي', desc: 'استماع قرآن + تدبر + تحسين النبرة' },
+                    { time: '15:00-16:30', title: 'كتلة الجري الانفجاري', desc: 'ساعة ونصف: sprint/interval (تحفيز النمو العظمي)' },
+                    { time: '16:30-17:00', title: 'الاستشفاء والترطيب', desc: 'مغذيات دقيقة لتجنب الإجهاد (Ca/Mg/Zn)' },
+                    { time: '17:00-18:30', title: 'الأداء الرياضي التنافسي', desc: 'كرة القدم: مباراة جماعية كاملة (ذكاء حركي + تفريغ طاقة)' },
+                    { time: '18:30-19:30', title: 'الأنظمة البرمجية', desc: 'مراقبة مشاريع + تطوير مواقع' },
+                    { time: '19:30-20:30', title: 'معايرة الأنظمة', desc: 'تطوير ذات + تقييم أسبوعي متكامل' },
+                    { time: '20:30-21:30', title: 'التخطيط التكتيكي', desc: 'تحديث مهام الأسبوع القادم' },
+                    { time: '21:30-23:00', title: 'نظام التحفيز الأقصى للنمو', desc: 'تمارين طول (تعلق/سباحة/سلة) + شوفان/شعير + نوم محسّن' }
+                ]
             }
-        };
+        }
+    }
+};
 
-        // ==========================================
-        // INITIALIZATION
-        // ==========================================
-        window.addEventListener('DOMContentLoaded', () => LogManager.init());
-        window.LogManager = LogManager;
-    </script>
+// ==========================================
+// UTILITIES
+// ==========================================
+const Utils = {
+    formatDecimalTime(dec) {
+        const h = Math.floor(dec);
+        const m = Math.floor((dec - h) * 60);
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    },
+    getCurrentDecimalTime() {
+        const now = new Date();
+        return now.getHours() + now.getMinutes() / 60;
+    },
+    getDayName(dayIndex) {
+        const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+        return days[dayIndex];
+    }
+};
+
+const Toast = {
+    show(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        const colors = {
+            success: 'border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]',
+            error: 'border-rose-500 text-rose-400 shadow-[0_0_15px_rgba(225,29,72,0.3)]',
+            info: 'border-[var(--sys-cyan)] text-[var(--sys-cyan)] shadow-[0_0_15px_rgba(0,240,255,0.3)]',
+            purple: 'border-[var(--sys-purple)] text-[var(--sys-purple)] shadow-[0_0_15px_rgba(157,78,221,0.3)]'
+        };
+        toast.className = `pointer-events-auto px-5 py-3 bg-[#02040a]/95 border backdrop-blur-md text-sm font-bold sys-font tracking-wide animate-system-pop ${colors[type] || colors.info}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
+    }
+};
+
+// ==========================================
+// PLAYER STATE SYNC (from index9 engine)
+// ==========================================
+const PlayerSync = {
+    data: { level: 1, xp: 0, gold: 0 },
+    init() {
+        this.load();
+        this.updateUI();
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'monarch_system_data') { this.load(); this.updateUI(); }
+        });
+    },
+    load() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('monarch_system_data') || '{}');
+            this.data.level = saved.level || 1;
+            this.data.xp = saved.xp || 0;
+            this.data.gold = saved.gold || 0;
+        } catch(e) {}
+    },
+    updateUI() {
+        const lvlEl = document.getElementById('player-level');
+        const barEl = document.getElementById('player-xp-bar');
+        const goldEl = document.getElementById('player-gold');
+        if(lvlEl) lvlEl.textContent = this.data.level;
+        if(goldEl) goldEl.textContent = this.data.gold;
+        if(barEl) {
+            const needed = this.data.level * 100;
+            const pct = Math.min((this.data.xp / needed) * 100, 100);
+            barEl.style.width = `${pct}%`;
+        }
+    }
+};
+
+// ==========================================
+// PROGRAM MANAGER (Week 1 / Week 2 Toggle)
+// ==========================================
+const ProgramManager = {
+    activeProgramId: 'week1',
+
+    init() {
+        this.activeProgramId = localStorage.getItem('sovereign_active_program') || 'week1';
+        this.renderButtons();
+        this.renderProgramInfo();
+        this.renderTodaySchedule();
+    },
+
+    switch(weekId) {
+        if (this.activeProgramId === weekId) return;
+        this.activeProgramId = weekId;
+        localStorage.setItem('sovereign_active_program', weekId);
+
+        const prog = PROGRAM_DATA[weekId];
+        Toast.show(`تم تفعيل: ${prog.title} ${prog.version}`, weekId === 'week2' ? 'purple' : 'info');
+
+        this.renderButtons();
+        this.renderProgramInfo();
+        this.renderTodaySchedule();
+
+        // Log the switch
+        LogManager.addLog('system', `تبديل البروتوكول التشغيلي إلى: [${prog.title} ${prog.version}]`);
+    },
+
+    renderButtons() {
+        const btn1 = document.getElementById('btn-week1');
+        const btn2 = document.getElementById('btn-week2');
+        if(btn1) btn1.classList.toggle('active', this.activeProgramId === 'week1');
+        if(btn2) btn2.classList.toggle('active', this.activeProgramId === 'week2');
+
+        const badge = document.getElementById('active-program-badge');
+        if(badge) {
+            badge.textContent = this.activeProgramId === 'week1' ? 'WEEK 1' : 'WEEK 2';
+            badge.className = this.activeProgramId === 'week1' 
+                ? 'text-xs font-bold text-[var(--sys-cyan)] sys-font border border-[var(--sys-cyan)] px-2 py-0.5 rounded bg-cyan-950/40'
+                : 'text-xs font-bold text-[var(--sys-purple)] sys-font border border-[var(--sys-purple)] px-2 py-0.5 rounded bg-purple-950/40';
+        }
+    },
+
+    renderProgramInfo() {
+        const prog = PROGRAM_DATA[this.activeProgramId];
+        const msgBox = document.getElementById('program-message');
+        if(!msgBox) return;
+
+        msgBox.classList.remove('hidden');
+        let html = `<strong class="text-[var(--sys-cyan)] block mb-1">${prog.title} — ${prog.version}</strong>`;
+        html += `<span class="block mb-1">${prog.desc}</span>`;
+        html += `<span class="text-[var(--sys-purple)] font-bold sys-font">المستوى: ${prog.range}</span>`;
+
+        if (this.activeProgramId === 'week2' && PlayerSync.data.level >= 450) {
+            html += `<div class="mt-2 p-2 bg-cyan-950/40 border border-[var(--sys-cyan)] rounded animate-pulse">
+                <span class="text-[var(--sys-cyan)] font-bold sys-font text-[10px] block">[SYSTEM: SOVEREIGN AUTONOMY ACTIVATED]</span>
+                <span class="text-white text-[11px]">الآن يمكنك تدبر أمورك بنفسك. هذا هو التحسين الأخير للنظام.</span>
+            </div>`;
+        }
+        msgBox.innerHTML = html;
+    },
+
+    renderTodaySchedule() {
+        const container = document.getElementById('today-schedule-container');
+        const dayLabel = document.getElementById('current-day-label');
+        if(!container) return;
+
+        const now = new Date();
+        const day = now.getDay(); // 0=Sun, 6=Sat
+        const currentTime = Utils.getCurrentDecimalTime();
+        const prog = PROGRAM_DATA[this.activeProgramId];
+
+        if(dayLabel) dayLabel.textContent = Utils.getDayName(day);
+
+        let html = '';
+
+        // Day header
+        const dayData = prog.days[day];
+        html += `<div class="mb-3 p-3 bg-slate-950/60 border border-slate-800 rounded">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold text-[var(--sys-cyan)] sys-font">DAILY DIRECTIVE</span>
+                <span class="text-[10px] text-slate-500 sys-font">${prog.version}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+                <div><span class="text-slate-500">رياضة:</span> <span class="text-white">${dayData.sport}</span></div>
+                <div><span class="text-slate-500">PPL:</span> <span class="text-white">${dayData.ppl}</span></div>
+                <div><span class="text-slate-500">ذهني:</span> <span class="text-white">${dayData.cognitive}</span></div>
+                <div><span class="text-slate-500">جري:</span> <span class="text-white">${dayData.running}</span></div>
+            </div>
+        </div>`;
+
+        // Schedule blocks
+        let scheduleBlocks = [];
+
+        // Check if special day (Thu=4, Fri=5, Sat=6)
+        if ([4,5,6].includes(day) && prog.special[day]) {
+            const special = prog.special[day];
+            html += `<div class="mb-2 px-2 py-1 bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)]/30 rounded text-center">
+                <span class="text-[var(--sys-purple)] font-bold text-xs">${special.title}</span>
+            </div>`;
+            scheduleBlocks = special.blocks.map(b => ({
+                start: parseFloat(b.time.split('-')[0].replace(':','.')),
+                end: parseFloat(b.time.split('-')[1].replace(':','.')),
+                title: b.title,
+                desc: b.desc,
+                timeStr: b.time
+            }));
+        } else {
+            // Normal day: use unified schedule + inject sport block details
+            scheduleBlocks = prog.schedule.map(s => ({
+                start: s.start,
+                end: s.end,
+                title: s.title,
+                desc: s.desc,
+                timeStr: `${Utils.formatDecimalTime(s.start)} - ${Utils.formatDecimalTime(s.end)}`
+            }));
+        }
+
+        // Render blocks
+        let activeFound = false;
+        scheduleBlocks.forEach((block, idx) => {
+            const isActive = !activeFound && currentTime >= block.start && currentTime < block.end;
+            if (isActive) activeFound = true;
+
+            const activeClass = isActive ? 'block-active live-pulse' : 'bg-slate-950/40 border-slate-800';
+            const titleColor = isActive ? 'text-[var(--sys-cyan)]' : 'text-slate-300';
+            const icon = isActive ? '<span class="text-[var(--sys-cyan)] animate-pulse">●</span>' : '<span class="text-slate-700">○</span>';
+
+            html += `<div class="p-3 rounded border ${activeClass} mb-2 transition-all">
+                <div class="flex justify-between items-start mb-1">
+                    <div class="flex items-center gap-2">
+                        ${icon}
+                        <span class="font-bold text-sm ${titleColor}">${block.title}</span>
+                    </div>
+                    <span class="sys-font text-[10px] text-slate-500 bg-black/40 px-1.5 py-0.5 rounded">${block.timeStr}</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed pr-5">${block.desc}</p>
+                ${isActive ? '<div class="mt-2 flex items-center gap-2"><span class="text-[9px] sys-font text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-500/30">ACTIVE BLOCK</span><span class="text-[9px] sys-font text-slate-500">NOW</span></div>' : ''}
+            </div>`;
+        });
+
+        container.innerHTML = html;
+    }
+};
+
+// ==========================================
+// LOG MANAGER (Archive Engine)
+// ==========================================
+const LogManager = {
+    currentFilter: 'all',
+
+    init() {
+        this.updateStats();
+        this.render();
+        this.setupFilters();
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'sovereign_system_logs') { this.updateStats(); this.render(); }
+        });
+    },
+
+    getLogs() {
+        try { return JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]'); }
+        catch(e) { return []; }
+    },
+
+    addLog(type, message) {
+        const logs = this.getLogs();
+        logs.unshift({
+            id: 'log_' + Date.now(),
+            timestamp: new Date().toLocaleTimeString('ar-EG'),
+            type: type,
+            message: message
+        });
+        localStorage.setItem('sovereign_system_logs', JSON.stringify(logs.slice(0, 200)));
+        this.updateStats();
+        this.render();
+    },
+
+    updateStats() {
+        const logs = this.getLogs();
+        const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+        set('stat-total', logs.length);
+        set('stat-quests', logs.filter(l => l.type === 'quest').length);
+        set('stat-system', logs.filter(l => l.type === 'system').length);
+        set('stat-errors', logs.filter(l => l.type === 'error').length);
+    },
+
+    setupFilters() {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentFilter = e.target.dataset.filter;
+                this.render();
+            });
+        });
+    },
+
+    getIcon(type) {
+        switch(type) {
+            case 'quest': return '<span class="text-[var(--sys-gold)]">⚔️</span>';
+            case 'system': return '<span class="text-[var(--sys-cyan)]">⚙️</span>';
+            case 'level': return '<span class="text-[var(--sys-purple)]">⭐</span>';
+            case 'error': return '<span class="text-[var(--sys-red)]">⚠️</span>';
+            default: return '<span class="text-slate-400">📄</span>';
+        }
+    },
+
+    getColorClass(type) {
+        switch(type) {
+            case 'quest': return 'log-quest';
+            case 'system': return 'log-system';
+            case 'level': return 'log-level';
+            case 'error': return 'log-error';
+            default: return 'border-slate-600';
+        }
+    },
+
+    render() {
+        const container = document.getElementById('logsContainer');
+        let logs = this.getLogs();
+
+        if (this.currentFilter !== 'all') {
+            logs = logs.filter(log => log.type === this.currentFilter);
+        }
+
+        if (logs.length === 0) {
+            container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-500 space-y-3 py-10">
+                <div class="text-4xl opacity-30">📂</div>
+                <p class="font-bold tracking-widest uppercase sys-font text-xs">لا توجد سجلات مطابقة</p>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = logs.map(log => `
+            <div class="log-item ${this.getColorClass(log.type)} bg-slate-900/40 rounded-lg p-3 flex gap-3 items-start">
+                <div class="flex-shrink-0 text-lg bg-slate-950 p-1.5 rounded border border-slate-800 w-10 h-10 flex items-center justify-center">
+                    ${this.getIcon(log.type)}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] font-mono text-slate-400 bg-black/50 px-2 py-0.5 rounded">${log.timestamp || '00:00'}</span>
+                        <span class="text-[9px] uppercase tracking-wider text-slate-600 sys-font">${log.id || '#SYS'}</span>
+                    </div>
+                    <p class="text-sm text-slate-200 leading-relaxed font-semibold break-words">${log.message}</p>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    clearLogs() {
+        if(confirm('تحذير: هل أنت متأكد من مسح جميع السجلات التاريخية؟ لا يمكن التراجع عن هذا الإجراء.')) {
+            localStorage.setItem('sovereign_system_logs', '[]');
+            this.updateStats();
+            this.render();
+            Toast.show('تم مسح السجلات التاريخية بنجاح.', 'error');
+        }
+    },
+
+    exportLogs() {
+        const logs = this.getLogs();
+        if(logs.length === 0) {
+            Toast.show('لا توجد سجلات للتصدير.', 'error');
+            return;
+        }
+        const dataStr = JSON.stringify(logs, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sovereign_logs_${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        Toast.show('تم تصدير السجلات بنجاح.', 'success');
+    }
+};
+
+// ==========================================
+// CLOCK & AUTO REFRESH
+// ==========================================
+setInterval(() => {
+    ProgramManager.renderTodaySchedule();
+}, 60000);
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    PlayerSync.init();
+    ProgramManager.init();
+    LogManager.init();
+});
+
+// Global exposure
+window.ProgramManager = ProgramManager;
+window.LogManager = LogManager;
+window.Toast = Toast;
+</script>
 </body>
 </html>
