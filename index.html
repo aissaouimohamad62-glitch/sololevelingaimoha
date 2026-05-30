@@ -93,6 +93,7 @@
             transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
+<base target="_blank">
 </head>
 
 <body class="p-2 md:p-6 relative text-slate-200">
@@ -670,8 +671,10 @@ const DirectiveTimer = {
         if (progressEl) progressEl.style.width = '0%';
     }
 };
-// ANIME POPUP ENGINE - UPDATED WITH SOVEREIGN LEVEL-UP & AP SYSTEM
-// =================================================================
+
+// ==========================================
+// ANIME POPUP ENGINE
+// ==========================================
 const AnimePopup = {
     currentQuest: null,
     questStartTime: null,
@@ -761,50 +764,11 @@ const AnimePopup = {
         const totalXP = baseReward + timeBonus;
         const goldReward = totalXP * 2;
 
-        // 1. إضافة الـ XP والذهب عبر النظام الأساسي الحالي للموقع للحفاظ على استقراره
         if(window.PlayerState) {
             PlayerState.addXP(totalXP);
             PlayerState.addGold(goldReward);
         }
 
-        // 2. المحرك المطور: فحص الترقية (Level Up) الميكانيكية وتوليد نقاط الـ AP بأمان
-        try {
-            let coreData = JSON.parse(localStorage.getItem('monarch_system_data')) || {};
-            let currentLevel = coreData.level || 1;
-            let currentXP = coreData.xp || 0;
-            let nextLevelXp = currentLevel * 100; // ميكانيكية النظام: لكل مستوى يحتاج (المستوى الحالي × 100) نقطة خبرة
-
-            let leveledUp = false;
-            // حلقة التحقق للتعامل مع الارتفاعات المتعددة في حال كانت المكافأة ضخمة
-            while (currentXP >= nextLevelXp) {
-                currentXP -= nextLevelXp;
-                currentLevel += 1;
-                coreData.available_ap = (coreData.available_ap || 0) + 5; // منح +5 نقاط تخصيص حرة تلقائياً عند الترقية
-                nextLevelXp = currentLevel * 100;
-                leveledUp = true;
-            }
-
-            // إذا تحقق الارتقاء، نقوم بحفظ البيانات المحدثة وضخها في نظام السجلات
-            if (leveledUp) {
-                coreData.level = currentLevel;
-                coreData.xp = currentXP;
-                localStorage.setItem('monarch_system_data', JSON.stringify(coreData));
-
-                // توثيق حدث الارتقاء السينمائي في لوحة الـ Logs الافتراضية الخاصة بك
-                if(window.SovereignEngine && typeof SovereignEngine.logToSystem === 'function') {
-                    SovereignEngine.logToSystem('quest', `⚡ ارتقاء مستوى! تم الوصول للمستوى [${currentLevel}] بنجاح ومنح +5 نقاط AP حرة.`);
-                }
-                
-                // إعادة تهيئة واجهة المستخدم للاعب فوراً لعكس المستوى الجديد بدون عمل Refresh للمتصفح
-                if(window.PlayerState && typeof PlayerState.init === 'function') {
-                    PlayerState.init();
-                }
-            }
-        } catch (err) {
-            console.error("Sovereign Level Up Engine Error: ", err);
-        }
-
-        // 3. استكمال بقية العمليات واللوجات الأصلية الخاصة بالمهمة
         if(window.SovereignEngine) {
             SovereignEngine.logToSystem('quest', `إنجاز مهمة: [${quest.title}] | النوع: ${questType} | الوقت: ${elapsedMinutes}د | مكافأة: +${totalXP} XP | ذهب: +${goldReward}`);
         }
@@ -846,7 +810,7 @@ const AnimePopup = {
 };
 
 // ==========================================
-// PLAYER STATE (RPG MECHANICS)
+// PLAYER STATE (RPG MECHANICS - DATA OVERWRITE SHIELD APPLIED)
 // ==========================================
 const PlayerState = {
     data: {
@@ -864,6 +828,7 @@ const PlayerState = {
         if (saved) {
             try { 
                 const parsedData = JSON.parse(saved);
+                // دمج الخصائص الرئيسية مع الحفاظ على البيانات العميقة المتشعبة (stats وغيرها)
                 this.data = { 
                     ...this.data, 
                     ...parsedData,
@@ -982,19 +947,14 @@ const PlayerState = {
         setInterval(updateSystemBroadcast, 60000);
     },
 
-       save() {
-        // 🛡️ SAFE MERGE PROTOCOL — Fixed: fresh data wins over stale data
+    save() {
+        // 🛡️ Safe Merge Protocol: يمنع الكتابة الفوقية والمسح العرضي للبيانات التي يتم تحديثها في الملفات الأخرى
         try {
             const savedData = JSON.parse(localStorage.getItem('monarch_system_data') || '{}');
-            // CORRECTED MERGE ORDER: Start with current in-memory state, then overlay with freshest data from localStorage
-            // This ensures that if another page updated localStorage, those changes are preserved while keeping our current modifications
             this.data = { 
-                ...this.data,           // ← Start with current in-memory state (our modifications)
-                ...savedData,           // ← Overlay with freshest data from localStorage (other pages may have updated)
-                stats: { 
-                    ...(this.data.stats || {}),  // ← Current stats first
-                    ...(savedData.stats || {})   // ← Fresh stats overlay (wins)
-                } 
+                ...savedData, 
+                ...this.data, 
+                stats: { ...(savedData.stats || {}), ...this.data.stats } 
             };
         } catch(e) {
             console.error("System save error", e);
@@ -1071,8 +1031,9 @@ const QuestSystem = {
             task.completed = false;
             if(window.PlayerState) {
                 PlayerState.data.authority = Math.max(0, (PlayerState.data.authority || 0) - authorityReward);
-                // FIXED: Use removeReward instead of negative addXP to prevent level-down on uncheck
-                PlayerState.removeReward(xpReward, goldReward);
+                PlayerState.addXP(-xpReward);
+                PlayerState.addGold(-goldReward);
+                if (PlayerState.data.gold < 0) PlayerState.data.gold = 0;
                 PlayerState.addStat(task.stat || 'int', -1);
             }
             Toast.show(`Quest Reversed! Rewards Deducted.`, 'error');
@@ -1124,15 +1085,6 @@ const QuestSystem = {
         if(window.PlayerState) {
             PlayerState.data.lethality = lethalityRate;
             PlayerState.save();
-            // الكود المُصلح:
-this.data = { 
-    ...this.data,      // ← احتفظ بما لدينا
-    ...savedData,      // ← البيانات الطازجة تكتب فوق القديمة (الأحدث تفوز)
-    stats: { 
-        ...(this.data.stats || {}), 
-        ...(savedData.stats || {}) 
-    }
-};
         }
         this.updateStatsUI(activeCount, this.tasks.length, lethalityRate);
     },
@@ -1211,136 +1163,23 @@ const Milestone = {
 // ==========================================
 // SOVEREIGN SCHEDULES MATRIX
 // ==========================================
-// ==========================================
-// SOVEREIGN SCHEDULES MATRIX (UPDATED FROM CHARTER)
-// ==========================================
-const PHASE_DATA = {
-    1: { // LEVEL 1 TO 450 (From 08.txt)
-        title: "البرنامج التأسيسي",
-        type: "Foundation",
-        schedules: [
-            { start: 2.75, end: 5.0, title: "كتلة قيام الليل والسحور", details: "صلاة القيام + سحور غني بالبروتين + الأذكار + مراجعة ذهنية سريعة.", type: "languages_books" },
-            { start: 5.0, end: 6.0, title: "الكتلة الروحية", details: "تلاوة تدبرية + مراجعة أو حفظ جديد.", type: "languages_books" },
-            { start: 6.0, end: 8.5, title: "البرمجة العميقة", details: "مشروع AiMoha (Python/JS).", type: "coding_ai" },
-            { start: 8.5, end: 10.5, title: "أكاديمية الذكاء الاصطناعي", details: "كورسات (ML, LLMs) وتطبيق الخوارزميات.", type: "coding_ai" },
-            { start: 10.5, end: 12.0, title: "إتقان الإنجليزية", details: "انغماس تقني + بناء مفردات + Shadowing.", type: "languages_books" },
-            { start: 12.0, end: 13.0, title: "الاستراحة الكبرى", details: "صلاة الظهر + غداء بروتيني.", type: "sports" },
-            { start: 13.0, end: 15.0, title: "المعمل التطبيقي", details: "مشاريع ذكاء اصطناعي حقيقية.", type: "coding_ai" },
-            { start: 15.0, end: 16.5, title: "PPL المتقدم", details: "Push, Pull, Legs + Calisthenics.", type: "sports" },
-            { start: 17.5, end: 19.5, title: "العلوم التجريبية", details: "صلاة المغرب + درس الشيخ الرسلان + رياضيات/فيزياء.", type: "languages_books" },
-            { start: 20.5, end: 21.5, title: "الارتقاء الذهني والبدني", details: "كتب، شطرنج، الرياضات البدنية والفنون.", type: "dungeons" }
-        ],
-        specialDays: {
-            4: [ // Thursday
-                { start: 5.0, end: 6.5, title: "مراجعة القرآن", type: "languages_books" },
-                { start: 6.5, end: 9.5, title: "كتاب التوحيد + علوم شرعية", type: "languages_books" },
-                { start: 9.5, end: 11.5, title: "ماراثون الحفظ (خرائط ذهنية)", type: "languages_books" },
-                { start: 11.5, end: 13.5, title: "منطق اللغات (إنجليزي/فرنسي)", type: "languages_books" },
-                { start: 13.5, end: 15.0, title: "تطوير الويب", type: "coding_ai" },
-                { start: 15.0, end: 16.5, title: "تدريب أرجل مكثف", type: "sports" },
-                { start: 16.5, end: 18.5, title: "مراجعة مفردات إنجليزية", type: "languages_books" },
-                { start: 19.5, end: 20.5, title: "صنع الموسيقى والغيتار", type: "dungeons" }
-            ],
-            5: [ // Friday
-                { start: 5.0, end: 8.0, title: "سورة الكهف + مراجعة طبيعية", type: "languages_books" },
-                { start: 8.0, end: 10.5, title: "تعديل فيديو للمحتوى", type: "coding_ai" },
-                { start: 10.5, end: 14.5, title: "برمجة عميقة AiMoha", type: "coding_ai" },
-                { start: 14.5, end: 16.0, title: "Dual N-Back + كتاب رقمي", type: "dungeons" },
-                { start: 16.0, end: 17.0, title: "ألعاب الخفة (Sleight of hand)", type: "dungeons" },
-                { start: 17.0, end: 18.0, title: "الحلاقة", type: "dungeons" }
-            ],
-            6: [ // Saturday
-                { start: 5.0, end: 10.0, title: "مراجعة فيزياء + قرآن", type: "languages_books" },
-                { start: 10.0, end: 14.0, title: "قرصنة أخلاقية + إنجليزية", type: "coding_ai" },
-                { start: 14.0, end: 15.0, title: "الاستماع للقرآن وتحسين الصوت", type: "languages_books" },
-                { start: 15.0, end: 16.0, title: "Push (Chest & Shoulders)", type: "sports" },
-                { start: 16.0, end: 18.0, title: "تعلم وصنع الموسيقى", type: "dungeons" },
-                { start: 18.0, end: 19.5, title: "مباراة كرة قدم", type: "sports" }
-            ]
-        }
+const SovereignSchedules = {
+    getTier(level) {
+        if (level >= 1 && level <= 70) return "tier_1_70";
+        if (level > 70 && level <= 130) return "tier_70_130";
+        if (level > 130 && level <= 180) return "tier_130_180";
+        if (level > 180 && level <= 250) return "tier_180_250";
+        if (level > 250 && level <= 320) return "tier_250_320";
+        if (level > 320 && level <= 400) return "tier_320_400";
+        if (level > 400 && level <= 450) return "tier_400_450";
+        if (level > 450) return "tier_infinity";
+        return "tier_1_70";
     },
-    2: { // LEVEL 450 TO 950 (From 09.txt)
-        title: "بروتوكول السيادة الذاتية",
-        type: "Autonomy",
-        schedules: [
-            { start: 2.75, end: 5.0, title: "صلاة الليل والسحور", details: "قيام + سحور عالي البروتين.", type: "languages_books" },
-            { start: 5.0, end: 6.0, title: "الكتلة الروحية", details: "قرآن + أذكار الفجر.", type: "languages_books" },
-            { start: 6.0, end: 8.5, title: "البرمجة العميقة", details: "AiMoha + دمج منطق الشطرنج لـ AI Agents.", type: "coding_ai" },
-            { start: 8.5, end: 10.5, title: "أكاديمية الذكاء الاصطناعي", details: "تعلم الآلة و LLMs.", type: "coding_ai" },
-            { start: 10.5, end: 12.0, title: "إتقان الإنجليزية كوقود", details: "Lex Fridman Podcast + Shadowing.", type: "languages_books" },
-            { start: 13.0, end: 15.0, title: "المعمل التطبيقي", details: "مشاريع AI وتكامل الأنظمة.", type: "coding_ai" },
-            { start: 15.0, end: 16.5, title: "PPL مضاعف + Calisthenics", details: "تمارين معقدة بوزن الجسم والأوزان.", type: "sports" },
-            { start: 16.5, end: 17.5, title: "كتلة الجري المكثف (قانون وولف)", details: "جري لتحفيز HGH وكثافة العظام.", type: "sports" },
-            { start: 19.5, end: 20.5, title: "المنافسات والفنون", details: "سلة/قدم + فنون شاولين/موسيقى.", type: "sports" }
-        ],
-        specialDays: {
-            4: [
-                { start: 5.0, end: 6.5, title: "تكرار ومراجعة القرآن", type: "languages_books" },
-                { start: 6.5, end: 9.5, title: "دراسة شرعية متكاملة", type: "languages_books" },
-                { start: 9.5, end: 11.5, title: "حفظ بالخرائط الذهنية", type: "languages_books" },
-                { start: 15.0, end: 16.5, title: "تدريب أرجل مكثف (قوة قفز)", type: "sports" },
-                { start: 19.5, end: 21.0, title: "الجري الطويل الانفجاري", type: "sports" },
-                { start: 21.0, end: 22.0, title: "تأليف الموسيقى", type: "dungeons" }
-            ],
-            5: [
-                { start: 5.0, end: 8.0, title: "سورة الكهف + مراجعة أكاديمية", type: "languages_books" },
-                { start: 10.5, end: 14.5, title: "برمجة عميقة ومراقبة المشاريع", type: "coding_ai" },
-                { start: 14.5, end: 16.0, title: "Dual N-Back + كتاب رقمي", type: "dungeons" },
-                { start: 16.0, end: 17.0, title: "الجري الهوائي بانتظام", type: "sports" },
-                { start: 17.0, end: 18.0, title: "ألعاب الخفة", type: "dungeons" }
-            ],
-            6: [
-                { start: 5.0, end: 10.0, title: "مراجعة فيزياء + قرآن", type: "languages_books" },
-                { start: 10.0, end: 14.0, title: "القرصنة الأخلاقية", type: "coding_ai" },
-                { start: 15.0, end: 16.5, title: "الجري الانفجاري (سبرينت)", type: "sports" },
-                { start: 17.0, end: 18.5, title: "مباراة تنافسية", type: "sports" },
-                { start: 18.5, end: 20.5, title: "عزف وتأليف الموسيقى", type: "dungeons" }
-            ]
-        }
-    },
-    3: { // LEVEL 950 TO INFINITY (Hybrid Merge)
-        title: "النظام الهجين المتكامل",
-        type: "Infinity",
-        schedules: [
-            { start: 2.75, end: 5.0, title: "الروحانيات الليلية والأذكار", details: "تمكين روحاني وصيام.", type: "languages_books" },
-            { start: 5.0, end: 6.0, title: "القرآن والتمدد الغضروفي", details: "تلاوة وتمدد ميكانيكي.", type: "languages_books" },
-            { start: 6.0, end: 10.0, title: "البرمجة السيادية العميقة", details: "4 ساعات متواصلة لأنظمة AI.", type: "coding_ai" },
-            { start: 10.0, end: 13.0, title: "أكاديمية AI والشطرنج", details: "تغذية الشبكات ببيانات الشطرنج.", type: "coding_ai" },
-            { start: 13.0, end: 15.0, title: "هندسة الأنظمة", details: "جودة الأكواد والمزامنة.", type: "coding_ai" },
-            { start: 15.0, end: 16.5, title: "الروتين البدني الصارم الجديد", details: "بناء ذروة القوة (بدون موسيقى/ألعاب خفة).", type: "sports" },
-            { start: 16.5, end: 18.0, title: "الجري السيادي (8 ساعات)", details: "تطبيق قانون وولف الميكانيكي.", type: "sports" },
-            { start: 18.0, end: 22.0, title: "التخطيط والمباريات", details: "شطرنج استراتيجي ونوم عميق.", type: "dungeons" }
-        ],
-        specialDays: {
-            4: [
-                { start: 5.0, end: 6.5, title: "مراجعة القرآن", type: "languages_books" },
-                { start: 6.5, end: 9.5, title: "العلوم الشرعية السيادية", type: "languages_books" },
-                { start: 11.5, end: 13.5, title: "منطق لغوي برامجي", type: "coding_ai" },
-                { start: 15.0, end: 16.5, title: "بيسبس وصدر داخلي", type: "sports" },
-                { start: 19.5, end: 21.0, title: "الجري الطويل الانفجاري", type: "sports" },
-                { start: 21.0, end: 23.0, title: "شطرنج استراتيجي + ديتوكس", type: "dungeons" }
-            ],
-            5: [
-                { start: 5.0, end: 8.0, title: "سورة الكهف + مراجعة", type: "languages_books" },
-                { start: 10.5, end: 14.5, title: "برمجة عميقة", type: "coding_ai" },
-                { start: 16.0, end: 17.0, title: "جري هوائي منتظم", type: "sports" },
-                { start: 17.0, end: 18.5, title: "صدر علوي وسفلي وسمانة", type: "sports" },
-                { start: 18.5, end: 20.5, title: "تدقيق برمجي + شطرنج", type: "coding_ai" }
-            ],
-            6: [
-                { start: 5.0, end: 10.0, title: "قرآن + مراجعة فيزياء", type: "languages_books" },
-                { start: 10.0, end: 14.0, title: "قرصنة أخلاقية", type: "coding_ai" },
-                { start: 15.0, end: 16.5, title: "جري انفجاري متناوب", type: "sports" },
-                { start: 16.5, end: 17.5, title: "كاليستنيكس متقدم", type: "sports" },
-                { start: 17.5, end: 19.0, title: "مباراة تنافسية", type: "sports" },
-                { start: 19.0, end: 20.5, title: "شطرنج + تدقيق أمني", type: "dungeons" }
-            ]
-        }
-    }
+    xpRules: { coding_ai: 30, sports: 20, languages_books: 10, dungeons: 10 }
 };
 
 // ==========================================
-// SOVEREIGN ENGINE (CORE SYSTEM WITH NEW TRACKING)
+// SOVEREIGN ENGINE (CORE SYSTEM)
 // ==========================================
 const SovereignEngine = {
     state: {
@@ -1353,78 +1192,68 @@ const SovereignEngine = {
     },
     config: { 
         weights: { coding_ai: 30, sports: 20, languages_books: 10, dungeons: 10 }, 
-        penaltyXP: 10 
+        penaltyXP: 5, 
+        xpPerLevelBase: 100 
     },
-    
     init() {
         this.checkActiveQuestOnLoad();
         this.runTimeScheduleEngine();
-        setInterval(() => this.runTimeScheduleEngine(), 60000); // Check every minute
+        setInterval(() => this.runTimeScheduleEngine(), 60000);
     },
-
-    determinePhase(level) {
-        if (level >= 950) return 3; // Hybrid Infinity
-        if (level >= 450) return 2; // Sovereign Autonomy
-        return 1; // Foundation
-    },
-
     runTimeScheduleEngine() {
         const now = new Date();
         const day = now.getDay();
         const hour = now.getHours();
         const minute = now.getMinutes();
         const currentTimeDecimal = hour + (minute / 60);
-        
-        const phaseNum = this.determinePhase(this.state.playerLevel);
-        const currentQuest = this.getTaskFromMatrix(phaseNum, day, currentTimeDecimal);
+        let currentQuest = null;
+        const currentTier = this.determineTier(this.state.playerLevel);
 
-        // Update UI Motivational Quote with tracking logic
-        const phaseData = PHASE_DATA[phaseNum];
-        let sysMsg = `[SYSTEM: PHASE ${phaseNum} ACTIVE]: ⚔️ في انتظار التوجيه التالي...`;
-        if (currentQuest) {
-            sysMsg = `⚡ ACTIVE BLOCK: [${currentQuest.title}] -> ${currentQuest.details || "التركيز المطلق مطلوب."}`;
+        if (currentTimeDecimal >= 5.0 && currentTimeDecimal < 6.0) {
+            const isEvenDay = (day % 2 === 0);
+            currentQuest = { 
+                title: "الكتلة الروحية السيادية", 
+                details: isEvenDay ? "صلاة الفجر والأذكار + حفظ جديد وتلاوة قرآنية تدبرية" : "صلاة الفجر والأذكار + مراجعة وتثبيت المحفوظ السابق", 
+                type: "languages_books" 
+            };
+        } else {
+            currentQuest = this.getTaskBySchedule(currentTier, day, currentTimeDecimal);
         }
-        if(document.getElementById('motivationalQuote')) document.getElementById('motivationalQuote').textContent = sysMsg;
 
-        // Auto-Trigger Quest if not already active
         if (currentQuest && (!this.state.activeQuest || this.state.activeQuest.title !== currentQuest.title)) {
-            // Calculate time left for the block dynamically
-            const targetTime = currentQuest.endTime; 
-            const h = Math.floor(targetTime);
-            const m = Math.floor((targetTime - h) * 60);
-            const targetTimeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            
-            AnimePopup.show(currentQuest.title, currentQuest.details || "تفعيل بروتوكول الميثاق التشغيلي.", targetTimeStr, this.config.weights[currentQuest.type] || 15);
+            this.triggerQuestPopup(currentQuest);
         }
     },
-
-    getTaskFromMatrix(phaseNum, day, timeDec) {
-        const data = PHASE_DATA[phaseNum];
-        let matchedTask = null;
-
-        // Check Special Days First (4=Thu, 5=Fri, 6=Sat)
-        if ([4, 5, 6].includes(day) && data.specialDays[day]) {
-            const specialBlocks = data.specialDays[day];
-            for (let block of specialBlocks) {
-                if (timeDec >= block.start && timeDec < block.end) {
-                    matchedTask = { title: block.title, details: `بروتوكول الأيام الخاصة: المرحلة ${phaseNum}`, type: block.type, endTime: block.end };
-                    break;
-                }
-            }
-        }
-
-        // If no special day match, check regular schedule
-        if (!matchedTask) {
-            for (let block of data.schedules) {
-                if (timeDec >= block.start && timeDec < block.end) {
-                    matchedTask = { title: block.title, details: block.details, type: block.type, endTime: block.end };
-                    break;
-                }
-            }
-        }
-        return matchedTask;
+    determineTier(level) {
+        if (level <= 70) return 'ALPHA';
+        if (level <= 130) return 'BETA';
+        if (level <= 450) return 'GAMMA';
+        if (level <= 599) return 'SOVEREIGN_PRE';
+        return 'INFINITY';
     },
-
+    getTaskBySchedule(tier, day, time) {
+        if (day >= 0 && day <= 3) {
+            if (time >= 6.0 && time < 8.5) return { title: "الهندسة البرمجية العميقة", details: "تطوير مشروع AiMoha والتحكم البرمجي بأسلوب الويب (Python/JS)", type: "coding_ai" };
+            if (time >= 8.5 && time < 10.5) return { title: tier === 'ALPHA' || tier === 'BETA' ? "المسار الأكاديمي الأساسي" : "أكاديمية الذكاء الاصطناعي", details: tier === 'ALPHA' || tier === 'BETA' ? "حل مسائل المنطق والرياضيات المتقدمة" : "دراسة خوارزميات التعلم الآلي والنماذج اللغوية الكبيرة", type: "coding_ai" };
+            if (time >= 10.3 && time < 12.0) return { title: "إتقان اللغة الإنجليزية التقنية", details: "انغماس لغوي مكثف وجلسات المحاكاة الصوتية", type: "languages_books" };
+            if (time >= 13.0 && time < 15.0) return { title: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "إنتاج وتأليف الكتاب الرقمي" : "المعمل التقني التطبيقي", details: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "جلسات الكتابة والتدقيق النهائي" : "بناء مشاريع فرونت إند متقدمة", type: tier === 'GAMMA' || tier === 'SOVEREIGN_PRE' ? "languages_books" : "coding_ai" };
+            if (time >= 15.0 && time < 16.5) return { title: tier === 'SOVEREIGN_PRE' || tier === 'INFINITY' ? "كتلة الجري الانفجاري" : "الإعداد البدني الصارم", details: tier === 'SOVEREIGN_PRE' || tier === 'INFINITY' ? "رفع الصلابة العظمية وفق قانون وولف" : "نظام تمارين PPL المتقدم", type: "sports" };
+            if (time >= 19.5 && time < 20.5) {
+                const sportsMatrix = { 0: "تمارين الجري والتحمل", 1: "فنون القتال الحية: قتال الموي تاي", 2: "تمارين الكور والجري الانفجاري", 3: "تمارين كرة القدم الفردية" };
+                return { title: "جلسة التدريب البدني التخصصي", details: sportsMatrix[day], type: "sports" };
+            }
+        }
+        if (day === 6) {
+            if (time >= 10.0 && time < 14.0) return { title: "كتلة الأمن التقني والسيبراني", details: "دراسة وتطبيق أساسيات القرصنة الأخلاقية", type: "coding_ai" };
+            if (time >= 15.0 && time < 16.5) return { title: "كتلة الجري الصارم", details: "ساعة ونصف من الجري مقسمة بدقة", type: "sports" };
+            if (time >= 17.0 && time < 18.5) return { title: "الأداء الرياضي التنافسي", details: "مباراة كاملة لاختبار الصلابة والمقاومة", type: "sports" };
+        }
+        if (day === 4 && time >= 13.0 && time < 15.0) return { title: "الدراسة الشرعية العميقة", details: "دراسة متعمقة في التوحيد ورياض الصالحين", type: "languages_books" };
+        return null;
+    },
+    triggerQuestPopup(quest) {
+        AnimePopup.show(quest.title, quest.details, "NOW", this.config.weights[quest.type] || 10);
+    },
     acceptQuest(quest) {
         if(!quest) return;
         if(!quest.acceptedAt) quest.acceptedAt = Date.now();
@@ -1438,13 +1267,47 @@ const SovereignEngine = {
         if(window.DirectiveTimer) DirectiveTimer.start(quest.acceptedAt);
         this.logToSystem('quest', `تم قبول المهمة: ${quest.title}`);
     },
+    completeQuest() {
+        if (!this.state.activeQuest) return;
+        const quest = this.state.activeQuest;
+        const questType = quest.type || 'coding_ai';
+        const baseReward = this.config.weights[questType] || 10;
+        const acceptedAt = quest.acceptedAt || Date.now();
+        const elapsedMinutes = Math.floor((Date.now() - acceptedAt) / 60000);
+        let timeBonus = 0;
+        if (elapsedMinutes >= 25) timeBonus = 10;
+        if (elapsedMinutes >= 60) timeBonus = 25;
+        const totalXP = baseReward + timeBonus;
+        const goldReward = totalXP * 2;
 
+        if(window.PlayerState) {
+            PlayerState.addXP(totalXP);
+            PlayerState.addGold(goldReward);
+        }
+
+        this.logToSystem('quest', `إنجاز مهمة: [${quest.title}] | النوع: ${questType} | الوقت: ${elapsedMinutes}د | مكافأة: +${totalXP} XP | ذهب: +${goldReward}`);
+
+        const bar = document.getElementById('activeDirectiveBar');
+        if (bar) bar.classList.add('hidden');
+        this.state.activeQuest = null;
+        localStorage.removeItem('sovereign_active_quest');
+        localStorage.removeItem('directive_start_time');
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.9 }, colors: ['#00f0ff', '#9d4edd'] });
+        }
+        if(window.Toast) Toast.show(`✅ تم إنجاز المهمة! +${totalXP} XP | +${goldReward} 🪙`, 'success');
+    },
     logToSystem(type, message) {
         let logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
-        logs.unshift({ id: 'log_'+Date.now(), timestamp: new Date().toLocaleTimeString('ar-EG'), type, message: message });
+        logs.unshift({ id: Date.now(), time: new Date().toLocaleTimeString('ar-EG'), type, text: message });
         localStorage.setItem('sovereign_system_logs', JSON.stringify(logs.slice(0, 200)));
     },
-
+    renderInterface() {
+        const lvlEl = document.getElementById('currentLevel');
+        const ttlEl = document.getElementById('activeTitleDisplay');
+        if (lvlEl) lvlEl.innerText = this.state.playerLevel;
+        if (ttlEl) ttlEl.innerText = `TITLE: ${this.state.activeTitle}`;
+    },
     checkActiveQuestOnLoad() {
         const saved = localStorage.getItem('sovereign_active_quest');
         const savedStartTime = localStorage.getItem('directive_start_time');
@@ -1467,6 +1330,7 @@ const SovereignEngine = {
         }
     }
 };
+
 // ==========================================
 // WEATHER & METRICS
 // ==========================================
@@ -1544,4 +1408,5 @@ window.DirectiveTimer = DirectiveTimer;
 </script>
 </body>
 </html>
+
 
