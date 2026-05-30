@@ -322,188 +322,193 @@
                 }
             }
         };
+// ==========================================
+// QUEST MANAGER PROTOCOL (Strict Engagement - Optimized)
+// ==========================================
+const QuestManager = {
+    activeQuest: null,
+    timerInterval: null,
+    baseXPReward: 0,
+    baseGoldReward: 0,
 
-        // ==========================================
-        // QUEST MANAGER PROTOCOL (Strict Engagement)
-        // ==========================================
-        const QuestManager = {
-            activeQuest: null,
-            timerInterval: null,
-            baseXPReward: 0,
-            baseGoldReward: 0,
-
-            init() {
-                const savedActive = localStorage.getItem('sovereign_active_quest');
-                if (savedActive) {
-                    try {
-                        this.activeQuest = JSON.parse(savedActive);
-                        this.baseXPReward = parseInt(this.activeQuest.xp || this.activeQuest.rewardXP || 30);
-                        this.baseGoldReward = this.baseXPReward * 2;
-                    } catch(e) {
-                        this.activeQuest = null;
-                    }
-                } else {
-                    this.activeQuest = null;
-                }
-
-                this.render();
-                this.renderLogs();
-            },
-
-            render() {
-                const noQuestState = document.getElementById('no-quest-state');
-                const activeQuestState = document.getElementById('active-quest-state');
-                const actionsEl = document.getElementById('quest-actions');
-
-                if (!this.activeQuest) {
-                    if (noQuestState) noQuestState.classList.remove('hidden');
-                    if (activeQuestState) activeQuestState.classList.add('hidden');
-                    if (actionsEl) actionsEl.classList.add('hidden');
-                    clearInterval(this.timerInterval);
-                } else {
-                    if (noQuestState) noQuestState.classList.add('hidden');
-                    if (activeQuestState) activeQuestState.classList.remove('hidden');
-                    if (actionsEl) actionsEl.classList.remove('hidden');
-
-                    document.getElementById('quest-title').textContent = this.activeQuest.title || 'مهمة سيادية نشطة';
-                    document.getElementById('quest-desc').textContent = this.activeQuest.details || this.activeQuest.desc || 'لا يوجد وصف متاح.';
-                    document.getElementById('quest-category').textContent = (this.activeQuest.type || this.activeQuest.category || 'DIRECTIVE').toUpperCase();
-                    
-                    document.getElementById('quest-xp-reward').textContent = `+${this.baseXPReward} XP`;
-                    document.getElementById('quest-gold-reward').textContent = `+${this.baseGoldReward} 🪙`;
-
-                    this.startTimer();
-                }
-            },
-
-            startTimer() {
-                clearInterval(this.timerInterval);
-                const timerText = document.getElementById('quest-timer-text');
-                const timerBar = document.getElementById('quest-timer-bar');
-                
-                const startTimeKey = localStorage.getItem('directive_start_time') || Date.now();
-                if (!localStorage.getItem('directive_start_time')) {
-                    localStorage.setItem('directive_start_time', startTimeKey);
-                }
-
-                // Default to 60 mins if not specified, parsing timeLimit if it exists (e.g. "25:00")
-                let totalDurationMs = 60 * 60 * 1000; 
-                if (this.activeQuest.timeLimit && this.activeQuest.timeLimit.includes(':')) {
-                    const parts = this.activeQuest.timeLimit.split(':');
-                    totalDurationMs = (parseInt(parts[0]) * 60 * 1000) + (parseInt(parts[1] || 0) * 1000);
-                } else if (this.activeQuest.duration) {
-                    totalDurationMs = this.activeQuest.duration * 60 * 1000;
-                }
-
-                const updateTimer = () => {
-                    const elapsed = Date.now() - parseInt(startTimeKey);
-                    const remaining = totalDurationMs - elapsed;
-
-                    if (remaining <= 0) {
-                        if (timerText) timerText.textContent = "00:00:00 - الوقت المستهدف اكتمل";
-                        if (timerBar) timerBar.style.width = "100%";
-                        clearInterval(this.timerInterval);
-                        return;
-                    }
-
-                    const secs = Math.floor((remaining / 1000) % 60);
-                    const mins = Math.floor((remaining / (1000 * 60)) % 60);
-                    const hrs = Math.floor((remaining / (1000 * 60 * 60)) % 24);
-
-                    if (timerText) {
-                        timerText.textContent = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-                    }
-                    if (timerBar) {
-                        let pct = (remaining / totalDurationMs) * 100;
-                        timerBar.style.width = `${pct}%`;
-                    }
-                };
-
-                updateTimer();
-                this.timerInterval = setInterval(updateTimer, 1000);
-            },
-
-            completeActiveQuest() {
-                if (!this.activeQuest) return;
-
-                PlayerState.addReward(this.baseXPReward, this.baseGoldReward);
-
-                this.logAction('quest', `تم إنجاز المهمة النشطة [${this.activeQuest.title}]: +${this.baseXPReward} XP | +${this.baseGoldReward} 🪙`);
-                
-                this.clearQuestMemory();
-                this.init();
-            },
-
-            cancelActiveQuest() {
-                if (!this.activeQuest) return;
-
-                // Strict Penalty System Activation
-                const penaltyXP = 10;
-                const penaltyGold = 15;
-
-                PlayerState.applyPenalty(penaltyXP, penaltyGold);
-
-                this.logAction('error', `عقوبة تراجع: تم إلغاء المهمة [${this.activeQuest.title}]. خصم ${penaltyXP} XP و ${penaltyGold} 🪙`);
-                
-                this.clearQuestMemory();
-                this.init();
-            },
-
-            clearQuestMemory() {
-                localStorage.removeItem('sovereign_active_quest');
-                localStorage.removeItem('directive_start_time');
+    init() {
+        const savedActive = localStorage.getItem('sovereign_active_quest');
+        if (savedActive) {
+            try {
+                this.activeQuest = JSON.parse(savedActive);
+                this.baseXPReward = parseInt(this.activeQuest.xp || this.activeQuest.rewardXP || 30);
+                // ميزة جديدة: التحقق أولاً إذا كان هناك ذهب محدد للمهمة، وإلا يتم الاحتساب تلقائياً
+                this.baseGoldReward = parseInt(this.activeQuest.gold || this.activeQuest.rewardGold || (this.baseXPReward * 2));
+            } catch(e) {
+                console.error("System Core Error: Failed to bind Quest data.", e);
                 this.activeQuest = null;
-            },
+            }
+        } else {
+            this.activeQuest = null;
+        }
 
-            logAction(type, detail) {
-                const logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
-                logs.unshift({
-                    id: 'log_' + Date.now(),
-                    timestamp: new Date().toLocaleTimeString('ar-EG'),
-                    type: type, // 'quest', 'system', 'error'
-                    message: detail
-                });
-                localStorage.setItem('sovereign_system_logs', JSON.stringify(logs.slice(0, 100)));
-                this.renderLogs();
-            },
+        this.render();
+        this.renderLogs();
+    },
 
-            renderLogs() {
-                const container = document.getElementById('local-logs-container');
-                if (!container) return;
+    // دالة مساعدة آمنة لتحديث النصوص لتجنب انهيار السكريبت
+    safeSetText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    },
 
-                const logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
-                if (logs.length === 0) {
-                    container.innerHTML = `<p class="text-slate-600 text-center py-4">السجل فارغ حالياً.</p>`;
-                    return;
-                }
+    render() {
+        const noQuestState = document.getElementById('no-quest-state');
+        const activeQuestState = document.getElementById('active-quest-state');
+        const actionsEl = document.getElementById('quest-actions');
 
-                container.innerHTML = logs.slice(0, 15).map(log => {
-                    let color = 'text-[var(--sys-cyan)]';
-                    if (log.type === 'quest') color = 'text-emerald-400';
-                    if (log.type === 'error') color = 'text-rose-400';
-                    
-                    return `<div class="p-1.5 bg-slate-950/60 border border-slate-900 rounded mb-1 flex items-start gap-2">
-                        <span class="text-slate-500 flex-shrink-0 mt-0.5">[${log.timestamp}]</span> 
-                        <span class="${color} font-bold leading-tight">${log.message}</span>
-                    </div>`;
-                }).join('');
+        if (!this.activeQuest) {
+            if (noQuestState) noQuestState.classList.remove('hidden');
+            if (activeQuestState) activeQuestState.classList.add('hidden');
+            if (actionsEl) actionsEl.classList.add('hidden');
+            clearInterval(this.timerInterval);
+        } else {
+            if (noQuestState) noQuestState.classList.add('hidden');
+            if (activeQuestState) activeQuestState.classList.remove('hidden');
+            if (actionsEl) actionsEl.classList.remove('hidden');
+
+            // تحديث آمن لعناصر الواجهة دون الخوف من عدم وجودها بالصفحة
+            this.safeSetText('quest-title', this.activeQuest.title || 'مهمة سيادية نشطة');
+            this.safeSetText('quest-desc', this.activeQuest.details || this.activeQuest.desc || 'لا يوجد وصف متاح.');
+            this.safeSetText('quest-category', (this.activeQuest.type || this.activeQuest.category || 'DIRECTIVE').toUpperCase());
+            
+            this.safeSetText('quest-xp-reward', `+${this.baseXPReward} XP`);
+            this.safeSetText('quest-gold-reward', `+${this.baseGoldReward} 🪙`);
+
+            this.startTimer();
+        }
+    },
+
+    startTimer() {
+        clearInterval(this.timerInterval);
+        const timerText = document.getElementById('quest-timer-text');
+        const timerBar = document.getElementById('quest-timer-bar');
+        
+        const startTimeKey = localStorage.getItem('directive_start_time') || Date.now();
+        if (!localStorage.getItem('directive_start_time')) {
+            localStorage.setItem('directive_start_time', startTimeKey);
+        }
+
+        // معالجة ذكية ومرنة للوقت تدعم صيغ: HH:MM:SS أو MM:SS أو الدقائق الصافية
+        let totalDurationMs = 60 * 60 * 1000; // الافتراضي ساعة
+        
+        if (this.activeQuest.timeLimit && this.activeQuest.timeLimit.includes(':')) {
+            const parts = this.activeQuest.timeLimit.split(':').map(Number);
+            if (parts.length === 3) {
+                // صيغة HH:MM:SS
+                totalDurationMs = (parts[0] * 3600 + parts[1] * 60 + parts[2]) * 1000;
+            } else if (parts.length === 2) {
+                // صيغة MM:SS
+                totalDurationMs = (parts[0] * 60 + parts[1]) * 1000;
+            }
+        } else if (this.activeQuest.duration) {
+            totalDurationMs = this.activeQuest.duration * 60 * 1000;
+        }
+
+        const updateTimer = () => {
+            const elapsed = Date.now() - parseInt(startTimeKey);
+            const remaining = totalDurationMs - elapsed;
+
+            if (remaining <= 0) {
+                if (timerText) timerText.textContent = "00:00:00 - اكتمل الوقت المستهدف";
+                if (timerBar) timerBar.style.width = "100%";
+                clearInterval(this.timerInterval);
+                return;
+            }
+
+            const secs = Math.floor((remaining / 1000) % 60);
+            const mins = Math.floor((remaining / (1000 * 60)) % 60);
+            const hrs = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+
+            if (timerText) {
+                timerText.textContent = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+            if (timerBar) {
+                let pct = (remaining / totalDurationMs) * 100;
+                timerBar.style.width = `${pct}%`;
             }
         };
 
-        // INITIALIZATION
-        window.addEventListener('DOMContentLoaded', () => {
-            TimeSync.init();
-            PlayerState.init();
-            QuestManager.init();
+        updateTimer();
+        this.timerInterval = setInterval(updateTimer, 1000);
+    },
 
-            // Handle cross-tab synchronization
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'monarch_system_data' || e.key === 'sovereign_active_quest' || e.key === 'sovereign_system_logs') {
-                    PlayerState.init();
-                    QuestManager.init();
-                }
-            });
+    completeActiveQuest() {
+        if (!this.activeQuest) return;
+
+        // استدعاء إضافة المكافآت للنظام الرئيسي
+        if (typeof PlayerState !== 'undefined' && PlayerState.addReward) {
+            PlayerState.addReward(this.baseXPReward, this.baseGoldReward);
+        }
+
+        this.logAction('quest', `تم إنجاز المهمة [${this.activeQuest.title}]: +${this.baseXPReward} XP | +${this.baseGoldReward} 🪙`);
+        
+        this.clearQuestMemory();
+        this.init();
+    },
+
+    cancelActiveQuest() {
+        if (!this.activeQuest) return;
+
+        // تفعيل عقوبة ديناميكية: خصم 30% من قيمة مكافأة المهمة، أو حد أدنى ثابت لإشعار اللاعب بالخطورة
+        const penaltyXP = parseInt(this.activeQuest.penaltyXP || Math.max(10, Math.floor(this.baseXPReward * 0.3)));
+        const penaltyGold = parseInt(this.activeQuest.penaltyGold || Math.max(15, Math.floor(this.baseGoldReward * 0.3)));
+
+        if (typeof PlayerState !== 'undefined' && PlayerState.applyPenalty) {
+            PlayerState.applyPenalty(penaltyXP, penaltyGold);
+        }
+
+        this.logAction('error', `عقوبة تراجع: تم إلغاء المهمة [${this.activeQuest.title}]. خصم ${penaltyXP} XP و ${penaltyGold} 🪙`);
+        
+        this.clearQuestMemory();
+        this.init();
+    },
+
+    clearQuestMemory() {
+        localStorage.removeItem('sovereign_active_quest');
+        localStorage.removeItem('directive_start_time');
+        this.activeQuest = null;
+    },
+
+    logAction(type, detail) {
+        const logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
+        logs.unshift({
+            id: 'log_' + Date.now(),
+            timestamp: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            type: type, 
+            message: detail
         });
+        localStorage.setItem('sovereign_system_logs', JSON.stringify(logs.slice(0, 100)));
+        this.renderLogs();
+    },
+
+    renderLogs() {
+        const container = document.getElementById('local-logs-container');
+        if (!container) return;
+
+        const logs = JSON.parse(localStorage.getItem('sovereign_system_logs') || '[]');
+        if (logs.length === 0) {
+            container.innerHTML = `<p class="text-slate-600 text-center py-4">السجل فارغ حالياً.</p>`;
+            return;
+        }
+
+        container.innerHTML = logs.slice(0, 15).map(log => {
+            let color = 'text-[var(--sys-cyan)]';
+            if (log.type === 'quest') color = 'text-emerald-400';
+            if (log.type === 'error') color = 'text-rose-400';
+            
+            return `<div class="p-1.5 bg-slate-950/60 border border-slate-900 rounded mb-1 flex items-start gap-2">
+                <span class="text-slate-500 flex-shrink-0 mt-0.5">[${log.timestamp}]</span> 
+                <span class="${color} font-bold leading-tight">${log.message}</span>
+            </div>`;
+        }).join('');
+    }
+};
     </script>
 </body>
 </html>
